@@ -1,5 +1,5 @@
 # Downloaded and processed NASA data (cite sources in README instead)
-data/
+/data/
 
 # Secrets (Earthdata Login, tokens)
 .env
