@@ -6,7 +6,10 @@ Local event: Lima.
 SIGNO looks for real, long-term change in Earth system variables using NASA data, and tries to tell that change
 apart from noise.
 
-> Status: research phase (14 Nov 2026). The method and the architecture are still being decided by the team.
+**Live prototype:** <https://signo-chi-pink.vercel.app/>
+
+> Status (14 Nov 2026): the problem and region are decided (the Amazon forest as one natural region); the
+> statistical method and the final variables are still being decided by the team.
 
 ## Repository layout
 

@@ -39,7 +39,7 @@ Whatever the option, the statistical test is the product's core and must be tran
 |---|---|---|
 | Local | Windows 11, Python 3.13 via `py` | Data download and analysis |
 | Preview | Vercel, one URL per pull request | Team review before merging |
-| Production | Vercel, deployed from `main` | Public link for the submission (ADR-002); must open without login |
+| Production | Vercel, deployed from `main`: <https://signo-chi-pink.vercel.app/> | Public link for the submission (ADR-002); verified without login on 2026-11-14 |
 
 Vercel does not run long processes or Streamlit, so heavy data work stays outside it (ADR-002). Access to NASA data requires an Earthdata Login account
 per member; credentials never go in the repo.
