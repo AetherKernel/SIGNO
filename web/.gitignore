@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Generated API v1 (built from server/ by `npm run api:build`)
+public/api/

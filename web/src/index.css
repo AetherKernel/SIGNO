@@ -1,9 +1,17 @@
-/* AI-generated: base styles written with Claude (Anthropic) via Claude Code, 2026-11-14. Placeholder only. */
+/* AI-generated: base styles written with Claude (Anthropic) via Claude Code, 2026-11-14. Reviewed and owned by team AETHER. */
 :root {
   --bg: #f7f8f5;
+  --surface: #ffffff;
   --text: #1c2420;
   --muted: #56615b;
+  --border: #d8ded9;
   --accent: #1f6f4a;
+  --error: #b42318;
+  --banner-bg: #fff4d6;
+  --banner-text: #5c4300;
+  --cell-empty: #e4e8e5;
+  --decreasing: hsl(24 70% 45%);
+  --increasing: hsl(174 70% 35%);
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.5;
   color: var(--text);
@@ -13,10 +21,20 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #111613;
+    --surface: #182019;
     --text: #e6ece8;
     --muted: #9aa8a0;
+    --border: #2c3830;
     --accent: #6fcf9a;
+    --error: #ff8a80;
+    --banner-bg: #3a2f10;
+    --banner-text: #f5dc9a;
+    --cell-empty: #26302a;
   }
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
@@ -25,27 +43,236 @@ body {
 }
 
 .page {
-  max-width: 44rem;
+  max-width: 60rem;
   margin: 0 auto;
-  padding: 4rem 1rem;
-}
-
-.eyebrow,
-.status {
-  color: var(--muted);
-  font-size: 0.9rem;
+  padding: 3rem 1rem 4rem;
 }
 
 h1 {
   font-size: 3rem;
-  margin: 0.5rem 0;
+  margin: 0.25rem 0;
   letter-spacing: 0.04em;
 }
 
-.lead {
-  font-size: 1.15rem;
+h2 {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+h3 {
+  font-size: 1.05rem;
+  margin: 0 0 0.25rem;
 }
 
 a {
   color: var(--accent);
+}
+
+.eyebrow,
+.muted {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.lead {
+  font-size: 1.15rem;
+  max-width: 44rem;
+}
+
+.error {
+  color: var(--error);
+}
+
+.banner {
+  background: var(--banner-bg);
+  color: var(--banner-text);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+
+.picker {
+  border: 0;
+  padding: 0;
+  margin: 2rem 0 0;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+}
+
+.picker legend {
+  font-weight: 600;
+  font-size: 1.2rem;
+  margin-bottom: 0.75rem;
+}
+
+.option {
+  display: grid;
+  gap: 0.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  cursor: pointer;
+}
+
+.option.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.option input {
+  position: absolute;
+  opacity: 0;
+}
+
+.option:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.option-name {
+  font-weight: 600;
+}
+
+.option-description {
+  font-size: 0.92rem;
+}
+
+.option-source {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.results {
+  margin-top: 2.5rem;
+}
+
+.results-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.toggle {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  font-size: 0.95rem;
+}
+
+.map,
+.chart {
+  margin: 1rem 0 0;
+}
+
+.map svg,
+.chart svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.cell {
+  stroke: var(--surface);
+  stroke-width: 1;
+  cursor: pointer;
+}
+
+.cell.not-significant {
+  opacity: 0.4;
+}
+
+.cell.selected {
+  stroke: var(--text);
+  stroke-width: 3;
+  opacity: 1;
+}
+
+.cell:focus-visible {
+  outline: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.swatch {
+  display: inline-block;
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 3px;
+  vertical-align: -0.1rem;
+  margin-right: 0.3rem;
+}
+
+.swatch.decreasing {
+  background: var(--decreasing);
+}
+
+.swatch.increasing {
+  background: var(--increasing);
+}
+
+.swatch.faded {
+  background: var(--decreasing);
+  opacity: 0.4;
+}
+
+.summary dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0 0.5rem;
+}
+
+.summary dl div {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+}
+
+.summary dt {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.summary dd {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.details {
+  margin-top: 1rem;
+}
+
+.axis {
+  stroke: var(--border);
+}
+
+.tick {
+  fill: var(--muted);
+  font-size: 11px;
+}
+
+.line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+footer {
+  margin-top: 3rem;
 }

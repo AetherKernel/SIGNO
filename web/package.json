@@ -4,8 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "api:build": "node server/buildApi.ts",
+    "dev": "npm run api:build && vite",
+    "build": "npm run api:build && npm run check:layers && npm test && tsc -b && vite build",
+    "test": "node --test server/validate.test.ts server/summary.test.ts",
+    "check:layers": "node scripts/checkLayers.ts",
     "lint": "oxlint",
     "preview": "vite preview"
   },
@@ -21,5 +24,8 @@
     "oxlint": "^1.90.0",
     "typescript": "~7.0.2",
     "vite": "^8.3.6"
+  },
+  "engines": {
+    "node": "22.x"
   }
 }

@@ -57,3 +57,45 @@ Vite 8, TypeScript, oxlint). It is a static single-page app: `npm run build` pro
 - The app only reads files it ships with, so any analysis results it shows must be exported as static files into
   the app (consistent with option 1 in tab 02, still to be confirmed by the team).
 - `web/node_modules/` and `web/dist/` are git-ignored by the template's own `.gitignore`.
+
+## ADR-004: Layered app with a static API v1 and a swappable data source
+
+- **Date:** 2026-11-14
+- **Status:** Accepted (José)
+
+**Context.** José asked to turn the placeholder into the production architecture with a strict frontend/backend
+separation, clear contracts, and a data layer that Alexis's pipeline can replace without touching the interface.
+Vercel runs no long processes and the link must never sleep (ADR-002). The pipeline and method are not ready yet.
+
+**Decision.**
+
+- Three layers in `web/`, enforced by `scripts/checkLayers.ts`:
+  - `shared/`: the contract and route map;
+  - `server/`: the backend;
+  - `src/`: the frontend.
+- The backend reads data only through a `DataSource` port. There are two adapters:
+  - `mock`: synthetic data, the default;
+  - `files`: the pipeline's JSON export.
+
+  `SIGNO_DATA_SOURCE` selects which one is used.
+- The backend validates the data against the contract, computes the business aggregates and publishes a
+  versioned, read-only **static API v1** (`/api/v1/...json`) at build time. The frontend reaches it only over HTTP,
+  through `src/services`.
+- The backend is TypeScript run directly by Node (type stripping, Node 22.18 or later). It needs no compile step
+  and no extra dependencies.
+
+**Consequences.**
+
+- Option 1 of tab 02 is adopted. The site never sleeps, has no cold starts and holds no credentials.
+- New data requires a rebuild: a push, or a redeploy in Vercel.
+- Switching to real data means three steps:
+  1. export the files;
+  2. set `SIGNO_DATA_SOURCE=files`;
+  3. rebuild.
+
+  The frontend does not change. Contract errors stop the build.
+- A runtime API can be added later behind the same paths. `VITE_API_BASE_URL` already lets the frontend point
+  elsewhere.
+- Vercel must use Node 22.x (`package.json` engines) so the build can run the TypeScript backend.
+- The production build runs the contract validation, the layer check and the unit tests. If any of them fails,
+  the deploy fails and the previous version stays live.
