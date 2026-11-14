@@ -53,9 +53,6 @@ so any view can be shared as a link.
 Commands, run inside `web/`: `npm install`, `npm run dev` (publishes the API, then starts Vite), `npm run build`
 (API, layer check, type check, Vite build), `npm run lint`, `npm run api:build`, `npm run check:layers`.
 
-The template's demo files (`web/src/App.css`, `web/src/assets/`, `web/public/icons.svg`) are no longer used and can
-be removed (needs the owner's OK).
-
 ### Options that were evaluated
 
 Option 1 below was adopted in ADR-004 (static API built from precomputed results). Options 2 and 3 remain possible
