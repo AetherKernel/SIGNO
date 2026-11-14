@@ -14,8 +14,17 @@ apart from noise.
 SIGNO/
 ├── .ai-context/   # Living project docs: 01 logic · 02 architecture · 03 data · 04 decisions (ADRs) · 05 pending · 06 API
 ├── CLAUDE.md      # Working rules for the AI coding assistant (in Spanish)
+├── web/           # Web prototype (React + Vite + TypeScript), deployed on Vercel
 ├── LICENSE        # Apache License 2.0
 └── README.md
+```
+
+Run the web prototype locally (Node.js 22+):
+
+```bash
+cd web
+npm install
+npm run dev
 ```
 
 Downloaded NASA data goes in `data/`, which is not versioned (see `.gitignore`). Each dataset will be listed below
@@ -30,7 +39,8 @@ To be completed as datasets are chosen. Every NASA product used is cited here wi
 The team uses AI tools to speed up the work, following the Space Apps rules: AI is not used to come up with how to
 solve the challenge, and design decisions are made by the team.
 
-- **Claude (Anthropic), via Claude Code:** set up this repository's structure and its documentation files.
+- **Claude (Anthropic), via Claude Code:** set up this repository's structure, its documentation files and the
+  placeholder web page (`web/src/App.tsx`, `web/src/index.css`, marked with a header comment).
 - **Gemini (Google):** literature and data-source exploration.
 
 Any code or data generated with AI carries a header comment saying so. Images and videos generated with AI carry a
