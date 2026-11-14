@@ -15,7 +15,10 @@
 
 - 2026-11-14: repository cloned outside Drive and documented (ADR-001).
 - 2026-11-14: P-001, repository made public (Space Apps links must open without login).
-- 2026-11-14: layered architecture with static API v1 and swappable data source (ADR-004).
+- 2026-11-14: layered architecture with static API v1 and swappable data source (ADR-004). Verified in production
+  (commit `21a3659`): without cookies, `/`, `manifest.json`, both `trends/*.json` and sample `series/*/*.json` answer
+  200 with JSON, an unknown variable answers 404, API headers match `web/vercel.json`, the deployed bundle is the new
+  one, and a deep link (`?variable=ndvi&cell=r04c05`) renders the map, selection and series with no console errors.
 - 2026-11-14: P-010, 26 backend unit tests (`npm test`), run in every build.
 - 2026-11-14: P-006, Vercel project deployed by José at <https://signo-chi-pink.vercel.app/>; checked without
   cookies (HTTP 200, no login redirect), no console errors, no horizontal scroll at 375 px.
