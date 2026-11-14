@@ -1,0 +1,22 @@
+# Downloaded and processed NASA data (cite sources in README instead)
+data/
+
+# Secrets (Earthdata Login, tokens)
+.env
+.env.*
+.netrc
+_netrc
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# OS / editors
+desktop.ini
+Thumbs.db
+.DS_Store
+.vscode/
+.idea/
