@@ -6,6 +6,7 @@
 
 import type { Hotspot, Manifest, ValidationCase, ValidationReport } from '../../shared/contracts.ts'
 import type { Remote } from '../hooks/useSignoData.ts'
+import { useLang } from '../lib/i18n.ts'
 import { ValidationPanel } from './ValidationPanel.tsx'
 import { ViewLink } from './ViewLink.tsx'
 
@@ -20,9 +21,10 @@ export interface ChecksViewProps {
 }
 
 export function ChecksView({ manifest, validation, flaggedModisYears, onShowHotspot, onShowCase }: ChecksViewProps) {
+  const { t } = useLang()
   return (
     <div className="page page-checks">
-      <h1>How the data were cross-checked</h1>
+      <h1>{t('How the data were cross-checked', 'Cómo se contrastaron los datos')}</h1>
       {manifest.extras.validation ? (
         <ValidationPanel
           report={validation.data}
@@ -34,7 +36,8 @@ export function ChecksView({ manifest, validation, flaggedModisYears, onShowHots
         />
       ) : (
         <p className="muted">
-          Cross-checks are not published yet. The map works: <ViewLink view="map">open the map</ViewLink>.
+          {t('Cross-checks are not published yet. The map works:', 'Los contrastes aún no se publican. El mapa funciona:')}{' '}
+          <ViewLink view="map">{t('open the map', 'abre el mapa')}</ViewLink>.
         </p>
       )}
     </div>

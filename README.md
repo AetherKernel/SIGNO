@@ -199,9 +199,10 @@ Global Imagery Browse Services (GIBS), part of NASA's Earth Science Data and Inf
 Next Generation, MODIS Terra Corrected Reflectance (true colour) and MODIS Terra NDVI (monthly), served at
 <https://gibs.earthdata.nasa.gov>.
 
-**Software and fonts.** Map engine: [Leaflet](https://leafletjs.com) (BSD-2-Clause). Data colour scale: ColorBrewer
-PuOr (Cynthia Brewer, Penn State). Fonts under the SIL Open Font License: Source Serif 4, Source Sans 3 (Adobe) and
-JetBrains Mono (JetBrains), served by the site itself from the [Fontsource](https://fontsource.org) packages.
+**Software and fonts.** Map engine: [Leaflet](https://leafletjs.com) (BSD-2-Clause). Icons:
+[Tabler Icons](https://tabler.io/icons) (MIT). Data colour scale: ColorBrewer PuOr (Cynthia Brewer, Penn State). Fonts
+under the SIL Open Font License: Source Serif 4, Source Sans 3 (Adobe) and JetBrains Mono (JetBrains), served by the site
+itself from the [Fontsource](https://fontsource.org) packages.
 
 ## Use of AI
 
@@ -211,8 +212,9 @@ solve the challenge, and design decisions are made by the team.
 - **Claude (Anthropic), via Claude Code:** set up this repository's structure and documentation, and wrote the web
   app's code to the team's architecture brief: the shared contract, the backend (data sources, validation, API
   publisher), the frontend and the synthetic mock data. It also implemented the interface of 15 Nov 2026 following the
-  visual decisions made by José (concept, palette, type, layout, user journey). Each of those files starts with a header
-  comment saying so.
+  visual decisions made by José (concept, palette, type, layout, user journey), and the Spanish version of the
+  interface (texts translated by Claude; English stays the default). Each of those files starts with a header comment
+  saying so.
 - **Claude (Anthropic), via Claude Code (data side):** checked candidate data sources (existence, access, license,
   citation) and drafted `data/README.md` and `notebooks/README.md` (marked with a header comment). It wrote the data
   pipeline in `pipeline/` (download, clipping, unit conversion, zone averages, and on 2026-11-15 the modules

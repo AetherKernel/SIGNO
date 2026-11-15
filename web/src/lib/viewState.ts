@@ -16,11 +16,11 @@ export interface MapView {
 
 export type AppView = 'map' | 'trends' | 'checks' | 'method'
 
-export const APP_VIEWS: { id: AppView; label: string }[] = [
-  { id: 'map', label: 'Map' },
-  { id: 'trends', label: 'Trends' },
-  { id: 'checks', label: 'Cross-checks' },
-  { id: 'method', label: 'Method & sources' },
+export const APP_VIEWS: { id: AppView; label: string; labelEs: string }[] = [
+  { id: 'map', label: 'Map', labelEs: 'Mapa' },
+  { id: 'trends', label: 'Trends', labelEs: 'Tendencias' },
+  { id: 'checks', label: 'Cross-checks', labelEs: 'Contrastes' },
+  { id: 'method', label: 'Method & sources', labelEs: 'Método y fuentes' },
 ]
 
 /** The view of the URL; a missing or unknown value opens the map (so every old link still works). */

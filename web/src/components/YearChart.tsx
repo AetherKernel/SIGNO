@@ -8,6 +8,7 @@
 
 import type { SenLine } from '../../shared/contracts.ts'
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
+import { useLang } from '../lib/i18n.ts'
 
 /** ok = a normal point; hollow = incomplete or suspect (not joined to the line); outside = complete but not used by the test. */
 export type PointKind = 'ok' | 'hollow' | 'outside'
@@ -72,6 +73,7 @@ interface Props {
 }
 
 export function YearChart({ years, type, series, format, tick, domain, tone = 'plain', from, to, tested = null, sen = null, label, caption, height = 170 }: Props) {
+  const { t } = useLang()
   const { ref, width } = useWidth()
   const readoutId = useId()
   const [active, setActive] = useState<number | null>(null)
@@ -129,7 +131,7 @@ export function YearChart({ years, type, series, format, tick, domain, tone = 'p
       return [series.length > 1 ? `${s.label} ${format(v)}` : format(v)]
     })
     const notes = series.map((s) => s.notes?.[shown]).filter(Boolean)
-    return `${years[shown]}: ${parts.length > 0 ? parts.join(' · ') : 'no value'}${notes.length > 0 ? `. ${notes[0]}.` : ''}`
+    return `${years[shown]}: ${parts.length > 0 ? parts.join(' · ') : t('no value', 'sin valor')}${notes.length > 0 ? `. ${notes[0]}.` : ''}`
   })()
 
   // Line segments: runs of consecutive points that are not hollow.
@@ -168,7 +170,7 @@ export function YearChart({ years, type, series, format, tick, domain, tone = 'p
           viewBox={`0 0 ${width} ${height}`}
           role="img"
           tabIndex={0}
-          aria-label={`${label}. Use the left and right arrow keys to read each year.`}
+          aria-label={t(`${label}. Use the left and right arrow keys to read each year.`, `${label}. Usa las flechas izquierda y derecha para leer cada año.`)}
           aria-describedby={readoutId}
           onPointerMove={move}
           onPointerLeave={() => setActive(null)}

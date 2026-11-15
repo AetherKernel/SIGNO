@@ -5,6 +5,7 @@
 // from the keyboard. The years live in the URL (?from=&to=), so a view can be shared.
 
 import { useEffect, useId, useState, type KeyboardEvent } from 'react'
+import { useLang } from '../lib/i18n.ts'
 
 interface Props {
   years: number[]
@@ -16,6 +17,7 @@ interface Props {
 const PLAY_MS = 900
 
 export function YearTravel({ years, from, to, onChange }: Props) {
+  const { t } = useLang()
   const [playing, setPlaying] = useState(false)
   const fromId = useId()
   const toId = useId()
@@ -61,9 +63,9 @@ export function YearTravel({ years, from, to, onChange }: Props) {
   }
 
   return (
-    <div className="viewer-travel" role="group" aria-label="Compare two years" onKeyDown={keys}>
+    <div className="viewer-travel" role="group" aria-label={t('Compare two years', 'Comparar dos años')} onKeyDown={keys}>
       <div className="travel-years">
-        <label htmlFor={fromId}>From</label>
+        <label htmlFor={fromId}>{t('From', 'De')}</label>
         <select id={fromId} className="select" value={from} onChange={(event) => chooseFrom(Number(event.target.value))}>
           {years.slice(0, -1).map((y) => (
             <option key={y} value={y}>
@@ -71,7 +73,7 @@ export function YearTravel({ years, from, to, onChange }: Props) {
             </option>
           ))}
         </select>
-        <label htmlFor={toId}>to</label>
+        <label htmlFor={toId}>{t('to', 'a')}</label>
         <select id={toId} className="select" value={to} onChange={(event) => chooseTo(Number(event.target.value))}>
           {years.slice(1).map((y) => (
             <option key={y} value={y}>
@@ -81,14 +83,14 @@ export function YearTravel({ years, from, to, onChange }: Props) {
         </select>
       </div>
       <div className="travel-steps">
-        <button type="button" className="btn icon" aria-label="Previous year" title="Previous year for B ( [ )" disabled={before(to) <= from} onClick={() => stepTo(-1)}>
+        <button type="button" className="btn icon" aria-label={t('Previous year', 'Año anterior')} title={t('Previous year for B ( [ )', 'Año anterior para B ( [ )')} disabled={before(to) <= from} onClick={() => stepTo(-1)}>
           ◀
         </button>
-        <button type="button" className="btn icon" aria-label="Next year" title="Next year for B ( ] )" disabled={to >= last} onClick={() => stepTo(1)}>
+        <button type="button" className="btn icon" aria-label={t('Next year', 'Año siguiente')} title={t('Next year for B ( ] )', 'Año siguiente para B ( ] )')} disabled={to >= last} onClick={() => stepTo(1)}>
           ▶
         </button>
         <button type="button" className="btn" aria-pressed={running} onClick={play} disabled={from >= last}>
-          {running ? 'Pause' : 'Play'}
+          {running ? t('Pause', 'Pausa') : t('Play', 'Reproducir')}
         </button>
       </div>
     </div>

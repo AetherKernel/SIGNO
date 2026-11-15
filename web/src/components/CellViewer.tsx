@@ -28,6 +28,7 @@ import {
 } from '../lib/cellView.ts'
 import type { MapCell } from '../lib/cover.ts'
 import { formatCoordinates, formatKm2, formatPercent } from '../lib/format.ts'
+import { useLang } from '../lib/i18n.ts'
 import { trendOptions } from '../lib/trendMap.ts'
 import { CellChanges } from './CellChanges.tsx'
 import { CellTrends } from './CellTrends.tsx'
@@ -80,6 +81,7 @@ function Locator({ cover, cellId }: { cover: CoverLayer; cellId: string }) {
 
 /** "MAAP #233 (Sep 2025), https://…": the text, with its web address as a link. */
 function Reference({ text }: { text: string }) {
+  const { t } = useLang()
   const match = /(https?:\/\/\S+)/.exec(text)
   if (!match) return <>{text}</>
   const url = match[1].replace(/[.,;)]+$/, '')
@@ -87,38 +89,46 @@ function Reference({ text }: { text: string }) {
     <>
       {text.slice(0, match.index).replace(/[,\s]+$/, '')}{' '}
       <a href={url} target="_blank" rel="noreferrer">
-        source
+        {t('source', 'fuente')}
       </a>
     </>
   )
 }
 
 function PlaceNote({ place }: { place: DocumentedPlace }) {
+  const { t } = useLang()
   if (place.kind === 'case') {
     const { place: p } = place
     const first = p.hansenTreeCover[0] ?? null
     const last = p.hansenTreeCover[p.hansenTreeCover.length - 1] ?? null
     return (
-      <aside className="flag-note cv-case" aria-label="Documented case">
-        <strong>Documented case: {p.label}.</strong>{' '}
+      <aside className="flag-note cv-case" aria-label={t('Documented case', 'Caso documentado')}>
+        <strong>
+          {t('Documented case', 'Caso documentado')}: {p.label}.
+        </strong>{' '}
         {first !== null && last !== null && (
           <>
-            At 0.05° (about 5 km) tree cover fell from {formatPercent(first)} in {p.years[0]} to {formatPercent(last)} in {p.years[p.years.length - 1]}
-            . This 1° square averages a much larger area, so its change looks smaller.{' '}
+            {t(
+              `At 0.05° (about 5 km) tree cover fell from ${formatPercent(first)} in ${p.years[0]} to ${formatPercent(last)} in ${p.years[p.years.length - 1]}. This 1° square averages a much larger area, so its change looks smaller.`,
+              `A 0.05° (unos 5 km) la cobertura arbórea bajó de ${formatPercent(first)} en ${p.years[0]} a ${formatPercent(last)} en ${p.years[p.years.length - 1]}. Este cuadro de 1° promedia un área mucho mayor, por eso su cambio parece menor.`,
+            )}{' '}
           </>
         )}
-        Reference: <Reference text={p.reference} />.{' '}
+        {t('Reference', 'Referencia')}: <Reference text={p.reference} />.{' '}
         <ViewLink view="checks" hash={`case-${p.id}`} params={place.zoneId ? { zone: place.zoneId } : {}}>
-          Open the cross-check
+          {t('Open the cross-check', 'Abrir el contraste')}
         </ViewLink>
       </aside>
     )
   }
   return (
-    <aside className="flag-note cv-case" aria-label="Cross-check hotspot">
-      <strong>Cross-check hotspot.</strong> At 0.05° (about 5 km) inside this square, tree cover loss peaked in {place.hotspot.peakLossYear}.
-      The 1° square averages a much larger area, so its own numbers look smaller. It is one of the places listed in the cross-checks.{' '}
-      <ViewLink view="checks">Open the cross-checks</ViewLink>
+    <aside className="flag-note cv-case" aria-label={t('Cross-check hotspot', 'Punto crítico de los contrastes')}>
+      <strong>{t('Cross-check hotspot.', 'Punto crítico de los contrastes.')}</strong>{' '}
+      {t(
+        `At 0.05° (about 5 km) inside this square, tree cover loss peaked in ${place.hotspot.peakLossYear}. The 1° square averages a much larger area, so its own numbers look smaller. It is one of the places listed in the cross-checks.`,
+        `A 0.05° (unos 5 km) dentro de este cuadro, la pérdida de cobertura tuvo su máximo en ${place.hotspot.peakLossYear}. El cuadro de 1° promedia un área mucho mayor, por eso sus cifras parecen menores. Es uno de los lugares listados en los contrastes.`,
+      )}{' '}
+      <ViewLink view="checks">{t('Open the cross-checks', 'Abrir los contrastes')}</ViewLink>
     </aside>
   )
 }
@@ -132,6 +142,7 @@ interface ContentProps extends Omit<CellViewerProps, 'cell' | 'onClose' | 'onRes
 }
 
 function CellContent({ cell, manifest, cover, validation, titleId, summaryId, headingRef, onCloseClick }: ContentProps) {
+  const { t } = useLang()
   const [params, setParams] = useUrlParams()
   const [copied, setCopied] = useState(false)
   const variables = manifest.variables
@@ -143,10 +154,10 @@ function CellContent({ cell, manifest, cover, validation, titleId, summaryId, he
   const { from, to } = travel
   const setTravel = (a: number, b: number) => setParams({ from: String(a), to: String(b) })
 
-  const rows = [...(cover ? coverRows(cover, coverCell) : []), ...variables.map((v) => seriesRow(v, profile.series[v.id]))]
-  const options = useMemo(() => trendOptions(variables, cover), [variables, cover])
-  const entries = buildTrendEntries(options, profile.trends, coverCell)
-  const summary = buildSummary(cover, coverCell, entries, from, to)
+  const rows = [...(cover ? coverRows(cover, coverCell, t) : []), ...variables.map((v) => seriesRow(v, profile.series[v.id], t))]
+  const options = useMemo(() => trendOptions(variables, cover, t), [variables, cover, t])
+  const entries = buildTrendEntries(options, profile.trends, coverCell, t)
+  const summary = buildSummary(cover, coverCell, entries, from, to, t)
   const place = findDocumentedPlace(validation, cell.cellId)
   const top = entries.find((e) => e.status === 'falling' || e.status === 'rising') ?? entries[0]
 
@@ -174,7 +185,7 @@ function CellContent({ cell, manifest, cover, validation, titleId, summaryId, he
           values: coverCell?.modisTreeCover ?? [],
           dashed: true,
           kinds: cover.years.map((y) => (flaggedModis.includes(y) ? 'hollow' : 'ok')),
-          notes: cover.years.map((y) => (flaggedModis.includes(y) ? 'Suspect MODIS value' : null)),
+          notes: cover.years.map((y) => (flaggedModis.includes(y) ? t('Suspect MODIS value', 'Valor MODIS dudoso') : null)),
         },
       ]
     : []
@@ -187,16 +198,20 @@ function CellContent({ cell, manifest, cover, validation, titleId, summaryId, he
       <header className="viewer-head">
         <div>
           <h2 id={titleId} ref={headingRef} tabIndex={-1}>
-            Area around {where}
+            {t('Area around', 'Área alrededor de')} {where}
           </h2>
           <p className="small muted">
-            1° area (about 12,000 km²) · Square {cell.cellId}
-            {place && <span className="cv-pill">{place.kind === 'case' ? 'Documented case' : 'Cross-check hotspot'}</span>}
+            {t('1° area (about 12,000 km²) · Square', 'Área de 1° (unos 12,000 km²) · Cuadro')} {cell.cellId}
+            {place && (
+              <span className="cv-pill">
+                {place.kind === 'case' ? t('Documented case', 'Caso documentado') : t('Cross-check hotspot', 'Punto crítico de los contrastes')}
+              </span>
+            )}
           </p>
         </div>
         {cover && <Locator cover={cover} cellId={cell.cellId} />}
-        <button type="button" className="btn" aria-label="Close area viewer" onClick={onCloseClick}>
-          Close <span aria-hidden="true">✕</span>
+        <button type="button" className="btn" aria-label={t('Close area viewer', 'Cerrar el visor del área')} onClick={onCloseClick}>
+          {t('Close', 'Cerrar')} <span aria-hidden="true">✕</span>
         </button>
       </header>
 
@@ -210,21 +225,23 @@ function CellContent({ cell, manifest, cover, validation, titleId, summaryId, he
 
         <section aria-labelledby={`${titleId}-changed`} className="cv-section">
           <h3 id={`${titleId}-changed`}>
-            What changed from {from} to {to}
+            {t(`What changed from ${from} to ${to}`, `Qué cambió de ${from} a ${to}`)}
           </h3>
           <p className="sr-only" aria-live="polite">
-            Showing {from} and {to}.
+            {t(`Showing ${from} and ${to}.`, `Mostrando ${from} y ${to}.`)}
           </p>
           <CellChanges rows={rows} years={years} from={from} to={to} onRetry={profile.retry} />
           <p className="small muted">
-            A difference is the later value minus the earlier one, in the measure’s own units, never a percentage. Years that are incomplete,
-            suspect or missing are shown but left out of differences.
+            {t(
+              'A difference is the later value minus the earlier one, in the measure’s own units, never a percentage. Years that are incomplete, suspect or missing are shown but left out of differences.',
+              'Una diferencia es el valor posterior menos el anterior, en las unidades de la medida, nunca un porcentaje. Los años incompletos, dudosos o sin dato se muestran, pero no entran en las diferencias.',
+            )}
           </p>
         </section>
 
         {cover && coverCell && (
           <section aria-labelledby={`${titleId}-charts`} className="cv-section">
-            <h3 id={`${titleId}-charts`}>Tree cover, loss and fire by year</h3>
+            <h3 id={`${titleId}-charts`}>{t('Tree cover, loss and fire by year', 'Cobertura, pérdida y fuego por año')}</h3>
             <YearChart
               years={cover.years}
               type="line"
@@ -234,14 +251,20 @@ function CellContent({ cell, manifest, cover, validation, titleId, summaryId, he
               domain={[0, 100]}
               from={from}
               to={to}
-              label={`Tree cover of this area, ${cover.years[0]} to ${cover.years[cover.years.length - 1]}, Hansen and MODIS`}
-              caption="Hansen (solid) counts loss but not regrowth, so it can only go down. MODIS (dashed) is an independent check; a hollow dot is a suspect value. Source: Hansen/UMD Global Forest Change (Landsat); NASA MOD44B."
+              label={t(
+                `Tree cover of this area, ${cover.years[0]} to ${cover.years[cover.years.length - 1]}, Hansen and MODIS`,
+                `Cobertura arbórea de esta área, ${cover.years[0]} a ${cover.years[cover.years.length - 1]}, Hansen y MODIS`,
+              )}
+              caption={t(
+                'Hansen (solid) counts loss but not regrowth, so it can only go down. MODIS (dashed) is an independent check; a hollow dot is a suspect value. Source: Hansen/UMD Global Forest Change (Landsat); NASA MOD44B.',
+                'Hansen (línea continua) cuenta la pérdida pero no el rebrote, así que solo puede bajar. MODIS (discontinua) es un contraste independiente; un punto hueco es un valor dudoso. Fuente: Hansen/UMD Global Forest Change (Landsat); NASA MOD44B.',
+              )}
             />
             <div className="cv-pair">
               <YearChart
                 years={cover.lossYears}
                 type="bars"
-                series={[{ id: 'loss', label: 'Loss', values: coverCell.lossKm2 }]}
+                series={[{ id: 'loss', label: t('Loss', 'Pérdida'), values: coverCell.lossKm2 }]}
                 format={formatKm2}
                 tick={(v) => v.toLocaleString('en-US')}
                 tone="loss"
@@ -249,21 +272,27 @@ function CellContent({ cell, manifest, cover, validation, titleId, summaryId, he
                 to={to}
                 tested={lossTested}
                 sen={coverCell.trends?.lossKm2?.line}
-                label="Tree cover lost per year in this area, in square kilometres"
-                caption="Tree cover lost each year (km²). Includes fire, logging, mining and clearing, not only deforestation. Source: Hansen/UMD."
+                label={t('Tree cover lost per year in this area, in square kilometres', 'Cobertura perdida por año en esta área, en kilómetros cuadrados')}
+                caption={t(
+                  'Tree cover lost each year (km²). Includes fire, logging, mining and clearing, not only deforestation. Source: Hansen/UMD.',
+                  'Cobertura perdida cada año (km²). Incluye fuego, tala, minería y desbroce, no solo deforestación. Fuente: Hansen/UMD.',
+                )}
                 height={150}
               />
               <YearChart
                 years={cover.burnedYears}
                 type="bars"
-                series={[{ id: 'burned', label: 'Burned', values: coverCell.burnedKm2 }]}
+                series={[{ id: 'burned', label: t('Burned', 'Quemado'), values: coverCell.burnedKm2 }]}
                 format={formatKm2}
                 tick={(v) => v.toLocaleString('en-US')}
                 tone="burned"
                 from={from}
                 to={to}
-                label="Area burned per year in this area, in square kilometres"
-                caption="Area burned each year (km²). Fire and loss in the same place do not show which caused which. Source: NASA MCD64A1."
+                label={t('Area burned per year in this area, in square kilometres', 'Superficie quemada por año en esta área, en kilómetros cuadrados')}
+                caption={t(
+                  'Area burned each year (km²). Fire and loss in the same place do not show which caused which. Source: NASA MCD64A1.',
+                  'Superficie quemada cada año (km²). Que haya fuego y pérdida en el mismo lugar no muestra cuál causó cuál. Fuente: NASA MCD64A1.',
+                )}
                 height={150}
               />
             </div>
@@ -271,31 +300,33 @@ function CellContent({ cell, manifest, cover, validation, titleId, summaryId, he
         )}
 
         <section aria-labelledby={`${titleId}-trends`} className="cv-section">
-          <h3 id={`${titleId}-trends`}>Trends in this area</h3>
+          <h3 id={`${titleId}-trends`}>{t('Trends in this area', 'Tendencias en esta área')}</h3>
           <p className="small muted">
-            The team’s test looks at yearly values, so the seasons do not count. “A clear trend” means it stands out from year-to-year
-            variation even after correcting for the many squares tested at once (false discovery rate 5 %).
+            {t(
+              'The team’s test looks at yearly values, so the seasons do not count. “A clear trend” means it stands out from year-to-year variation even after correcting for the many squares tested at once (false discovery rate 5 %).',
+              'El test del equipo mira valores anuales, así que las estaciones no cuentan. “Una tendencia clara” significa que destaca sobre la variación de un año a otro incluso tras corregir por los muchos cuadros probados a la vez (tasa de falsos descubrimientos del 5 %).',
+            )}
           </p>
           <CellTrends entries={entries} variables={variables} series={profile.series} from={from} to={to} onRetry={profile.retry} />
         </section>
 
         <details className="cv-exact-details">
-          <summary>Exact values</summary>
+          <summary>{t('Exact values', 'Valores exactos')}</summary>
           <CellValues rows={rows} years={years} from={from} to={to} entries={entries} alpha={validation?.trendChecks?.design.alpha ?? null} />
         </details>
 
         <section aria-labelledby={`${titleId}-links`} className="cv-section">
           <h3 id={`${titleId}-links`} className="sr-only">
-            Links
+            {t('Links', 'Enlaces')}
           </h3>
           <div className="cv-links">
             {top && (
               <ViewLink view="trends" params={{ var: top.id }} className="btn">
-                Open in Trends
+                {t('Open in Trends', 'Abrir en Tendencias')}
               </ViewLink>
             )}
             <details className="cv-menu">
-              <summary className="btn">Download this area’s data (JSON)</summary>
+              <summary className="btn">{t('Download this area’s data (JSON)', 'Descargar los datos de esta área (JSON)')}</summary>
               <ul>
                 <li>
                   <a href={`${API_BASE_PATH}/${apiPaths.cell(cell.cellId)}`} target="_blank" rel="noreferrer">
@@ -312,17 +343,17 @@ function CellContent({ cell, manifest, cover, validation, titleId, summaryId, he
                 {cover && (
                   <li>
                     <a href={`${API_BASE_PATH}/${apiPaths.cover()}`} target="_blank" rel="noreferrer">
-                      Tree cover, loss and burned area (all squares)
+                      {t('Tree cover, loss and burned area (all squares)', 'Cobertura, pérdida y área quemada (todos los cuadros)')}
                     </a>
                   </li>
                 )}
               </ul>
             </details>
             <button type="button" className="btn" onClick={copyLink}>
-              Copy link to this view
+              {t('Copy link to this view', 'Copiar el enlace a esta vista')}
             </button>
             <span className="small muted" role="status" aria-live="polite">
-              {copied ? 'Link copied' : ''}
+              {copied ? t('Link copied', 'Enlace copiado') : ''}
             </span>
           </div>
         </section>

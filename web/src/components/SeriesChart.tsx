@@ -7,6 +7,7 @@
 import { useState, type PointerEvent } from 'react'
 import type { CellSeries, Period, Variable } from '../../shared/contracts.ts'
 import { semesterLabel } from '../lib/format.ts'
+import { useLang } from '../lib/i18n.ts'
 
 const W = 640
 const H = 240
@@ -22,9 +23,10 @@ interface Props {
 }
 
 export function SeriesChart({ series, variable, compare, highlight = null }: Props) {
+  const { t } = useLang()
   const [hover, setHover] = useState<number | null>(null)
   const values = series.points.map((p) => p.value).filter((v): v is number => v !== null)
-  if (values.length === 0) return <p className="muted small">No valid months for this area.</p>
+  if (values.length === 0) return <p className="muted small">{t('No valid months for this area.', 'No hay meses válidos para esta área.')}</p>
 
   const min = Math.min(...values)
   const max = Math.max(...values)
@@ -71,7 +73,10 @@ export function SeriesChart({ series, variable, compare, highlight = null }: Pro
       <svg
         viewBox={`0 0 ${W} ${H}`}
         role="img"
-        aria-label={`Monthly ${variable.name} for this area, ${series.points[0]?.month} to ${series.points[n - 1]?.month}, ${missing} missing months`}
+        aria-label={t(
+          `Monthly ${variable.name} for this area, ${series.points[0]?.month} to ${series.points[n - 1]?.month}, ${missing} missing months`,
+          `${variable.name} mensual para esta área, ${series.points[0]?.month} a ${series.points[n - 1]?.month}, ${missing} meses sin dato`,
+        )}
         onPointerMove={onMove}
         onPointerLeave={() => setHover(null)}
       >
@@ -116,9 +121,17 @@ export function SeriesChart({ series, variable, compare, highlight = null }: Pro
         )}
       </svg>
       <figcaption>
-        Monthly values ({unit}) · {missing} missing month{missing === 1 ? '' : 's'} (for example clouds) shown as gaps
-        {compare ? ` · shaded: ${compare[1].start} to ${compare[1].end}` : ''}
-        {highlight ? ` · highlighted: ${semesterLabel(highlight.key)}${highlight.complete ? '' : ' (incomplete)'}` : ''}
+        {t(
+          `Monthly values (${unit}) · ${missing} missing month${missing === 1 ? '' : 's'} (for example clouds) shown as gaps`,
+          `Valores mensuales (${unit}) · ${missing} ${missing === 1 ? 'mes sin dato' : 'meses sin dato'} (por ejemplo, nubes) como huecos`,
+        )}
+        {compare ? t(` · shaded: ${compare[1].start} to ${compare[1].end}`, ` · sombreado: ${compare[1].start} a ${compare[1].end}`) : ''}
+        {highlight
+          ? t(
+              ` · highlighted: ${semesterLabel(highlight.key, t)}${highlight.complete ? '' : ' (incomplete)'}`,
+              ` · resaltado: ${semesterLabel(highlight.key, t)}${highlight.complete ? '' : ' (incompleto)'}`,
+            )
+          : ''}
       </figcaption>
     </figure>
   )

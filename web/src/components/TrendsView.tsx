@@ -13,15 +13,19 @@ import { useZones } from '../hooks/useZones.ts'
 import { useMediaQuery } from '../hooks/useMediaQuery.ts'
 import { useValidation } from '../hooks/useSignoData.ts'
 import { useUrlParams } from '../hooks/useUrlParam.ts'
-import { formatPValue } from '../lib/format.ts'
+import { formatPValue, localizeUnits } from '../lib/format.ts'
+import { useLang } from '../lib/i18n.ts'
 import {
   defaultYear,
-  DIRECTION_WORD,
   directionOf,
+  directionWord,
   formatSignedNumber,
   formatValue,
   LST_NOTE,
+  LST_NOTE_ES,
   measureFor,
+  measureName,
+  measureNote,
   measuresOf,
   orderedZoneIds,
   rangeSentence,
@@ -46,6 +50,7 @@ export interface TrendsViewProps {
 const KPI_KEYS = ['hansenTreeCover', 'lossKm2', 'lst_day', 'precip']
 
 export function TrendsView({ manifest }: TrendsViewProps) {
+  const { t } = useLang()
   const zonesPublished = manifest.extras.zones === true
   const zones = useZones(zonesPublished)
   const validation = useValidation(manifest.extras.validation)
@@ -53,10 +58,11 @@ export function TrendsView({ manifest }: TrendsViewProps) {
   if (!zonesPublished) {
     return (
       <div className="page page-trends">
-        <h1>How has the Amazon changed since 2001?</h1>
+        <h1>{t('How has the Amazon changed since 2001?', '¿Cómo ha cambiado la Amazonía desde 2001?')}</h1>
         <p className="muted">
-          Zone trends are not published yet. The map and the cross-checks work: <ViewLink view="map">open the map</ViewLink> or{' '}
-          <ViewLink view="checks">see the cross-checks</ViewLink>.
+          {t('Zone trends are not published yet. The map and the cross-checks work:', 'Las tendencias por zona aún no se publican. El mapa y los contrastes funcionan:')}{' '}
+          <ViewLink view="map">{t('open the map', 'abre el mapa')}</ViewLink> {t('or', 'o')}{' '}
+          <ViewLink view="checks">{t('see the cross-checks', 'mira los contrastes')}</ViewLink>.
         </p>
       </div>
     )
@@ -64,13 +70,13 @@ export function TrendsView({ manifest }: TrendsViewProps) {
   if (zones.error) {
     return (
       <div className="page page-trends">
-        <h1>How has the Amazon changed since 2001?</h1>
+        <h1>{t('How has the Amazon changed since 2001?', '¿Cómo ha cambiado la Amazonía desde 2001?')}</h1>
         <p className="error" role="alert">
-          Could not load the zone trends ({zones.error}).
+          {t('Could not load the zone trends', 'No se pudieron cargar las tendencias por zona')} ({zones.error}).
         </p>
         <p>
           <button type="button" className="btn" onClick={zones.retry}>
-            Try again
+            {t('Try again', 'Reintentar')}
           </button>
         </p>
       </div>
@@ -79,12 +85,12 @@ export function TrendsView({ manifest }: TrendsViewProps) {
   if (!zones.data) {
     return (
       <div className="page page-trends" aria-busy="true">
-        <h1>How has the Amazon changed since 2001?</h1>
+        <h1>{t('How has the Amazon changed since 2001?', '¿Cómo ha cambiado la Amazonía desde 2001?')}</h1>
         <div className="tr-skeleton" style={{ height: 96 }} />
         <div className="tr-skeleton" style={{ height: 384 }} />
         <div className="tr-skeleton" style={{ height: 280 }} />
         <p className="sr-only" role="status">
-          Loading the zone trends…
+          {t('Loading the zone trends…', 'Cargando las tendencias por zona…')}
         </p>
       </div>
     )
@@ -96,6 +102,7 @@ export function TrendsView({ manifest }: TrendsViewProps) {
 // Dashboard
 
 function TrendsDashboard({ report, validation }: { report: ZonesReport; validation: ReturnType<typeof useValidation> | null }) {
+  const { t } = useLang()
   const [params, setParams] = useUrlParams()
   const compact = useMediaQuery('(max-width: 767px)')
   const detailRef = useRef<HTMLElement>(null)
@@ -105,13 +112,13 @@ function TrendsDashboard({ report, validation }: { report: ZonesReport; validati
   const zoneParam = params.get('zone')
   const zoneId = zoneParam !== null && zoneIds.includes(zoneParam) ? zoneParam : (zoneIds[0] ?? 'amazon')
   const zone: Zone | undefined = report.zones[zoneId]
-  if (!zone) return <p className="muted page-status">This report has no zones.</p>
+  if (!zone) return <p className="muted page-status">{t('This report has no zones.', 'Este informe no tiene zonas.')}</p>
 
   const rows = measuresOf(zone)
   const asked = measureFor(params.get('var'))
   const selected =
     rows.find((r) => asked !== null && r.measure.key === asked.key) ?? rows.find((r) => r.variable.zoneTrend) ?? rows[0]
-  const heading = zoneHeading(zoneId, zone.label)
+  const heading = zoneHeading(zoneId, zone.label, t)
   const missing = rows.length < 8
   const notAvailable = ['lossKm2', 'burned_area', 'ndvi', 'evi', 'lst_day', 'precip', 'modisTreeCover', 'hansenTreeCover'].filter(
     (key) => !zone.variables[key],
@@ -130,23 +137,29 @@ function TrendsDashboard({ report, validation }: { report: ZonesReport; validati
     <div className="page page-trends tr">
       <header className="tr-head">
         <div>
-          <h1>How has the {heading} changed since 2001?</h1>
+          <h1>{t(`How has the ${heading} changed since 2001?`, `¿Cómo ha cambiado la ${heading} desde 2001?`)}</h1>
           <p className="muted tr-lead">
-            Yearly values and a trend test for each measure: Mann-Kendall test on yearly values, Sen slope per decade, α = {report.alpha}.{' '}
-            <a href="#how-it-works">How the test works and how we checked it</a>
+            {t(
+              'Yearly values and a trend test for each measure: Mann-Kendall test on yearly values, Sen slope per decade',
+              'Valores anuales y un test de tendencia por medida: test de Mann-Kendall sobre valores anuales, pendiente de Sen por década',
+            )}
+            , α = {report.alpha}.{' '}
+            <a href="#how-it-works">{t('How the test works and how we checked it', 'Cómo funciona el test y cómo lo comprobamos')}</a>
           </p>
-          {report.dataStatus === 'mock' && <p className="tr-small muted">Sample data: these numbers are synthetic.</p>}
+          {report.dataStatus === 'mock' && (
+            <p className="tr-small muted">{t('Sample data: these numbers are synthetic.', 'Datos de muestra: estas cifras son sintéticas.')}</p>
+          )}
         </div>
         <ZoneSelector
           ids={zoneIds}
-          labels={Object.fromEntries(zoneIds.map((id) => [id, zoneSelectorLabel(id, report.zones[id].label)]))}
+          labels={Object.fromEntries(zoneIds.map((id) => [id, zoneSelectorLabel(id, report.zones[id].label, t)]))}
           value={zoneId}
           compact={compact}
           onChange={(id) => setParams({ zone: id })}
         />
       </header>
 
-      <section aria-label="Headline numbers">
+      <section aria-label={t('Headline numbers', 'Cifras principales')}>
         <ul className="tr-kpis">
           {KPI_KEYS.map((key) => {
             const row = rows.find((r) => r.measure.key === key)
@@ -158,27 +171,34 @@ function TrendsDashboard({ report, validation }: { report: ZonesReport; validati
           })}
         </ul>
         <p className="tr-small muted">
-          “Clear trend” is a zone-level test: one test for this zone and measure, not corrected for multiple tests. Counts of squares
-          are corrected (false discovery rate {Math.round(report.alpha * 100)} %).
+          {t(
+            `“Clear trend” is a zone-level test: one test for this zone and measure, not corrected for multiple tests. Counts of squares are corrected (false discovery rate ${Math.round(report.alpha * 100)} %).`,
+            `“Tendencia clara” es un test a nivel de zona: un test para esta zona y medida, sin corregir por pruebas múltiples. Los conteos de cuadros sí se corrigen (tasa de falsos descubrimientos del ${Math.round(report.alpha * 100)} %).`,
+          )}
         </p>
       </section>
 
       <section aria-labelledby="tr-table-title" className="tr-section">
-        <h2 id="tr-table-title">Every measure, one row each</h2>
+        <h2 id="tr-table-title">{t('Every measure, one row each', 'Cada medida, una fila')}</h2>
         <div className="tr-table-scroll tr-measures-wrap">
           <table className="tr-measures">
             <caption className="sr-only">
-              Trend of each measure in the {heading}. Choose a measure to show its chart below the table.
+              {t(
+                `Trend of each measure in the ${heading}. Choose a measure to show its chart below the table.`,
+                `Tendencia de cada medida en la ${heading}. Elige una medida para ver su gráfico debajo de la tabla.`,
+              )}
             </caption>
             <thead>
               <tr>
-                <th scope="col">Measure</th>
-                <th scope="col">Years tested</th>
-                <th scope="col">Direction</th>
-                <th scope="col">Change per decade</th>
-                <th scope="col">Clear trend? <span className="tr-colnote">zone-level test</span></th>
-                <th scope="col">Squares falling | rising</th>
-                <th scope="col">Yearly values</th>
+                <th scope="col">{t('Measure', 'Medida')}</th>
+                <th scope="col">{t('Years tested', 'Años probados')}</th>
+                <th scope="col">{t('Direction', 'Dirección')}</th>
+                <th scope="col">{t('Change per decade', 'Cambio por década')}</th>
+                <th scope="col">
+                  {t('Clear trend?', '¿Tendencia clara?')} <span className="tr-colnote">{t('zone-level test', 'test por zona')}</span>
+                </th>
+                <th scope="col">{t('Squares falling | rising', 'Cuadros que bajan | suben')}</th>
+                <th scope="col">{t('Yearly values', 'Valores anuales')}</th>
               </tr>
             </thead>
             <tbody>
@@ -195,9 +215,16 @@ function TrendsDashboard({ report, validation }: { report: ZonesReport; validati
           </table>
         </div>
         <p className="tr-small muted">
-          Squares: 1° squares of the zone with a clear fall or rise (after correcting for testing many squares), out of the squares
-          tested. Hansen tree cover is shown as context and is not tested.
-          {missing && notAvailable.length > 0 && ` Not available for the ${heading}: ${notAvailable.map((k) => measureFor(k)?.name ?? k).join(', ')}.`}
+          {t(
+            'Squares: 1° squares of the zone with a clear fall or rise (after correcting for testing many squares), out of the squares tested. Hansen tree cover is shown as context and is not tested.',
+            'Cuadros: cuadros de 1° de la zona con una bajada o subida clara (tras corregir por probar muchos cuadros), del total de cuadros probados. La cobertura de Hansen se muestra como contexto y no se prueba.',
+          )}
+          {missing &&
+            notAvailable.length > 0 &&
+            t(
+              ` Not available for the ${heading}: ${notAvailable.map((k) => { const m = measureFor(k); return m ? measureName(m, t) : k }).join(', ')}.`,
+              ` No disponible para la ${heading}: ${notAvailable.map((k) => { const m = measureFor(k); return m ? measureName(m, t) : k }).join(', ')}.`,
+            )}
         </p>
       </section>
 
@@ -205,10 +232,12 @@ function TrendsDashboard({ report, validation }: { report: ZonesReport; validati
         <section ref={detailRef} aria-labelledby="tr-detail-title" className="tr-section tr-detail">
           <div className="tr-detail-chart">
             <h2 id="tr-detail-title">
-              {selected.measure.name}, {heading}
+              {measureName(selected.measure, t)}, {heading}
             </h2>
             <p className="tr-small muted tr-units">
-              {selected.variable.units === 'unitless' ? 'Yearly mean, no units' : `Yearly values in ${selected.variable.units}`}
+              {selected.variable.units === 'unitless'
+                ? t('Yearly mean, no units', 'Media anual, sin unidades')
+                : t(`Yearly values in ${selected.variable.units}`, `Valores anuales en ${localizeUnits(selected.variable.units, t)}`)}
             </p>
             <ZoneChart
               key={yearKey}
@@ -217,15 +246,17 @@ function TrendsDashboard({ report, validation }: { report: ZonesReport; validati
               year={year}
               onYear={(y) => setPicked({ key: yearKey, year: y })}
             />
-            <p className="tr-small muted">Source: {selected.measure.source}</p>
+            <p className="tr-small muted">
+              {t('Source', 'Fuente')}: {selected.measure.source}
+            </p>
           </div>
           <aside className="tr-detail-text" aria-labelledby="tr-means-title">
-            <h3 id="tr-means-title">What this means</h3>
+            <h3 id="tr-means-title">{t('What this means', 'Qué significa')}</h3>
             <Meaning report={report} heading={heading} measure={selected.measure} variable={selected.variable} year={year} />
             {selected.measure.map && (
               <p>
                 <ViewLink view="map" params={selected.measure.map} className="btn primary">
-                  See it on the map
+                  {t('See it on the map', 'Verlo en el mapa')}
                 </ViewLink>
               </p>
             )}
@@ -237,13 +268,17 @@ function TrendsDashboard({ report, validation }: { report: ZonesReport; validati
 
       <footer className="tr-foot tr-small muted">
         <p>
-          Sources: NASA MODIS MOD13C2, MOD11C3, MCD64A1 and MOD44B (LP DAAC), NASA GPM IMERG (GES DISC) and Hansen/UMD/Google/USGS/NASA
-          Global Forest Change. Zone values are area-weighted means of the 1° squares. The Brazilian and Peruvian parts hold the squares
-          that lie mostly inside each country.
+          {t(
+            'Sources: NASA MODIS MOD13C2, MOD11C3, MCD64A1 and MOD44B (LP DAAC), NASA GPM IMERG (GES DISC) and Hansen/UMD/Google/USGS/NASA Global Forest Change. Zone values are area-weighted means of the 1° squares. The Brazilian and Peruvian parts hold the squares that lie mostly inside each country.',
+            'Fuentes: NASA MODIS MOD13C2, MOD11C3, MCD64A1 y MOD44B (LP DAAC), NASA GPM IMERG (GES DISC) y Hansen/UMD/Google/USGS/NASA Global Forest Change. Los valores por zona son medias ponderadas por área de los cuadros de 1°. Las partes brasileña y peruana reúnen los cuadros que quedan mayormente dentro de cada país.',
+          )}
         </p>
         <p>{report.aiDisclosure}</p>
         <p>
-          <ViewLink view="checks">Cross-checks</ViewLink> · <ViewLink view="method" hash="trend-test">Method and sources</ViewLink>
+          <ViewLink view="checks">{t('Cross-checks', 'Contrastes')}</ViewLink> ·{' '}
+          <ViewLink view="method" hash="trend-test">
+            {t('Method and sources', 'Método y fuentes')}
+          </ViewLink>
         </p>
       </footer>
     </div>
@@ -261,10 +296,11 @@ interface ZoneSelectorProps {
 }
 
 function ZoneSelector({ ids, labels, value, compact, onChange }: ZoneSelectorProps) {
+  const { t } = useLang()
   if (compact) {
     return (
       <div className="tr-zone-select">
-        <label htmlFor="tr-zone">Zone</label>
+        <label htmlFor="tr-zone">{t('Zone', 'Zona')}</label>
         <select id="tr-zone" value={value} onChange={(e) => onChange(e.target.value)}>
           {ids.map((id) => (
             <option key={id} value={id}>
@@ -277,7 +313,7 @@ function ZoneSelector({ ids, labels, value, compact, onChange }: ZoneSelectorPro
   }
   return (
     <fieldset className="tr-seg">
-      <legend>Zone</legend>
+      <legend>{t('Zone', 'Zona')}</legend>
       {ids.map((id) => (
         <label key={id}>
           <input type="radio" name="tr-zone" value={id} checked={id === value} onChange={() => onChange(id)} />
@@ -310,51 +346,59 @@ function SquareBar({ tested, down, up }: { tested: number; down: number; up: num
   )
 }
 
-function squaresText(variable: ZoneVariable): string | null {
+function squaresText(variable: ZoneVariable, t: (en: string, es: string) => string): string | null {
   const c = variable.cellSummary
-  return c ? `${c.significantDecreasing} falling and ${c.significantIncreasing} rising, of ${c.tested} squares tested` : null
+  return c
+    ? t(
+        `${c.significantDecreasing} falling and ${c.significantIncreasing} rising, of ${c.tested} squares tested`,
+        `${c.significantDecreasing} bajan y ${c.significantIncreasing} suben, de ${c.tested} cuadros probados`,
+      )
+    : null
 }
 
 // Table row
 
 function MeasureRow({ measure, variable, selected, onSelect }: { measure: Measure; variable: ZoneVariable; selected: boolean; onSelect: () => void }) {
+  const { t } = useLang()
   const trend = variable.zoneTrend
   const direction = directionOf(variable)
   const cells = variable.cellSummary
   return (
     <tr className={selected ? 'is-selected' : undefined}>
-      <th scope="row" data-label="Measure">
+      <th scope="row" data-label={t('Measure', 'Medida')}>
         <button type="button" className="tr-rowbtn" aria-pressed={selected} onClick={onSelect}>
-          {measure.name}
+          {measureName(measure, t)}
         </button>
-        <span className="tr-small muted tr-units">{variable.units === 'unitless' ? 'no units' : variable.units}</span>
+        <span className="tr-small muted tr-units">{variable.units === 'unitless' ? t('no units', 'sin unidades') : localizeUnits(variable.units, t)}</span>
       </th>
-      <td data-label="Years tested">
+      <td data-label={t('Years tested', 'Años probados')}>
         {trend ? `${trend.years[0]}–${trend.years[1]}` : '—'}
         {measure.key === 'lst_day' && (
-          <span className="tr-small muted tr-block">Ends in 2020: later years are biased by the satellite&rsquo;s orbit drift.</span>
+          <span className="tr-small muted tr-block">{t(LST_NOTE, LST_NOTE_ES)}</span>
         )}
         {(measure.key === 'ndvi' || measure.key === 'evi') && trend && (
-          <span className="tr-small muted tr-block">Ends in 2020: satellite drift after that.</span>
+          <span className="tr-small muted tr-block">{t('Ends in 2020: satellite drift after that.', 'Termina en 2020: después hay deriva del satélite.')}</span>
         )}
       </td>
-      <td data-label="Direction">
+      <td data-label={t('Direction', 'Dirección')}>
         <span className="tr-dirtext">
           <DirectionIcon direction={direction} />
-          {DIRECTION_WORD[direction]}
+          {directionWord(direction, t)}
         </span>
       </td>
-      <td data-label="Change per decade" className="tr-num">
+      <td data-label={t('Change per decade', 'Cambio por década')} className="tr-num">
         {trend && trend.slopePerDecade !== null ? <SlopeText slope={trend.slopePerDecade} units={variable.units} /> : '—'}
       </td>
-      <td data-label="Clear trend?">
+      <td data-label={t('Clear trend?', '¿Tendencia clara?')}>
         {trend ? (
-          <span className={trend.significant ? 'tr-tag is-clear' : 'tr-tag'}>{trend.significant ? 'Clear trend' : 'Not clear'}</span>
+          <span className={trend.significant ? 'tr-tag is-clear' : 'tr-tag'}>
+            {trend.significant ? t('Clear trend', 'Tendencia clara') : t('Not clear', 'No es clara')}
+          </span>
         ) : (
-          <span className="muted">Not tested</span>
+          <span className="muted">{t('Not tested', 'Sin probar')}</span>
         )}
       </td>
-      <td data-label="Squares falling | rising">
+      <td data-label={t('Squares falling | rising', 'Cuadros que bajan | suben')}>
         {cells ? (
           <>
             <span className="tr-squares">
@@ -362,16 +406,16 @@ function MeasureRow({ measure, variable, selected, onSelect }: { measure: Measur
               <SquareBar tested={cells.tested} down={cells.significantDecreasing} up={cells.significantIncreasing} />
               <span className="tr-sq-n">{cells.significantIncreasing}</span>
             </span>
-            <span className="sr-only">{squaresText(variable)}</span>
+            <span className="sr-only">{squaresText(variable, t)}</span>
             <span className="tr-small muted tr-block" aria-hidden="true">
-              of {cells.tested} tested
+              {t(`of ${cells.tested} tested`, `de ${cells.tested} probados`)}
             </span>
           </>
         ) : (
           <span className="muted">—</span>
         )}
       </td>
-      <td data-label="Yearly values">
+      <td data-label={t('Yearly values', 'Valores anuales')}>
         <Sparkline variable={variable} measure={measure} />
       </td>
     </tr>
@@ -379,12 +423,13 @@ function MeasureRow({ measure, variable, selected, onSelect }: { measure: Measur
 }
 
 function SlopeText({ slope, units }: { slope: number; units: string }) {
-  const { value, unit } = slopeParts(slope, units)
+  const { t } = useLang()
+  const { value, unit } = slopeParts(slope, units, t)
   return (
     <span className="mono">
       {value}
       {unit ? ` ${unit}` : ''}
-      <span className="tr-small muted tr-block">per decade</span>
+      <span className="tr-small muted tr-block">{t('per decade', 'por década')}</span>
     </span>
   )
 }
@@ -392,6 +437,7 @@ function SlopeText({ slope, units }: { slope: number; units: string }) {
 // Headline cards
 
 function Kpi({ measure, variable, selected, onSelect }: { measure: Measure; variable: ZoneVariable; selected: boolean; onSelect: () => void }) {
+  const { t } = useLang()
   const trend = variable.zoneTrend
   const direction = directionOf(variable)
   const cells = variable.cellSummary
@@ -409,45 +455,52 @@ function Kpi({ measure, variable, selected, onSelect }: { measure: Measure; vari
             {formatValue(first.value as number, variable.units)} → {formatValue(last.value as number, variable.units)}
           </p>
           <p className="tr-small">
-            {first.year} → {last.year}: {formatSignedNumber((last.value as number) - (first.value as number))} points.
+            {first.year} → {last.year}: {formatSignedNumber((last.value as number) - (first.value as number))} {t('points', 'puntos')}.
           </p>
-          <p className="tr-small muted">Not tested: it can only go down, because regrowth is not counted.</p>
+          <p className="tr-small muted">
+            {t('Not tested: it can only go down, because regrowth is not counted.', 'Sin probar: solo puede bajar, porque no cuenta el rebrote.')}
+          </p>
         </>
       ) : (
-        <p className="muted">No values.</p>
+        <p className="muted">{t('No values.', 'Sin valores.')}</p>
       )
   } else {
-    const { value, unit } = trend.slopePerDecade === null ? { value: '—', unit: '' } : slopeParts(trend.slopePerDecade, variable.units)
+    const { value, unit } = trend.slopePerDecade === null ? { value: '—', unit: '' } : slopeParts(trend.slopePerDecade, variable.units, t)
     body = (
       <>
         <p className="tr-kpi-dir">
           <DirectionIcon direction={direction} />
-          {DIRECTION_WORD[direction]}
+          {directionWord(direction, t)}
         </p>
         <p className="tr-kpi-value mono">
           {value}
           {unit && <small> {unit}</small>}
         </p>
         <p className="tr-small">
-          per decade, {trend.years[0]}–{trend.years[1]}.{' '}
-          <span className={trend.significant ? 'tr-tag is-clear' : 'tr-tag'}>{trend.significant ? 'Clear trend' : 'Not a clear trend'}</span>
+          {t('per decade', 'por década')}, {trend.years[0]}–{trend.years[1]}.{' '}
+          <span className={trend.significant ? 'tr-tag is-clear' : 'tr-tag'}>
+            {trend.significant ? t('Clear trend', 'Tendencia clara') : t('Not a clear trend', 'No es una tendencia clara')}
+          </span>
         </p>
         {cells && (
           <p className="tr-small muted">
-            {cells.significantDecreasing} squares falling, {cells.significantIncreasing} rising, of {cells.tested} tested.
+            {t(
+              `${cells.significantDecreasing} squares falling, ${cells.significantIncreasing} rising, of ${cells.tested} tested.`,
+              `${cells.significantDecreasing} cuadros bajan, ${cells.significantIncreasing} suben, de ${cells.tested} probados.`,
+            )}
           </p>
         )}
-        {measure.key === 'lst_day' && <p className="tr-small muted">{LST_NOTE}</p>}
+        {measure.key === 'lst_day' && <p className="tr-small muted">{t(LST_NOTE, LST_NOTE_ES)}</p>}
       </>
     )
   }
 
   return (
     <div className={selected ? 'tr-kpi is-selected' : 'tr-kpi'}>
-      <p className="tr-kpi-label">{measure.name}</p>
+      <p className="tr-kpi-label">{measureName(measure, t)}</p>
       {body}
       <button type="button" className="tr-link" aria-pressed={selected} onClick={onSelect}>
-        Show the chart
+        {t('Show the chart', 'Ver el gráfico')}
       </button>
     </div>
   )
@@ -456,10 +509,12 @@ function Kpi({ measure, variable, selected, onSelect }: { measure: Measure; vari
 // Plain-language reading
 
 function Meaning({ report, heading, measure, variable, year }: { report: ZonesReport; heading: string; measure: Measure; variable: ZoneVariable; year: number | null }) {
+  const { t } = useLang()
   const trend = variable.zoneTrend
-  const zone = `the ${heading}`
+  const zone = t(`the ${heading}`, `la ${heading}`)
+  const name = measureName(measure, t)
   const cells = variable.cellSummary
-  const range = year === null ? null : rangeSentence(variable, year)
+  const range = year === null ? null : rangeSentence(variable, year, t)
   const known = variable.annual.filter((p) => p.value !== null)
   const first = known[0]
   const last = known[known.length - 1]
@@ -467,33 +522,58 @@ function Meaning({ report, heading, measure, variable, year }: { report: ZonesRe
   if (!trend || trend.slopePerDecade === null) {
     headline =
       first && last
-        ? `${measure.name} in ${zone} went from ${formatValue(first.value as number, variable.units)} in ${first.year} to ${formatValue(last.value as number, variable.units)} in ${last.year}. It is not tested: it can only go down, because regrowth is not counted.`
-        : `${measure.name} has no values for ${zone}.`
+        ? t(
+            `${name} in ${zone} went from ${formatValue(first.value as number, variable.units)} in ${first.year} to ${formatValue(last.value as number, variable.units)} in ${last.year}. It is not tested: it can only go down, because regrowth is not counted.`,
+            `${name} en ${zone} pasó de ${formatValue(first.value as number, variable.units)} en ${first.year} a ${formatValue(last.value as number, variable.units)} en ${last.year}. No se prueba: solo puede bajar, porque no cuenta el rebrote.`,
+          )
+        : t(`${name} has no values for ${zone}.`, `${name} no tiene valores para ${zone}.`)
   } else {
-    const size = slopeSentence(Math.abs(trend.slopePerDecade), variable.units).replace(/^\+/, '')
+    const size = slopeSentence(Math.abs(trend.slopePerDecade), variable.units, t).replace(/^\+/, '')
     const pText = formatPValue(trend.pValue)
     const p = `p ${pText.startsWith('<') ? pText : `= ${pText}`}, α = ${report.alpha}`
     headline = trend.significant && trend.slopePerDecade === 0
-      ? `${measure.name} in ${zone} shows a clear order from ${trend.years[0]} to ${trend.years[1]} (${p}) but no measurable slope, so we do not call it a trend.`
+      ? t(
+          `${name} in ${zone} shows a clear order from ${trend.years[0]} to ${trend.years[1]} (${p}) but no measurable slope, so we do not call it a trend.`,
+          `${name} en ${zone} muestra un orden claro de ${trend.years[0]} a ${trend.years[1]} (${p}), pero sin pendiente medible, así que no lo llamamos tendencia.`,
+        )
       : trend.significant
-      ? `${measure.name} in ${zone} ${trend.slopePerDecade < 0 ? 'fell' : 'rose'} by about ${size} from ${trend.years[0]} to ${trend.years[1]}. The test says this is more than year-to-year variation (${p}).`
-      : `${measure.name} in ${zone} moved by about ${size} (${trend.slopePerDecade < 0 ? 'down' : 'up'}) from ${trend.years[0]} to ${trend.years[1]}, but that is within year-to-year variation (${p}), so we do not call it a trend.`
+      ? t(
+          `${name} in ${zone} ${trend.slopePerDecade < 0 ? 'fell' : 'rose'} by about ${size} from ${trend.years[0]} to ${trend.years[1]}. The test says this is more than year-to-year variation (${p}).`,
+          `${name} en ${zone} ${trend.slopePerDecade < 0 ? 'bajó' : 'subió'} unos ${size} de ${trend.years[0]} a ${trend.years[1]}. El test indica que es más que la variación de un año a otro (${p}).`,
+        )
+      : t(
+          `${name} in ${zone} moved by about ${size} (${trend.slopePerDecade < 0 ? 'down' : 'up'}) from ${trend.years[0]} to ${trend.years[1]}, but that is within year-to-year variation (${p}), so we do not call it a trend.`,
+          `${name} en ${zone} se movió unos ${size} (${trend.slopePerDecade < 0 ? 'a la baja' : 'al alza'}) de ${trend.years[0]} a ${trend.years[1]}, pero eso está dentro de la variación de un año a otro (${p}), así que no lo llamamos tendencia.`,
+        )
   }
   return (
     <div className="tr-meaning">
       <p>{headline}</p>
-      {trend && <p className="tr-small muted">This is one test for this zone and measure, not corrected for multiple tests.</p>}
+      {trend && (
+        <p className="tr-small muted">
+          {t('This is one test for this zone and measure, not corrected for multiple tests.', 'Es un solo test para esta zona y medida, sin corregir por pruebas múltiples.')}
+        </p>
+      )}
       {range && <p>{range}</p>}
       {cells && (
         <p>
-          Of the {cells.tested} squares tested, {cells.significantDecreasing} fell and {cells.significantIncreasing} rose clearly (after
-          correcting for testing many squares).
+          {t(
+            `Of the ${cells.tested} squares tested, ${cells.significantDecreasing} fell and ${cells.significantIncreasing} rose clearly (after correcting for testing many squares).`,
+            `De los ${cells.tested} cuadros probados, ${cells.significantDecreasing} bajaron y ${cells.significantIncreasing} subieron con claridad (tras corregir por probar muchos cuadros).`,
+          )}
         </p>
       )}
-      {measure.note && <p className="tr-small muted">{measure.note}</p>}
-      <p className="tr-small muted">A trend describes a pattern in measurements. It does not say what caused it.</p>
+      {measure.note && <p className="tr-small muted">{measureNote(measure, t)}</p>}
+      <p className="tr-small muted">
+        {t('A trend describes a pattern in measurements. It does not say what caused it.', 'Una tendencia describe un patrón en las mediciones. No dice qué lo causó.')}
+      </p>
       {unitParts(variable.units).value === '' && measure.kind === 'line' && (
-        <p className="tr-small muted">The index has no units: it is a ratio of satellite readings, higher means greener.</p>
+        <p className="tr-small muted">
+          {t(
+            'The index has no units: it is a ratio of satellite readings, higher means greener.',
+            'El índice no tiene unidades: es un cociente de lecturas del satélite; más alto significa más verde.',
+          )}
+        </p>
       )}
     </div>
   )

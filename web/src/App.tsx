@@ -12,6 +12,7 @@ import { MapScreen } from './components/MapScreen.tsx'
 import { TopBar } from './components/TopBar.tsx'
 import { useCover, useManifest, useValidation } from './hooks/useSignoData.ts'
 import { useUrlParams } from './hooks/useUrlParam.ts'
+import { LangContext, parseLang, translator, type Lang } from './lib/i18n.ts'
 import { APP_VIEWS, parseAppView, type AppView } from './lib/viewState.ts'
 
 const TrendsView = lazy(() => import('./components/TrendsView.tsx').then((m) => ({ default: m.TrendsView })))
@@ -22,6 +23,8 @@ function App() {
   const manifest = useManifest()
   const [params, setParams] = useUrlParams()
   const view = parseAppView(params.get('view'))
+  const lang = parseLang(params.get('lang'))
+  const t = translator(lang)
   const mainRef = useRef<HTMLElement>(null)
   const shownView = useRef(view)
 
@@ -32,12 +35,21 @@ function App() {
 
   // A new view: move focus to <main> so keyboard and screen reader users start at its content, and name the page.
   useEffect(() => {
-    document.title = `SIGNO · ${APP_VIEWS.find((v) => v.id === view)?.label ?? 'Map'}`
+    const current = APP_VIEWS.find((v) => v.id === view)
+    document.title = `SIGNO · ${current ? t(current.label, current.labelEs) : t('Map', 'Mapa')}`
     if (shownView.current !== view) {
       shownView.current = view
       mainRef.current?.focus({ preventScroll: true })
     }
-  }, [view])
+  }, [view, lang]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // The page language, for screen readers and hyphenation.
+  useEffect(() => {
+    document.documentElement.lang = lang
+  }, [lang])
+
+  // English is the default: drop the parameter instead of writing ?lang=en.
+  const chooseLang = (next: Lang) => setParams({ lang: next === 'en' ? null : next })
 
   const hrefFor = (target: AppView) => {
     const next = new URLSearchParams(params)
@@ -67,22 +79,24 @@ function App() {
   const flaggedModisYears = (cover.data?.flags ?? []).filter((f) => f.source.toLowerCase() === 'modis').map((f) => f.year)
 
   return (
+    <LangContext.Provider value={lang}>
     <div className="app">
       <TopBar
         manifest={manifest.data}
         view={view}
         hrefFor={hrefFor}
         onNavigate={navigate}
+        onLang={chooseLang}
       />
 
       <main id="main" ref={mainRef} tabIndex={-1} className={`view view-${view}`}>
-        {manifest.loading && <p className="muted page-status">Loading…</p>}
+        {manifest.loading && <p className="muted page-status">{t('Loading…', 'Cargando…')}</p>}
         {manifest.error && <p className="error page-status">{manifest.error}</p>}
 
         {manifest.data && view === 'map' && <MapScreen manifest={manifest.data} cover={cover} validation={validation} />}
 
         {manifest.data && view !== 'map' && (
-          <Suspense fallback={<p className="muted page-status">Loading…</p>}>
+          <Suspense fallback={<p className="muted page-status">{t('Loading…', 'Cargando…')}</p>}>
             {view === 'trends' && <TrendsView manifest={manifest.data} />}
             {view === 'checks' && (
               <ChecksView
@@ -100,6 +114,7 @@ function App() {
         )}
       </main>
     </div>
+    </LangContext.Provider>
   )
 }
 

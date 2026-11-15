@@ -7,7 +7,8 @@
 
 import { useId, type ReactNode } from 'react'
 import { BURNED_BREAKS, COVER_BREAKS, COVER_CLASSES, LOSS_BREAKS } from '../lib/cover.ts'
-import { formatSigned, legendBreaks, SLOPE_CLASSES } from '../lib/format.ts'
+import { formatSigned, legendBreaks, localizeUnits, SLOPE_CLASSES } from '../lib/format.ts'
+import { useLang } from '../lib/i18n.ts'
 import type { MapType } from '../lib/viewState.ts'
 import { ViewLink } from './ViewLink.tsx'
 
@@ -98,14 +99,22 @@ function AmountBar({ prefix, breaks, label }: { prefix: 'loss' | 'burn'; breaks:
 }
 
 export function MapLegend({ mapType, year, trend, compact = false }: Props) {
+  const { t } = useLang()
   const titleId = `legend-title-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`
   if (mapType === 'cover') {
     return (
       <section className={compact ? 'legend compact' : 'legend'} aria-labelledby={titleId}>
         <h3 id={titleId} className="legend-title">
-          Tree cover in {year} (% of the square)
+          {t(`Tree cover in ${year} (% of the square)`, `Cobertura arbórea en ${year} (% del cuadro)`)}
         </h3>
-        <div className="legend-bar" role="img" aria-label={`Six green classes of tree cover: ${COVER_BREAKS.join(', ')} percent of the square`}>
+        <div
+          className="legend-bar"
+          role="img"
+          aria-label={t(
+            `Six green classes of tree cover: ${COVER_BREAKS.join(', ')} percent of the square`,
+            `Seis clases verdes de cobertura: ${COVER_BREAKS.join(', ')} por ciento del cuadro`,
+          )}
+        >
           {Array.from({ length: COVER_CLASSES }, (_, k) => (
             <i key={k} style={{ background: `var(--green-${k})` }} />
           ))}
@@ -117,8 +126,10 @@ export function MapLegend({ mapType, year, trend, compact = false }: Props) {
         </div>
         {!compact && (
           <>
-            <Key icon={<Hatch />}>No data</Key>
-            <p className="small muted">Hansen counts loss but not regrowth, so this can only go down.</p>
+            <Key icon={<Hatch />}>{t('No data', 'Sin datos')}</Key>
+            <p className="small muted">
+              {t('Hansen counts loss but not regrowth, so this can only go down.', 'Hansen cuenta la pérdida pero no el rebrote, así que esto solo puede bajar.')}
+            </p>
           </>
         )}
       </section>
@@ -130,19 +141,28 @@ export function MapLegend({ mapType, year, trend, compact = false }: Props) {
     return (
       <section className={compact ? 'legend compact' : 'legend'} aria-labelledby={titleId}>
         <h3 id={titleId} className="legend-title">
-          {isLoss ? `Tree cover lost in ${year}` : `Area burned in ${year}`} (km² per square)
+          {isLoss ? t(`Tree cover lost in ${year}`, `Cobertura perdida en ${year}`) : t(`Area burned in ${year}`, `Superficie quemada en ${year}`)}{' '}
+          {t('(km² per square)', '(km² por cuadro)')}
         </h3>
         <AmountBar
           prefix={isLoss ? 'loss' : 'burn'}
           breaks={isLoss ? LOSS_BREAKS : BURNED_BREAKS}
-          label={`Five colour classes of ${isLoss ? 'tree cover lost' : 'area burned'}, in square kilometres per square`}
+          label={t(
+            `Five colour classes of ${isLoss ? 'tree cover lost' : 'area burned'}, in square kilometres per square`,
+            `Cinco clases de color de ${isLoss ? 'cobertura perdida' : 'superficie quemada'}, en kilómetros cuadrados por cuadro`,
+          )}
         />
         {!compact && (
           <>
-            <Key icon={<Transparent />}>None: transparent</Key>
-            <Key icon={<Hatch />}>No data</Key>
+            <Key icon={<Transparent />}>{t('None: transparent', 'Nada: transparente')}</Key>
+            <Key icon={<Hatch />}>{t('No data', 'Sin datos')}</Key>
             {isLoss && (
-              <p className="small muted">Loss includes fire, logging, mining and clearing; it is not only deforestation.</p>
+              <p className="small muted">
+                {t(
+                  'Loss includes fire, logging, mining and clearing; it is not only deforestation.',
+                  'La pérdida incluye fuego, tala, minería y desbroce; no es solo deforestación.',
+                )}
+              </p>
             )}
           </>
         )}
@@ -153,8 +173,8 @@ export function MapLegend({ mapType, year, trend, compact = false }: Props) {
   // Trend
   const maxAbs = trend?.maxAbs ?? 0
   const breaks = legendBreaks(maxAbs)
-  const name = trend?.name ?? 'the measure'
-  const units = trend?.slopeUnits ?? 'per decade'
+  const name = trend?.name ?? t('the measure', 'la medida')
+  const units = trend ? localizeUnits(trend.slopeUnits, t) : t('per decade', 'por década')
   // The scale ends at ±maxAbs so typical slopes show; say so when real squares go beyond it ("≤ −428.03").
   const range = trend?.range ?? null
   const clippedLow = range !== null && range.min < -maxAbs
@@ -162,17 +182,20 @@ export function MapLegend({ mapType, year, trend, compact = false }: Props) {
   return (
     <section className={compact ? 'legend compact' : 'legend'} aria-labelledby={titleId}>
       <h3 id={titleId} className="legend-title">
-        Change per decade, {name}
+        {t('Change per decade', 'Cambio por década')}, {name}
         {trend ? ` (${units})` : ''}
       </h3>
       <div className="legend-ends">
-        <span>Falling</span>
-        <span>Rising</span>
+        <span>{t('Falling', 'Baja')}</span>
+        <span>{t('Rising', 'Sube')}</span>
       </div>
       <div
         className="legend-bar"
         role="img"
-        aria-label={`Six colour classes from ${clippedLow ? 'at most ' : ''}${formatSigned(-maxAbs)} to ${clippedHigh ? 'at least ' : ''}${formatSigned(maxAbs)} ${units}: orange falls, purple rises`}
+        aria-label={t(
+          `Six colour classes from ${clippedLow ? 'at most ' : ''}${formatSigned(-maxAbs)} to ${clippedHigh ? 'at least ' : ''}${formatSigned(maxAbs)} ${units}: orange falls, purple rises`,
+          `Seis clases de color de ${clippedLow ? 'como mucho ' : ''}${formatSigned(-maxAbs)} a ${clippedHigh ? 'al menos ' : ''}${formatSigned(maxAbs)} ${units}: naranja baja, morado sube`,
+        )}
       >
         {Array.from({ length: SLOPE_CLASSES }, (_, k) => (
           <i key={k} style={{ background: `var(--puor-${k})` }} />
@@ -193,16 +216,20 @@ export function MapLegend({ mapType, year, trend, compact = false }: Props) {
         <>
           {range && (
             <p className="small muted">
-              Coloured squares range from {formatSigned(range.min)} to {formatSigned(range.max)} (same units).
-              {(clippedLow || clippedHigh) && ' Squares beyond the ends of the scale take the end colour.'}
+              {t(
+                `Coloured squares range from ${formatSigned(range.min)} to ${formatSigned(range.max)} (same units).`,
+                `Los cuadros coloreados van de ${formatSigned(range.min)} a ${formatSigned(range.max)} (mismas unidades).`,
+              )}
+              {(clippedLow || clippedHigh) &&
+                t(' Squares beyond the ends of the scale take the end colour.', ' Los cuadros más allá de los extremos de la escala toman el color del extremo.')}
             </p>
           )}
-          {!trend?.pending && <Key icon={<Dotted />}>Dotted: no significant trend</Key>}
-          <Key icon={<Hatch />}>Hatched: not tested</Key>
+          {!trend?.pending && <Key icon={<Dotted />}>{t('Dotted: no significant trend', 'Punteado: sin tendencia significativa')}</Key>}
+          <Key icon={<Hatch />}>{t('Hatched: not tested', 'Rayado: sin probar')}</Key>
           <p className="small muted">
-            Mann-Kendall test on yearly values, false discovery rate 5 %.{' '}
+            {t('Mann-Kendall test on yearly values, false discovery rate 5 %.', 'Test de Mann-Kendall sobre valores anuales, tasa de falsos descubrimientos del 5 %.')}{' '}
             <ViewLink view="method" hash="trend-test">
-              How the test works
+              {t('How the test works', 'Cómo funciona el test')}
             </ViewLink>
           </p>
         </>
@@ -213,5 +240,6 @@ export function MapLegend({ mapType, year, trend, compact = false }: Props) {
 
 /** The "outlined: the area you opened" key, shown once under the legend. */
 export function SelectedKey() {
-  return <Key icon={<Selected />}>Outlined: the area you opened</Key>
+  const { t } = useLang()
+  return <Key icon={<Selected />}>{t('Outlined: the area you opened', 'Contorneado: el área que abriste')}</Key>
 }

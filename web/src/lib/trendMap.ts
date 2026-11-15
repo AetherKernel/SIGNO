@@ -10,6 +10,7 @@
 import type { CoverCellTrend, SenLine, CoverLayer, TrendLayer, ValidationReport, Variable } from '../../shared/contracts.ts'
 import type { CellPaint, MapCell } from './cover.ts'
 import { formatCoordinates, formatTrendSlope, maxAbsSlope, slopeColor, unitLabel } from './format.ts'
+import { EN, type Tr } from './i18n.ts'
 import { matchesFilter, type CellFilter } from './viewState.ts'
 
 export interface TrendOption {
@@ -35,7 +36,7 @@ type CoverTrendKey = 'lossKm2' | 'modisTreeCover'
 const yearOf = (month: string) => Number(month.slice(0, 4))
 
 /** The measures that can be shown as a trend, in the order of the Variable select. */
-export function trendOptions(variables: Variable[], cover: CoverLayer | null): TrendOption[] {
+export function trendOptions(variables: Variable[], cover: CoverLayer | null, t: Tr = EN): TrendOption[] {
   const options: TrendOption[] = variables.map((v) => ({
     id: v.id,
     name: v.name,
@@ -50,14 +51,14 @@ export function trendOptions(variables: Variable[], cover: CoverLayer | null): T
     options.push(
       {
         id: 'lossKm2',
-        name: 'Tree cover loss (Hansen)',
+        name: t('Tree cover loss (Hansen)', 'Pérdida de cobertura (Hansen)'),
         slopeUnits: 'km² per year, per decade',
         years: [cover.lossYears[0], lastLoss],
         kind: 'cover',
       },
       {
         id: 'modisTreeCover',
-        name: 'Tree cover (MODIS)',
+        name: t('Tree cover (MODIS)', 'Cobertura arbórea (MODIS)'),
         slopeUnits: '% of cell per decade',
         years: [modisYears[0] ?? cover.years[0], modisYears[modisYears.length - 1] ?? cover.years[cover.years.length - 1]],
         kind: 'cover',
@@ -69,7 +70,10 @@ export function trendOptions(variables: Variable[], cover: CoverLayer | null): T
 
 export function optionLabel(option: TrendOption): string {
   // Short on purpose (no years): the select must not truncate; the years tested are in the summary under it.
-  return option.name.replace(' (Hansen)', '').replace('Tree cover (MODIS)', 'Tree cover, MODIS')
+  return option.name
+    .replace(' (Hansen)', '')
+    .replace('Tree cover (MODIS)', 'Tree cover, MODIS')
+    .replace('Cobertura arbórea (MODIS)', 'Cobertura, MODIS')
 }
 
 /** Trend results by cell id for a monthly variable. */
@@ -94,7 +98,7 @@ export function noneTested(results: Map<string, TrendResult>): boolean {
 }
 
 /** "212 of 566 squares changed significantly: 140 down, 72 up." from the backend's counts; null when there are none. */
-export function summaryLine(option: TrendOption, layer: TrendLayer | null, validation: ValidationReport | null): string | null {
+export function summaryLine(option: TrendOption, layer: TrendLayer | null, validation: ValidationReport | null, t: Tr = EN): string | null {
   let counts: { tested: number; down: number; up: number } | null = null
   if (option.kind === 'series' && layer && layer.variableId === option.id) {
     const s = layer.summary
@@ -105,7 +109,11 @@ export function summaryLine(option: TrendOption, layer: TrendLayer | null, valid
   }
   if (!counts || counts.tested === 0) return null
   const n = counts.down + counts.up
-  return `${n.toLocaleString('en-US')} of ${counts.tested.toLocaleString('en-US')} squares changed significantly: ${counts.down.toLocaleString('en-US')} down, ${counts.up.toLocaleString('en-US')} up. Years tested: ${option.years[0]}–${option.years[1]}.`
+  const [all, tested, down, up] = [n, counts.tested, counts.down, counts.up].map((x) => x.toLocaleString('en-US'))
+  return t(
+    `${all} of ${tested} squares changed significantly: ${down} down, ${up} up. Years tested: ${option.years[0]}–${option.years[1]}.`,
+    `${all} de ${tested} cuadros cambiaron de forma significativa: ${down} bajan, ${up} suben. Años probados: ${option.years[0]}–${option.years[1]}.`,
+  )
 }
 
 /** Legend range: symmetric, at the 90th percentile of |significant slopes| so typical values show (larger ones take the end colour). */
@@ -133,20 +141,27 @@ export interface TrendPaintInfo {
 }
 
 /** Paint of a trend map. Colour = direction and size; dotted = not significant (as decided by the backend). */
-export function makeTrendPaint(option: TrendOption, results: Map<string, TrendResult>, filter: CellFilter): TrendPaintInfo {
+export function makeTrendPaint(option: TrendOption, results: Map<string, TrendResult>, filter: CellFilter, t: Tr = EN): TrendPaintInfo {
   const maxAbs = legendRange([...results.values()])
   const span = `${option.years[0]}–${option.years[1]}`
   const readout = (cell: MapCell) => {
     const r = results.get(cell.cellId)
-    if (!r || r.slopePerDecade === null) return 'Not tested: too few years with data'
-    if (!r.significant) return `No clear trend (${span})`
-    if (r.slopePerDecade === 0) return `No measurable slope: clear order but no measurable slope (${span})`
-    const word = r.slopePerDecade < 0 ? 'Falling' : 'Rising'
-    return `${word}: ${formatTrendSlope(r.slopePerDecade, option.slopeUnits)}, significant (${span})`
+    if (!r || r.slopePerDecade === null) return t('Not tested: too few years with data', 'Sin probar: muy pocos años con datos')
+    if (!r.significant) return t(`No clear trend (${span})`, `Sin tendencia clara (${span})`)
+    if (r.slopePerDecade === 0)
+      return t(`No measurable slope: clear order but no measurable slope (${span})`, `Sin pendiente medible: orden claro, pero sin pendiente medible (${span})`)
+    const word = r.slopePerDecade < 0 ? t('Falling', 'Baja') : t('Rising', 'Sube')
+    return t(
+      `${word}: ${formatTrendSlope(r.slopePerDecade, option.slopeUnits, t)}, significant (${span})`,
+      `${word}: ${formatTrendSlope(r.slopePerDecade, option.slopeUnits, t)}, significativo (${span})`,
+    )
   }
   const paint: CellPaint = {
     key: `trend:${option.id}`,
-    regionLabel: `Trend map of ${option.name}, ${span}. Tab to reach the squares, use the arrow keys to move between them and Enter to open one.`,
+    regionLabel: t(
+      `Trend map of ${option.name}, ${span}. Tab to reach the squares, use the arrow keys to move between them and Enter to open one.`,
+      `Mapa de tendencia de ${option.name}, ${span}. Usa Tab para llegar a los cuadros, las flechas para moverte entre ellos y Enter para abrir uno.`,
+    ),
     style: (cell) => {
       const r = results.get(cell.cellId)
       if (!r || r.slopePerDecade === null) return { color: 'var(--cell-empty)', kind: 'empty' }

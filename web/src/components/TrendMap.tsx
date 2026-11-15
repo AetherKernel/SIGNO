@@ -27,6 +27,7 @@ import type { Region } from '../../shared/contracts.ts'
 import type { Basemap } from '../lib/basemaps.ts'
 import type { CellPaint, MapCell } from '../lib/cover.ts'
 import { formatCoordinates } from '../lib/format.ts'
+import { useLang } from '../lib/i18n.ts'
 import type { MapView } from '../lib/viewState.ts'
 import type { Borders } from '../services/staticData.ts'
 
@@ -60,6 +61,7 @@ const BORDERS_CREDIT = 'Borders: <a href="https://www.naturalearthdata.com">Natu
 export const CELL_ATTRIBUTE = 'data-cell-id'
 
 export function TrendMap(props: Props) {
+  const { lang, t } = useLang()
   const { cells, cellSizeDeg: size, region, basemap, paint, opacity, borders, selectedCellId, initialView, flyTo = null } = props
   const [west, south, east, north] = region.bbox
 
@@ -370,6 +372,21 @@ export function TrendMap(props: Props) {
     </>
   )
 
+  // Leaflet builds the zoom buttons once, in English: rename them when the language changes.
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+    const names: [string, string][] = [
+      ['.leaflet-control-zoom-in', t('Zoom in', 'Acercar')],
+      ['.leaflet-control-zoom-out', t('Zoom out', 'Alejar')],
+    ]
+    for (const [selector, name] of names) {
+      const button = container.querySelector(selector)
+      button?.setAttribute('title', name)
+      button?.setAttribute('aria-label', name)
+    }
+  }, [lang, svg]) // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <>
       <div ref={containerRef} className="map" role="region" aria-label={paint.regionLabel} />
@@ -383,24 +400,28 @@ export function TrendMap(props: Props) {
             : cursor
               ? formatCoordinates(cursor.lat, cursor.lon, 2)
               : window.matchMedia('(pointer: coarse)').matches
-                ? 'Tap a square to see its value'
-                : 'Move over a square to see its value'}
+                ? t('Tap a square to see its value', 'Toca un cuadro para ver su valor')
+                : t('Move over a square to see its value', 'Pasa sobre un cuadro para ver su valor')}
         </span>
         {readoutCell && <span>{paint.readout(readoutCell)}</span>}
         {readoutCell && (
-          <span className="muted">{touchCell && readoutCell === touchCell ? 'Tap again to open this area' : 'Click to open this area'}</span>
+          <span className="muted">
+            {touchCell && readoutCell === touchCell
+              ? t('Tap again to open this area', 'Toca otra vez para abrir esta área')
+              : t('Click to open this area', 'Haz clic para abrir esta área')}
+          </span>
         )}
       </div>
 
       {atMaxZoom && (
         <p className="map-overlay zoom-note" role="status">
-          <strong>Maximum zoom for {basemap.label}.</strong> Squares are {size}° wide; closer views would only
-          enlarge them.
+          <strong>{t(`Maximum zoom for ${basemap.label}.`, `Zoom máximo para ${basemap.labelEs}.`)}</strong>{' '}
+          {t(`Squares are ${size}° wide; closer views would only enlarge them.`, `Los cuadros miden ${size}°; acercar más solo los agrandaría.`)}
         </p>
       )}
       {tileErrorFor === basemap.id && basemap.url && (
         <p className="map-overlay map-status" role="status">
-          NASA GIBS imagery is not loading. The squares still work.
+          {t('NASA GIBS imagery is not loading. The squares still work.', 'Las imágenes de NASA GIBS no cargan. Los cuadros siguen funcionando.')}
         </p>
       )}
     </>

@@ -6,6 +6,7 @@
 
 import type { CoverCell, CoverFlag, CoverLayer } from '../../shared/contracts.ts'
 import { formatCoordinates, formatKm2, formatPercent } from './format.ts'
+import { EN, type Tr } from './i18n.ts'
 import type { CoverSource } from './viewState.ts'
 
 /** Colour class edges (percent of the cell). Finer at the top because most Amazon cells are dense forest. */
@@ -105,19 +106,25 @@ function yearAt(years: number[], values: (number | null)[] | undefined, year: nu
   return index < 0 ? null : (values?.[index] ?? null)
 }
 
-const HINT = 'Tab to reach the squares, use the arrow keys to move between them and Enter to open one.'
+const hint = (t: Tr) =>
+  t(
+    'Tab to reach the squares, use the arrow keys to move between them and Enter to open one.',
+    'Usa Tab para llegar a los cuadros, las flechas para moverte entre ellos y Enter para abrir uno.',
+  )
 
-export function makeCoverPaint(cover: CoverLayer, year: number): CellPaint {
+export function makeCoverPaint(cover: CoverLayer, year: number, t: Tr = EN): CellPaint {
   const cells = coverByCellId(cover)
   const valueOf = (cell: MapCell) => coverValue(cells.get(cell.cellId), 'hansen', cover.years, year)
   const readout = (cell: MapCell) => {
     const value = valueOf(cell)
-    const when = year === 2000 ? 'in the 2000 baseline' : `at the end of ${year}`
-    return value === null ? `No tree cover value for ${year}` : `Tree cover ${formatPercent(value)} ${when}`
+    const when = year === 2000 ? t('in the 2000 baseline', 'en la línea base 2000') : t(`at the end of ${year}`, `a fines de ${year}`)
+    return value === null
+      ? t(`No tree cover value for ${year}`, `Sin valor de cobertura para ${year}`)
+      : t(`Tree cover ${formatPercent(value)} ${when}`, `Cobertura ${formatPercent(value)} ${when}`)
   }
   return {
     key: 'cover',
-    regionLabel: `Tree cover map, ${year}. ${HINT}`,
+    regionLabel: t(`Tree cover map, ${year}. ${hint(t)}`, `Mapa de cobertura arbórea, ${year}. ${hint(t)}`),
     style: (cell) => {
       const value = valueOf(cell)
       return value === null ? { color: 'var(--cell-empty)', kind: 'empty' } : { color: coverColor(value), kind: 'solid' }
@@ -135,6 +142,7 @@ function makeAmountPaint(
   breaks: number[],
   prefix: 'loss' | 'burn',
   texts: { map: string; some: (km2: string, year: number) => string; none: (year: number) => string; missing: (year: number) => string },
+  t: Tr = EN,
 ): CellPaint {
   const cells = coverByCellId(cover)
   const valueOf = (cell: MapCell) => yearAt(years, cells.get(cell.cellId)?.[field], year)
@@ -145,7 +153,7 @@ function makeAmountPaint(
   }
   return {
     key: field === 'lossKm2' ? 'loss' : 'burned',
-    regionLabel: `${texts.map}, ${year}. ${HINT}`,
+    regionLabel: `${texts.map}, ${year}. ${hint(t)}`,
     style: (cell) => {
       const k = amountClass(valueOf(cell), breaks)
       if (k === null) return { color: 'var(--cell-empty)', kind: 'empty' }
@@ -156,22 +164,40 @@ function makeAmountPaint(
   }
 }
 
-export function makeLossPaint(cover: CoverLayer, year: number): CellPaint {
-  return makeAmountPaint(cover, year, 'lossKm2', cover.lossYears, LOSS_BREAKS, 'loss', {
-    map: 'Tree cover loss map',
-    some: (km2, y) => `${km2} of tree cover lost in ${y}`,
-    none: (y) => `No tree cover lost in ${y}`,
-    missing: (y) => `No tree cover loss value for ${y}`,
-  })
+export function makeLossPaint(cover: CoverLayer, year: number, t: Tr = EN): CellPaint {
+  return makeAmountPaint(
+    cover,
+    year,
+    'lossKm2',
+    cover.lossYears,
+    LOSS_BREAKS,
+    'loss',
+    {
+      map: t('Tree cover loss map', 'Mapa de pérdida de cobertura'),
+      some: (km2, y) => t(`${km2} of tree cover lost in ${y}`, `${km2} de cobertura perdida en ${y}`),
+      none: (y) => t(`No tree cover lost in ${y}`, `Sin cobertura perdida en ${y}`),
+      missing: (y) => t(`No tree cover loss value for ${y}`, `Sin valor de pérdida para ${y}`),
+    },
+    t,
+  )
 }
 
-export function makeBurnedPaint(cover: CoverLayer, year: number): CellPaint {
-  return makeAmountPaint(cover, year, 'burnedKm2', cover.burnedYears, BURNED_BREAKS, 'burn', {
-    map: 'Burned area map',
-    some: (km2, y) => `${km2} burned in ${y}`,
-    none: (y) => `No burned area in ${y}`,
-    missing: (y) => `No burned area value for ${y}`,
-  })
+export function makeBurnedPaint(cover: CoverLayer, year: number, t: Tr = EN): CellPaint {
+  return makeAmountPaint(
+    cover,
+    year,
+    'burnedKm2',
+    cover.burnedYears,
+    BURNED_BREAKS,
+    'burn',
+    {
+      map: t('Burned area map', 'Mapa de área quemada'),
+      some: (km2, y) => t(`${km2} burned in ${y}`, `${km2} quemados en ${y}`),
+      none: (y) => t(`No burned area in ${y}`, `Sin área quemada en ${y}`),
+      missing: (y) => t(`No burned area value for ${y}`, `Sin valor de área quemada para ${y}`),
+    },
+    t,
+  )
 }
 
 /** Year of the highest value of a yearly series (where a documented case is shown on the map). */

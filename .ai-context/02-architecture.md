@@ -67,6 +67,13 @@ raw data, clips, masks, logs and boundary files (`data/raw/boundaries/`) stay ou
 
 ### Interface (views of 15 Nov 2026)
 
+**Language (ADR-007).** English by default; Spanish when the user picks **ES** in the top bar (`?lang=es`, kept in shared
+links). `web/src/lib/i18n.ts` holds a React context and `t('English', 'Español')`; every view sentence is written in
+both languages where it is used, and lib functions that build sentences take `t` (English by default). Numbers keep
+the decimal point. Text that comes from the API (variable names, method descriptions, notes) stays in English until
+the pipeline publishes it in Spanish (05). Icons: Tabler Icons (`@tabler/icons-react`, MIT), so far only in the
+language switch.
+
 The app has four views, chosen with `?view=` (default `map`). The top bar links them, and each link works in a new tab.
 
 | View | `?view=` | What it shows |

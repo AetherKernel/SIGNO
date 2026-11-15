@@ -11,6 +11,7 @@ import type { CellYearlySeries, SenLine, Variable } from '../../shared/contracts
 import type { Slot } from '../hooks/useCellProfile.ts'
 import { useCellSeries } from '../hooks/useSignoData.ts'
 import { annualByYear, describeTrend, formatNumber, formatValue, seriesRow, type TrendEntry } from '../lib/cellView.ts'
+import { useLang } from '../lib/i18n.ts'
 import { SeriesChart } from './SeriesChart.tsx'
 import { ViewLink } from './ViewLink.tsx'
 import { YearChart, type ChartSeries, type PointKind } from './YearChart.tsx'
@@ -28,10 +29,11 @@ const ICON: Record<TrendEntry['status'], string> = { falling: '↓', rising: '�
 
 /** Yearly chart of a monthly variable in this square: tested years shaded, incomplete years hollow, later years muted. */
 function SeriesTrendChart({ variable, series, slot, from, to, sen }: { variable: Variable; series: CellYearlySeries; slot: Slot<CellYearlySeries>; from: number; to: number; sen?: SenLine }) {
+  const { t } = useLang()
   const [monthly, setMonthly] = useState(false)
   // The monthly points are not in the per-cell file: the series file loads only when the reader asks for it.
   const monthlySeries = useCellSeries(monthly ? variable.id : null, series.cellId)
-  const row = seriesRow(variable, slot)
+  const row = seriesRow(variable, slot, t)
   const annual = annualByYear(series)
   const years = [...annual.keys()]
   const tested: [number, number] | null = variable.trendYears ? [variable.trendYears.start, variable.trendYears.end] : null
@@ -52,7 +54,7 @@ function SeriesTrendChart({ variable, series, slot, from, to, sen }: { variable:
   return (
     <div className="cv-trend-body">
       {years.length === 0 ? (
-        <p className="muted small">Yearly values are not published yet.</p>
+        <p className="muted small">{t('Yearly values are not published yet.', 'Los valores anuales aún no se publican.')}</p>
       ) : (
         <YearChart
           years={years}
@@ -65,25 +67,36 @@ function SeriesTrendChart({ variable, series, slot, from, to, sen }: { variable:
           to={to}
           tested={tested}
           sen={sen}
-          label={`${variable.name}, yearly ${sum ? 'total' : 'mean'}, for this area`}
-          caption={`${tested ? `Shaded: the years the trend test used (${tested[0]}–${tested[1]}). ` : ''}Hollow: incomplete year, left out of the test.${sen ? ' Line: Sen slope over the tested years.' : ''} Source: NASA ${product.shortName} v${product.version} (${product.provider}).`}
+          label={t(
+            `${variable.name}, yearly ${sum ? 'total' : 'mean'}, for this area`,
+            `${variable.name}, ${sum ? 'total' : 'media'} anual, para esta área`,
+          )}
+          caption={t(
+            `${tested ? `Shaded: the years the trend test used (${tested[0]}–${tested[1]}). ` : ''}Hollow: incomplete year, left out of the test.${sen ? ' Line: Sen slope over the tested years.' : ''} Source: NASA ${product.shortName} v${product.version} (${product.provider}).`,
+            `${tested ? `Sombreado: los años que usó el test de tendencia (${tested[0]}–${tested[1]}). ` : ''}Hueco: año incompleto, fuera del test.${sen ? ' Línea: pendiente de Sen sobre los años probados.' : ''} Fuente: NASA ${product.shortName} v${product.version} (${product.provider}).`,
+          )}
         />
       )}
       <button type="button" className="cv-link" aria-expanded={monthly} onClick={() => setMonthly((on) => !on)}>
-        {monthly ? 'Hide monthly values' : 'Show monthly values'}
+        {monthly ? t('Hide monthly values', 'Ocultar valores mensuales') : t('Show monthly values', 'Mostrar valores mensuales')}
       </button>
       {monthly && monthlySeries.data && <SeriesChart series={monthlySeries.data} variable={variable} compare={null} />}
-      {monthly && monthlySeries.loading && <p className="muted small">Loading the monthly values…</p>}
-      {monthly && monthlySeries.error && <p className="error small">Could not load the monthly values. {monthlySeries.error}</p>}
+      {monthly && monthlySeries.loading && <p className="muted small">{t('Loading the monthly values…', 'Cargando los valores mensuales…')}</p>}
+      {monthly && monthlySeries.error && (
+        <p className="error small">
+          {t('Could not load the monthly values.', 'No se pudieron cargar los valores mensuales.')} {monthlySeries.error}
+        </p>
+      )}
     </div>
   )
 }
 
 export function CellTrends({ entries, variables, series, from, to, onRetry }: Props) {
+  const { t } = useLang()
   return (
     <ul className="cv-trends">
       {entries.map((entry) => {
-        const { headline, detail } = describeTrend(entry)
+        const { headline, detail } = describeTrend(entry, t)
         const variable = entry.kind === 'series' ? variables.find((v) => v.id === entry.id) : undefined
         const slot = series[entry.id]
         return (
@@ -98,18 +111,21 @@ export function CellTrends({ entries, variables, series, from, to, onRetry }: Pr
                 </span>
               </summary>
               {variable && slot?.state === 'ready' && <SeriesTrendChart variable={variable} series={slot.data} slot={slot} from={from} to={to} sen={entry.result?.line} />}
-              {variable && slot?.state === 'loading' && <p className="muted small">Loading the yearly values…</p>}
+              {variable && slot?.state === 'loading' && <p className="muted small">{t('Loading the yearly values…', 'Cargando los valores anuales…')}</p>}
               {variable && slot?.state === 'error' && (
                 <p className="error small">
-                  Could not load the yearly values. <button type="button" className="cv-link" onClick={onRetry}>Retry</button>
+                  {t('Could not load the yearly values.', 'No se pudieron cargar los valores anuales.')}{' '}
+                  <button type="button" className="cv-link" onClick={onRetry}>
+                    {t('Retry', 'Reintentar')}
+                  </button>
                 </p>
               )}
               {entry.kind === 'cover' && (
-                <p className="muted small">The yearly values of this measure are in the charts above.</p>
+                <p className="muted small">{t('The yearly values of this measure are in the charts above.', 'Los valores anuales de esta medida están en los gráficos de arriba.')}</p>
               )}
               <p className="small">
                 <ViewLink view="trends" params={{ var: entry.id }}>
-                  See {entry.name} trends for the whole zone
+                  {t(`See ${entry.name} trends for the whole zone`, `Ver las tendencias de ${entry.name} en toda la zona`)}
                 </ViewLink>
               </p>
             </details>
@@ -122,8 +138,8 @@ export function CellTrends({ entries, variables, series, from, to, onRetry }: Pr
             –
           </span>
           <span>
-            Tree cover (Hansen): not tested.{' '}
-            <span className="muted">It can only go down, because regrowth is not counted.</span>
+            {t('Tree cover (Hansen): not tested.', 'Cobertura arbórea (Hansen): sin probar.')}{' '}
+            <span className="muted">{t('It can only go down, because regrowth is not counted.', 'Solo puede bajar, porque no cuenta el rebrote.')}</span>
           </span>
         </p>
       </li>

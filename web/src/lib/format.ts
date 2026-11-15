@@ -5,6 +5,7 @@
 // statistics here: significance and slopes come from the backend data as they are.
 
 import type { Period, TrendLayer, Variable, YearMonth } from '../../shared/contracts.ts'
+import { EN, type Tr } from './i18n.ts'
 
 /** Number of colour classes in the diverging scale (ColorBrewer PuOr): 0-2 decrease, 3-5 increase. */
 export const SLOPE_CLASSES = 6
@@ -28,9 +29,22 @@ export function formatSlope(slope: number | null, units: string, testPending = f
  * A trend slope with the backend's slope units: "−0.012 per decade" (unitless), "+0.3 °C per decade",
  * "+31 mm per year, per decade". `slopeUnits` is Variable.slopeUnits (it already says "per decade").
  */
-export function formatTrendSlope(slope: number, slopeUnits: string): string {
+export function formatTrendSlope(slope: number, slopeUnits: string, t: Tr = EN): string {
   const units = slopeUnits.replace(/^unitless\s*/, '').trim()
-  return `${formatSigned(slope)} ${units === '' ? 'per decade' : units}`
+  return `${formatSigned(slope)} ${units === '' ? t('per decade', 'por década') : localizeUnits(units, t)}`
+}
+
+/** Units published by the API in English ("km² per year, per decade", "% of cell"), in the current language. */
+export function localizeUnits(units: string, t: Tr = EN): string {
+  return t(
+    units,
+    units
+      .replace(/\bper decade\b/g, 'por década')
+      .replace(/\bper year\b/g, 'por año')
+      .replace(/\bper month\b/g, 'por mes')
+      .replace(/% of cell/g, '% de la celda')
+      .replace(/^unitless$/, 'sin unidades'),
+  )
 }
 
 /** Signed number with a true minus sign and precision that suits small slopes. */
@@ -140,8 +154,9 @@ export function parseSemester(key: string): { year: number; half: Half } | null 
 }
 
 export const HALF_NAMES: Record<Half, string> = { H1: 'January to June', H2: 'July to December' }
+const HALF_NAMES_ES: Record<Half, string> = { H1: 'enero a junio', H2: 'julio a diciembre' }
 
-export function semesterLabel(key: string): string {
+export function semesterLabel(key: string, t: Tr = EN): string {
   const s = parseSemester(key)
-  return s ? `${HALF_NAMES[s.half]} ${s.year}` : key
+  return s ? t(`${HALF_NAMES[s.half]} ${s.year}`, `${HALF_NAMES_ES[s.half]} de ${s.year}`) : key
 }

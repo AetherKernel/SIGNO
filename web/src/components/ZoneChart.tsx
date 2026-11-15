@@ -13,6 +13,8 @@ import {
   formatNumber,
   formatValue,
   LST_NOTE,
+  LST_NOTE_ES,
+  measureName,
   monthName,
   niceTicks,
   pointState,
@@ -24,6 +26,8 @@ import {
   type Measure,
   type PointState,
 } from '../lib/zoneTrends.ts'
+import { localizeUnits } from '../lib/format.ts'
+import { useLang } from '../lib/i18n.ts'
 import './trends.css'
 
 const PAD = { left: 58, right: 16, top: 22, bottom: 30 }
@@ -51,6 +55,7 @@ export interface ZoneChartProps {
 }
 
 export function ZoneChart({ variable, measure, year, onYear }: ZoneChartProps) {
+  const { t } = useLang()
   const [wrapRef, width] = useElementWidth<HTMLDivElement>()
   const readoutId = useId()
   const points = variable.annual.filter((p) => p.value !== null)
@@ -59,7 +64,7 @@ export function ZoneChart({ variable, measure, year, onYear }: ZoneChartProps) {
   const showBand = measure.kind === 'line' && (variable.monthlyRange?.length ?? 0) > 0
   const height = width < 480 ? 250 : 300
 
-  if (points.length === 0) return <p className="muted">No yearly values for this measure.</p>
+  if (points.length === 0) return <p className="muted">{t('No yearly values for this measure.', 'No hay valores anuales para esta medida.')}</p>
 
   const years = points.map((p) => p.year)
   const firstYear = years[0]
@@ -129,11 +134,12 @@ export function ZoneChart({ variable, measure, year, onYear }: ZoneChartProps) {
 
   const current = year === null ? null : (points.find((p) => p.year === year) ?? null)
   const currentState = current ? states.get(current.year) : undefined
-  const range = year === null ? null : rangeSentence(variable, year)
+  const range = year === null ? null : rangeSentence(variable, year, t)
   const units = variable.units
   const monthlyRange = variable.monthlyRange ?? []
   const missingYears = variable.annual.filter((p) => p.value === null).map((p) => p.year)
-  const label = `${measure.name}, yearly values ${firstYear} to ${lastYear}`
+  const name = measureName(measure, t)
+  const label = t(`${name}, yearly values ${firstYear} to ${lastYear}`, `${name}, valores anuales de ${firstYear} a ${lastYear}`)
 
   return (
     <figure className="tr-chart">
@@ -142,7 +148,7 @@ export function ZoneChart({ variable, measure, year, onYear }: ZoneChartProps) {
         className="tr-chart-wrap"
         tabIndex={0}
         role="group"
-        aria-label={`${label}. Use the left and right arrow keys to move between years.`}
+        aria-label={t(`${label}. Use the left and right arrow keys to move between years.`, `${label}. Usa las flechas izquierda y derecha para moverte entre años.`)}
         aria-describedby={readoutId}
         onKeyDown={onKey}
       >
@@ -158,7 +164,7 @@ export function ZoneChart({ variable, measure, year, onYear }: ZoneChartProps) {
             <>
               <rect className="tr-window" x={x(trend.years[0] - 0.5)} y={PAD.top} width={x(trend.years[1] + 0.5) - x(trend.years[0] - 0.5)} height={plotH} />
               <text className="tr-note" x={x(trend.years[0] - 0.5) + 6} y={PAD.top - 8}>
-                Years tested: {trend.years[0]}–{trend.years[1]}
+                {t('Years tested', 'Años probados')}: {trend.years[0]}–{trend.years[1]}
               </text>
             </>
           )}
@@ -166,17 +172,17 @@ export function ZoneChart({ variable, measure, year, onYear }: ZoneChartProps) {
             <>
               <rect className="tr-drift" x={x(driftStart)} y={PAD.top} width={x(lastYear + 0.5) - x(driftStart)} height={plotH} fill={`url(#${readoutId}-hatch)`} />
               <text className="tr-note" x={x(lastYear + 0.5) - 4} y={PAD.top - 8} textAnchor="end">
-                Satellite drift years: not tested
+                {t('Satellite drift years: not tested', 'Años con deriva del satélite: sin probar')}
               </text>
             </>
           )}
 
           {/* Grid and axes */}
-          {ticks.map((t) => (
-            <g key={t}>
-              <line className="tr-grid" x1={PAD.left} x2={width - PAD.right} y1={y(t)} y2={y(t)} />
-              <text className="tr-tick" x={PAD.left - 8} y={y(t) + 4} textAnchor="end">
-                {formatNumber(t)}
+          {ticks.map((tick) => (
+            <g key={tick}>
+              <line className="tr-grid" x1={PAD.left} x2={width - PAD.right} y1={y(tick)} y2={y(tick)} />
+              <text className="tr-tick" x={PAD.left - 8} y={y(tick) + 4} textAnchor="end">
+                {formatNumber(tick)}
               </text>
             </g>
           ))}
@@ -238,7 +244,8 @@ export function ZoneChart({ variable, measure, year, onYear }: ZoneChartProps) {
               <line className={trend.significant ? 'tr-sen is-clear' : 'tr-sen'} x1={x(sen.x0)} y1={y(sen.y0)} x2={x(sen.x1)} y2={y(sen.y1)} />
               {trend.slopePerDecade !== null && (
                 <text className="tr-sen-label" x={x(sen.x1) - 4} y={y(sen.y1) - 8} textAnchor="end">
-                  {trend.significant ? 'Sen slope' : 'Sen slope (no clear trend)'}: {slopeSentence(trend.slopePerDecade, units)}
+                  {trend.significant ? t('Sen slope', 'Pendiente de Sen') : t('Sen slope (no clear trend)', 'Pendiente de Sen (sin tendencia clara)')}:{' '}
+                  {slopeSentence(trend.slopePerDecade, units, t)}
                 </text>
               )}
             </>
@@ -246,33 +253,33 @@ export function ZoneChart({ variable, measure, year, onYear }: ZoneChartProps) {
         </svg>
       </div>
 
-      <ul className="tr-legend" aria-label="Chart key">
+      <ul className="tr-legend" aria-label={t('Chart key', 'Leyenda del gráfico')}>
         <li>
           <span className="tr-key tr-key-used" style={{ '--series': seriesColor } as CSSProperties} aria-hidden="true" />
-          {trend ? 'Years used in the test' : 'Yearly values (context, not tested)'}
+          {trend ? t('Years used in the test', 'Años usados en el test') : t('Yearly values (context, not tested)', 'Valores anuales (contexto, sin probar)')}
         </li>
         {hasUnused && (
           <li>
             <span className="tr-key tr-key-unused" aria-hidden="true" />
-            {measure.drift ? 'Satellite drift years (not used)' : 'Years not used'}
+            {measure.drift ? t('Satellite drift years (not used)', 'Años con deriva del satélite (no se usan)') : t('Years not used', 'Años no usados')}
           </li>
         )}
         {hasIncomplete && (
           <li>
             <span className="tr-key tr-key-incomplete" style={{ '--series': seriesColor } as CSSProperties} aria-hidden="true" />
-            Flagged or incomplete year (hollow)
+            {t('Flagged or incomplete year (hollow)', 'Año marcado o incompleto (hueco)')}
           </li>
         )}
         {showBand && (
           <li>
             <span className="tr-key tr-key-band" aria-hidden="true" />
-            Lowest to highest month of the year (seasonality)
+            {t('Lowest to highest month of the year (seasonality)', 'Del mes más bajo al más alto del año (estacionalidad)')}
           </li>
         )}
         {sen && (
           <li>
             <span className={`tr-key tr-key-sen${trend?.significant ? ' is-clear' : ''}`} aria-hidden="true" />
-            {trend?.significant ? 'Sen trend line' : 'Sen trend line (not a clear trend)'}
+            {trend?.significant ? t('Sen trend line', 'Línea de tendencia de Sen') : t('Sen trend line (not a clear trend)', 'Línea de tendencia de Sen (sin tendencia clara)')}
           </li>
         )}
       </ul>
@@ -280,45 +287,54 @@ export function ZoneChart({ variable, measure, year, onYear }: ZoneChartProps) {
       <figcaption id={readoutId} className="tr-readout" aria-live="polite">
         {current && year !== null ? (
           <>
-            <strong>{year}:</strong> {valueSentence(measure, current.value as number, units)}
-            {currentState && currentState !== 'used' ? ` (${stateReason(currentState, variable, measure)})` : ''}.{' '}
+            <strong>{year}:</strong> {valueSentence(measure, current.value as number, units, t)}
+            {currentState && currentState !== 'used' ? ` (${stateReason(currentState, variable, measure, t)})` : ''}.{' '}
             {range}
           </>
         ) : (
-          'Choose a year on the chart to read its value.'
+          t('Choose a year on the chart to read its value.', 'Elige un año en el gráfico para leer su valor.')
         )}
       </figcaption>
 
       {measure.drift && trend && (
         <p className="tr-small muted">
-          {measure.key === 'lst_day' ? LST_NOTE : `The test ends in ${trend.years[1]}: later years are biased by the satellite's orbit drift (see the checks below).`}
+          {measure.key === 'lst_day'
+            ? t(LST_NOTE, LST_NOTE_ES)
+            : t(
+                `The test ends in ${trend.years[1]}: later years are biased by the satellite's orbit drift (see the checks below).`,
+                `El test termina en ${trend.years[1]}: los años siguientes están sesgados por la deriva de la órbita del satélite (ver las comprobaciones abajo).`,
+              )}
         </p>
       )}
       {trend && sen && (
         <p className="tr-small muted">
-          The slope, the line and the test come from the data pipeline.
+          {t('The slope, the line and the test come from the data pipeline.', 'La pendiente, la línea y el test vienen del pipeline de datos.')}
         </p>
       )}
       {missingYears.length > 0 && (
         <p className="tr-small muted">
-          No value for {missingYears.join(', ')}: {missingYears.length === 1 ? 'the year is' : 'the years are'} incomplete.
+          {t(
+            `No value for ${missingYears.join(', ')}: ${missingYears.length === 1 ? 'the year is' : 'the years are'} incomplete.`,
+            `Sin valor para ${missingYears.join(', ')}: ${missingYears.length === 1 ? 'el año está incompleto' : 'los años están incompletos'}.`,
+          )}
         </p>
       )}
 
       <details className="tr-details">
-        <summary>Show the numbers</summary>
+        <summary>{t('Show the numbers', 'Mostrar las cifras')}</summary>
         <div className="tr-table-scroll">
           <table className="tr-values">
             <caption className="sr-only">
-              {measure.name}: yearly values{unitParts(units).value ? ` in ${units}` : ''}
+              {name}: {t('yearly values', 'valores anuales')}
+              {unitParts(units).value ? t(` in ${units}`, ` en ${localizeUnits(units, t)}`) : ''}
             </caption>
             <thead>
               <tr>
-                <th scope="col">Year</th>
-                <th scope="col">Value</th>
-                {showBand && <th scope="col">Lowest month</th>}
-                {showBand && <th scope="col">Highest month</th>}
-                <th scope="col">Used in the test?</th>
+                <th scope="col">{t('Year', 'Año')}</th>
+                <th scope="col">{t('Value', 'Valor')}</th>
+                {showBand && <th scope="col">{t('Lowest month', 'Mes más bajo')}</th>}
+                {showBand && <th scope="col">{t('Highest month', 'Mes más alto')}</th>}
+                <th scope="col">{t('Used in the test?', '¿Usado en el test?')}</th>
               </tr>
             </thead>
             <tbody>
@@ -328,10 +344,10 @@ export function ZoneChart({ variable, measure, year, onYear }: ZoneChartProps) {
                 return (
                   <tr key={p.year} className={p.year === year ? 'is-selected' : undefined}>
                     <th scope="row">{p.year}</th>
-                    <td>{p.value === null ? 'no value' : formatValue(p.value, units)}</td>
-                    {showBand && <td>{r ? `${formatValue(r.min, units)} (${monthName(r.minMonth)})` : '—'}</td>}
-                    {showBand && <td>{r ? `${formatValue(r.max, units)} (${monthName(r.maxMonth)})` : '—'}</td>}
-                    <td>{state === 'used' ? (trend ? 'Yes' : 'Not tested') : stateReason(state, variable, measure)}</td>
+                    <td>{p.value === null ? t('no value', 'sin valor') : formatValue(p.value, units)}</td>
+                    {showBand && <td>{r ? `${formatValue(r.min, units)} (${monthName(r.minMonth, t)})` : '—'}</td>}
+                    {showBand && <td>{r ? `${formatValue(r.max, units)} (${monthName(r.maxMonth, t)})` : '—'}</td>}
+                    <td>{state === 'used' ? (trend ? t('Yes', 'Sí') : t('Not tested', 'Sin probar')) : stateReason(state, variable, measure, t)}</td>
                   </tr>
                 )
               })}

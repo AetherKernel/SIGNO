@@ -5,6 +5,7 @@
 // is shown as such, with the reason, and is never part of a difference. On a phone each row becomes a small card.
 
 import { formatChange, formatValue, sparkValues, type MeasureRow, type YearReading } from '../lib/cellView.ts'
+import { useLang } from '../lib/i18n.ts'
 import { Sparkline } from './YearChart.tsx'
 
 interface Props {
@@ -16,31 +17,33 @@ interface Props {
 }
 
 function Reading({ row, reading }: { row: MeasureRow; reading: YearReading }) {
+  const { t } = useLang()
   const shown = reading.value !== null && reading.status !== 'none'
   return (
     <>
       <span className={`cv-value mono${reading.status === 'ok' ? '' : ' faded'}`}>{shown ? formatValue(row, reading.value as number) : '—'}</span>
-      {reading.status === 'suspect' && <span className="cv-tag">suspect</span>}
-      {reading.drift && <span className="cv-tag">drift year</span>}
+      {reading.status === 'suspect' && <span className="cv-tag">{t('suspect', 'dudoso')}</span>}
+      {reading.drift && <span className="cv-tag">{t('drift year', 'año con deriva')}</span>}
       {reading.note && <span className="cv-note">{reading.note}</span>}
     </>
   )
 }
 
 export function CellChanges({ rows, years, from, to, onRetry }: Props) {
+  const { t } = useLang()
   return (
     <table className="cv-table cv-changes">
       <caption className="sr-only">
-        Measures of this area in {from} and {to}, and the change between them
+        {t(`Measures of this area in ${from} and ${to}, and the change between them`, `Medidas de esta área en ${from} y ${to}, y el cambio entre ambos`)}
       </caption>
       <thead>
         <tr>
-          <th scope="col">Measure</th>
+          <th scope="col">{t('Measure', 'Medida')}</th>
           <th scope="col">{from}</th>
           <th scope="col">{to}</th>
-          <th scope="col">Change</th>
+          <th scope="col">{t('Change', 'Cambio')}</th>
           <th scope="col" className="cv-spark-col">
-            <span className="sr-only">Yearly line</span>
+            <span className="sr-only">{t('Yearly line', 'Línea anual')}</span>
           </th>
         </tr>
       </thead>
@@ -53,11 +56,16 @@ export function CellChanges({ rows, years, from, to, onRetry }: Props) {
                 <td colSpan={4}>
                   {row.state === 'loading' ? (
                     <span className="cv-skeleton" role="status">
-                      <span className="sr-only">Loading {row.label}</span>
+                      <span className="sr-only">
+                        {t('Loading', 'Cargando')} {row.label}
+                      </span>
                     </span>
                   ) : (
                     <span className="error small">
-                      Could not load {row.label}. <button type="button" className="cv-link" onClick={onRetry}>Retry</button>
+                      {t('Could not load', 'No se pudo cargar')} {row.label}.{' '}
+                      <button type="button" className="cv-link" onClick={onRetry}>
+                        {t('Retry', 'Reintentar')}
+                      </button>
                     </span>
                   )}
                 </td>
@@ -76,7 +84,7 @@ export function CellChanges({ rows, years, from, to, onRetry }: Props) {
           }
           const a = row.reading(from)
           const b = row.reading(to)
-          const change = formatChange(row, a, b)
+          const change = formatChange(row, a, b, t)
           return (
             <tr key={row.id}>
               <th scope="row">{row.label}</th>
@@ -86,7 +94,7 @@ export function CellChanges({ rows, years, from, to, onRetry }: Props) {
               <td data-label={String(to)}>
                 <Reading row={row} reading={b} />
               </td>
-              <td data-label="Change">
+              <td data-label={t('Change', 'Cambio')}>
                 <span className={`cv-value mono${change === null ? ' faded' : ''}`}>{change ?? '—'}</span>
               </td>
               <td className="cv-spark-col">

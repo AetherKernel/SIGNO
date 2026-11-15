@@ -13,6 +13,7 @@ import { useBorders, useTrendLayer, type Remote } from '../hooks/useSignoData.ts
 import { useUrlParams, type ParamsPatch } from '../hooks/useUrlParam.ts'
 import { basemaps as listBasemaps, isBasemapId, type BasemapId } from '../lib/basemaps.ts'
 import { makeBurnedPaint, makeCoverPaint, makeLossPaint, peakYear, type CellPaint, type MapCell } from '../lib/cover.ts'
+import { useLang } from '../lib/i18n.ts'
 import {
   coverResults,
   layerResults,
@@ -51,6 +52,7 @@ function focusCell(cellId: string) {
 }
 
 export function MapScreen({ manifest, cover, validation }: Props) {
+  const { lang, t } = useLang()
   const [params, setParams] = useUrlParams()
   const extras = manifest.extras
   const [initialView] = useState<MapView | null>(() => parseView(params.get('z'), params.get('lat'), params.get('lon')))
@@ -66,7 +68,7 @@ export function MapScreen({ manifest, cover, validation }: Props) {
   const varParam = params.get('var') ?? params.get('variable')
   const show: CellFilter = parseFilter(params.get('show') ?? params.get('filter'))
 
-  const options = useMemo(() => trendOptions(manifest.variables, cover.data), [manifest.variables, cover.data])
+  const options = useMemo(() => trendOptions(manifest.variables, cover.data, t), [manifest.variables, cover.data, lang]) // eslint-disable-line react-hooks/exhaustive-deps
   const trendOption = options.find((o) => o.id === varParam) ?? options[0] ?? null
   // The trend layer of a monthly variable. It also gives the grid when there is no cover layer.
   const layerId = trendOption?.kind === 'series' ? trendOption.id : null
@@ -123,15 +125,15 @@ export function MapScreen({ manifest, cover, validation }: Props) {
   const year = resolveYear(years, params.get('year'))
 
   const trendInfo: TrendPaintInfo | null = useMemo(
-    () => (mapType === 'trend' && trendOption && results ? makeTrendPaint(trendOption, results, show) : null),
-    [mapType, trendOption, results, show],
+    () => (mapType === 'trend' && trendOption && results ? makeTrendPaint(trendOption, results, show, t) : null),
+    [mapType, trendOption, results, show, lang], // eslint-disable-line react-hooks/exhaustive-deps
   )
   const paint: CellPaint | null = useMemo(() => {
     if (mapType === 'trend') return trendInfo?.paint ?? null
     if (!cover.data) return null
-    if (mapType === 'cover') return makeCoverPaint(cover.data, year)
-    return mapType === 'loss' ? makeLossPaint(cover.data, year) : makeBurnedPaint(cover.data, year)
-  }, [mapType, trendInfo, cover.data, year])
+    if (mapType === 'cover') return makeCoverPaint(cover.data, year, t)
+    return mapType === 'loss' ? makeLossPaint(cover.data, year, t) : makeBurnedPaint(cover.data, year, t)
+  }, [mapType, trendInfo, cover.data, year, lang]) // eslint-disable-line react-hooks/exhaustive-deps
   // Keep the previous paint while the next trend layer loads, so the map (and its zoom) is never torn down.
   const [lastPaint, setLastPaint] = useState<CellPaint | null>(null)
   if (paint && paint !== lastPaint) setLastPaint(paint)
@@ -180,7 +182,9 @@ export function MapScreen({ manifest, cover, validation }: Props) {
 
   return (
     <>
-      <h1 className="sr-only">Amazon map: tree cover, tree cover loss, burned area and trends</h1>
+      <h1 className="sr-only">
+        {t('Amazon map: tree cover, tree cover loss, burned area and trends', 'Mapa de la Amazonía: cobertura, pérdida de cobertura, área quemada y tendencias')}
+      </h1>
       <MapFilters
         mapType={mapType}
         onMapType={(type) => set({ map: type })}
@@ -189,7 +193,7 @@ export function MapScreen({ manifest, cover, validation }: Props) {
         trendOptions={options}
         trendId={trendOption?.id ?? ''}
         onTrendId={(id) => set({ var: id })}
-        trendSummary={trendOption ? summaryLine(trendOption, layerData, validation.data) : null}
+        trendSummary={trendOption ? summaryLine(trendOption, layerData, validation.data, t) : null}
         show={show}
         onShow={(next) => set({ show: next === 'all' ? null : next })}
         years={years}
@@ -227,7 +231,7 @@ export function MapScreen({ manifest, cover, validation }: Props) {
           />
         ) : (
           <p className="map-overlay map-status" role="status">
-            {layer.error ?? (extras.cover ? cover.error : null) ?? 'Loading the map…'}
+            {layer.error ?? (extras.cover ? cover.error : null) ?? t('Loading the map…', 'Cargando el mapa…')}
           </p>
         )}
       </div>

@@ -11,8 +11,10 @@ export type BasemapId = 'bluemarble' | 'truecolor' | 'ndvi' | 'none'
 export interface Basemap {
   id: BasemapId
   label: string
+  labelEs: string
   /** Short note shown under the selector. */
   note: string
+  noteEs: string
   /** Leaflet tile URL template ({z}/{y}/{x}), or null for no imagery. */
   url: string | null
   /** Deepest zoom level the layer has (its GoogleMapsCompatible_LevelN). Also the map's zoom limit. */
@@ -44,7 +46,9 @@ export function basemaps(): Basemap[] {
     {
       id: 'bluemarble',
       label: 'Blue Marble',
+      labelEs: 'Blue Marble',
       note: 'NASA cloud-free composite, about 500 m',
+      noteEs: 'Composición de la NASA sin nubes, unos 500 m',
       url: `${GIBS}/BlueMarble_NextGeneration/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg`,
       maxZoom: 8,
       attribution: `${GIBS_CREDIT} · Blue Marble Next Generation`,
@@ -52,7 +56,9 @@ export function basemaps(): Basemap[] {
     {
       id: 'truecolor',
       label: 'MODIS true color',
+      labelEs: 'MODIS color real',
       note: `Terra, ${day}; clouds and swath gaps are real`,
+      noteEs: `Terra, ${day}; las nubes y franjas sin datos son reales`,
       url: `${GIBS}/MODIS_Terra_CorrectedReflectance_TrueColor/default/${day}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`,
       maxZoom: 9,
       attribution: `${GIBS_CREDIT} · MODIS Terra Corrected Reflectance, ${day}`,
@@ -60,7 +66,9 @@ export function basemaps(): Basemap[] {
     {
       id: 'ndvi',
       label: 'MODIS NDVI, monthly',
+      labelEs: 'MODIS NDVI, mensual',
       note: `Terra, ${month.slice(0, 7)}; context only, not the analysed data`,
+      noteEs: `Terra, ${month.slice(0, 7)}; solo contexto, no son los datos analizados`,
       url: `${GIBS}/MODIS_Terra_L3_NDVI_Monthly/default/${month}/GoogleMapsCompatible_Level7/{z}/{y}/{x}.png`,
       maxZoom: 7,
       attribution: `${GIBS_CREDIT} · MODIS Terra NDVI Monthly, ${month.slice(0, 7)}`,
@@ -68,7 +76,9 @@ export function basemaps(): Basemap[] {
     {
       id: 'none',
       label: 'No imagery',
+      labelEs: 'Sin imagen',
       note: 'Trend cells only',
+      noteEs: 'Solo los cuadros de datos',
       url: null,
       maxZoom: 8,
       attribution: '',

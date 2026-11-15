@@ -225,3 +225,42 @@ The AI did not choose the method. The parameters the team left open are the team
 delegated. Claude wrote `pipeline/trends.py`, `pipeline/test_trends.py` and `pipeline/export_borders.py` (each with a
 header comment) and Claude Opus 5.5 reviewed them. The README (*Use of AI*) declares this.
 
+## ADR-007: Interface in English by default, Spanish on request; Tabler Icons
+
+- **Date:** 2026-11-15
+- **Status:** Accepted (José)
+
+**Context.** José wants a Spanish version of the interface. The Space Apps submission must be in English, and the
+judges must see English by default. Before choosing, Claude listed the risks of choosing the language by location.
+
+- **Location is not language.** Someone in Lima may prefer English, and the Amazon includes Brazil, where people speak
+  Portuguese.
+- **Permissions and privacy.** Geolocation needs a permission prompt. Detecting by IP sends the visitor's IP to a third
+  party, which may be slow or down during the pitch.
+- **Default language.** A judge with a Spanish browser would land in Spanish.
+- **Work and deadline.** The API texts are English, and two languages double the browser checks before the deadline.
+
+José also chose Tabler Icons as the icon set (brand card 06).
+
+**Decision.**
+
+- **Default and switch.** English by default. Spanish only when the user picks it in the top bar (EN / ES), and the
+  choice lives in the URL (`?lang=es`).
+- **No detection for now.** No detection by browser, IP or location. Region detection with a confirmation pop-up and a
+  footer selector are kept as future work (05).
+- **Translation code.** Translation is a small in-house dictionary in `web/src/lib/i18n.ts`, with no i18n library:
+  - a React context;
+  - `t(english, spanish)` at each sentence;
+  - a `t` parameter, English by default, in the lib functions that build sentences.
+- **Numbers.** They keep the decimal point in both languages.
+- **API texts.** Texts that come from the API are shown as published (English).
+- **Icons.** `@tabler/icons-react` 3.50.0 (MIT) is the icon set. It is a new dependency, approved by José.
+
+**Consequences.**
+
+- **Missing translations show in English.** A sentence added without its Spanish version still shows in English, never
+  broken. Reviewers check `t(` pairs.
+- **API texts stay in English.** Variable names, method descriptions and data notes appear in English in the Spanish
+  interface until the pipeline publishes Spanish fields (05).
+- **Icons.** Icons are tree-shaken, so only the icons used add weight.
+

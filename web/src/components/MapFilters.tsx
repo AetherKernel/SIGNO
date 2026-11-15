@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useMediaQuery } from '../hooks/useMediaQuery.ts'
 import type { Basemap, BasemapId } from '../lib/basemaps.ts'
+import { useLang } from '../lib/i18n.ts'
 import { optionLabel, type TrendOption } from '../lib/trendMap.ts'
 import { OPACITY_MAX, OPACITY_MIN, type CellFilter, type MapType } from '../lib/viewState.ts'
 import { SelectedKey } from './MapLegend.tsx'
@@ -57,29 +58,58 @@ function readDismissed(): boolean {
   }
 }
 
-const MAP_TYPES: { id: MapType; label: string; help: string; needsCover: boolean }[] = [
-  { id: 'cover', label: 'Tree cover', help: 'Share of each square covered by trees (Hansen, 30 m Landsat).', needsCover: true },
-  { id: 'loss', label: 'Tree cover loss', help: 'Area where trees were lost that year: fire, logging, mining or clearing.', needsCover: true },
-  { id: 'burned', label: 'Burned area', help: 'Area burned that year (NASA MODIS).', needsCover: true },
-  { id: 'trend', label: 'Trend', help: 'Where a measure rose or fell, beyond year-to-year noise.', needsCover: false },
+const MAP_TYPES: { id: MapType; label: string; labelEs: string; help: string; helpEs: string; needsCover: boolean }[] = [
+  {
+    id: 'cover',
+    label: 'Tree cover',
+    labelEs: 'Cobertura arbórea',
+    help: 'Share of each square covered by trees (Hansen, 30 m Landsat).',
+    helpEs: 'Parte de cada cuadro cubierta por árboles (Hansen, Landsat de 30 m).',
+    needsCover: true,
+  },
+  {
+    id: 'loss',
+    label: 'Tree cover loss',
+    labelEs: 'Pérdida de cobertura',
+    help: 'Area where trees were lost that year: fire, logging, mining or clearing.',
+    helpEs: 'Superficie donde se perdieron árboles ese año: fuego, tala, minería o desbroce.',
+    needsCover: true,
+  },
+  {
+    id: 'burned',
+    label: 'Burned area',
+    labelEs: 'Área quemada',
+    help: 'Area burned that year (NASA MODIS).',
+    helpEs: 'Superficie quemada ese año (NASA MODIS).',
+    needsCover: true,
+  },
+  {
+    id: 'trend',
+    label: 'Trend',
+    labelEs: 'Tendencia',
+    help: 'Where a measure rose or fell, beyond year-to-year noise.',
+    helpEs: 'Dónde una medida subió o bajó, más allá del ruido de un año a otro.',
+    needsCover: false,
+  },
 ]
 
-const SHOW_OPTIONS: { id: CellFilter; label: string }[] = [
-  { id: 'all', label: 'All' },
-  { id: 'significant', label: 'Significant' },
-  { id: 'decreasing', label: 'Falling' },
-  { id: 'increasing', label: 'Rising' },
+const SHOW_OPTIONS: { id: CellFilter; label: string; labelEs: string }[] = [
+  { id: 'all', label: 'All', labelEs: 'Todos' },
+  { id: 'significant', label: 'Significant', labelEs: 'Significativos' },
+  { id: 'decreasing', label: 'Falling', labelEs: 'Bajan' },
+  { id: 'increasing', label: 'Rising', labelEs: 'Suben' },
 ]
 
-function yearMeaning(type: MapType, year: number): string {
-  if (type === 'cover') return year === 2000 ? '2000 baseline' : `End of ${year}`
-  return type === 'loss' ? `Lost during ${year}` : `Burned during ${year}`
+function yearMeaning(type: MapType, year: number, t: (en: string, es: string) => string): string {
+  if (type === 'cover') return year === 2000 ? t('2000 baseline', 'Línea base 2000') : t(`End of ${year}`, `Fin de ${year}`)
+  return type === 'loss' ? t(`Lost during ${year}`, `Perdida durante ${year}`) : t(`Burned during ${year}`, `Quemada durante ${year}`)
 }
 
 /** Pause between years while playing. */
 const PLAY_MS = 800
 
 function FiltersBody(props: MapFiltersProps) {
+  const { t } = useLang()
   const { mapType, years, year, trendOptions: options } = props
   const first = years[0]
   const last = years[years.length - 1]
@@ -111,27 +141,31 @@ function FiltersBody(props: MapFiltersProps) {
     }
   }
 
-  const types = MAP_TYPES.filter((t) => props.coverAvailable || !t.needsCover)
+  const types = MAP_TYPES.filter((m) => props.coverAvailable || !m.needsCover)
   const hasYear = mapType !== 'trend' && years.length > 0
 
   return (
     <div className="filters-body">
       <fieldset className="fsec">
-        <legend>Map</legend>
-        {types.map((t) => {
-          const disabled = t.id === 'trend' && !props.trendAvailable
+        <legend>{t('Map', 'Mapa')}</legend>
+        {types.map((m) => {
+          const disabled = m.id === 'trend' && !props.trendAvailable
           return (
-            <label key={t.id} className={disabled ? 'radio-row disabled' : 'radio-row'}>
+            <label key={m.id} className={disabled ? 'radio-row disabled' : 'radio-row'}>
               <input
                 type="radio"
                 name="map-type"
-                value={t.id}
-                checked={mapType === t.id}
+                value={m.id}
+                checked={mapType === m.id}
                 disabled={disabled}
-                onChange={stopThen(() => props.onMapType(t.id))}
+                onChange={stopThen(() => props.onMapType(m.id))}
               />
-              <span className="radio-label">{t.label}</span>
-              <span className="radio-help">{disabled ? 'Trend test results are not published yet.' : t.help}</span>
+              <span className="radio-label">{t(m.label, m.labelEs)}</span>
+              <span className="radio-help">
+                {disabled
+                  ? t('Trend test results are not published yet.', 'Los resultados del test de tendencia aún no se publican.')
+                  : t(m.help, m.helpEs)}
+              </span>
             </label>
           )
         })}
@@ -141,7 +175,7 @@ function FiltersBody(props: MapFiltersProps) {
       {mapType === 'trend' && trend && (
         <div className="fsec">
           <label className="fsec-label" htmlFor="trend-var">
-            Variable
+            {t('Variable', 'Variable')}
           </label>
           <select id="trend-var" className="select" value={trend.id} onChange={stopThen((event) => props.onTrendId(event.target.value))}>
             {options.map((o) => (
@@ -153,12 +187,12 @@ function FiltersBody(props: MapFiltersProps) {
           {props.trendSummary && <p className="small muted">{props.trendSummary}</p>}
 
           <fieldset className="fset-inline">
-            <legend className="fsec-label">Show</legend>
+            <legend className="fsec-label">{t('Show', 'Mostrar')}</legend>
             <div className="seg-radio">
               {SHOW_OPTIONS.map((o) => (
                 <label key={o.id} className={props.show === o.id ? 'on' : undefined}>
                   <input type="radio" name="show" value={o.id} checked={props.show === o.id} onChange={() => props.onShow(o.id)} />
-                  {o.label}
+                  {t(o.label, o.labelEs)}
                 </label>
               ))}
             </div>
@@ -169,7 +203,7 @@ function FiltersBody(props: MapFiltersProps) {
       {mapType === 'trend' && trend && (
         <div className="fsec">
           <p className="small muted">
-            Yearly values, {trend.years[0]}–{trend.years[1]}
+            {t('Yearly values', 'Valores anuales')}, {trend.years[0]}–{trend.years[1]}
           </p>
         </div>
       )}
@@ -177,16 +211,16 @@ function FiltersBody(props: MapFiltersProps) {
       {hasYear && (
         <div className="fsec">
           <label className="fsec-label" htmlFor="map-year">
-            Year <strong className="mono">{year}</strong>
+            {t('Year', 'Año')} <strong className="mono">{year}</strong>
           </label>
           <p className="small muted" aria-live="polite">
-            {yearMeaning(mapType, year)}
+            {yearMeaning(mapType, year, t)}
           </p>
           <div className="year-controls">
             <button
               type="button"
               className="btn icon-btn"
-              aria-label="Previous year"
+              aria-label={t('Previous year', 'Año anterior')}
               disabled={year <= first}
               onClick={stopThen(() => onYear(year - 1))}
             >
@@ -199,13 +233,13 @@ function FiltersBody(props: MapFiltersProps) {
               max={last}
               step={1}
               value={year}
-              aria-valuetext={`${year}, ${yearMeaning(mapType, year)}`}
+              aria-valuetext={`${year}, ${yearMeaning(mapType, year, t)}`}
               onChange={stopThen((event) => onYear(Number(event.target.value)))}
             />
             <button
               type="button"
               className="btn icon-btn"
-              aria-label="Next year"
+              aria-label={t('Next year', 'Año siguiente')}
               disabled={year >= last}
               onClick={stopThen(() => onYear(year + 1))}
             >
@@ -224,7 +258,7 @@ function FiltersBody(props: MapFiltersProps) {
                 }
               }}
             >
-              {isPlaying ? 'Pause' : 'Play'}
+              {isPlaying ? t('Pause', 'Pausa') : t('Play', 'Reproducir')}
             </button>
           </div>
         </div>
@@ -232,7 +266,7 @@ function FiltersBody(props: MapFiltersProps) {
 
       <div className="fsec">
         <label className="fsec-label" htmlFor="map-opacity">
-          Square opacity <strong className="mono">{props.opacity} %</strong>
+          {t('Square opacity', 'Opacidad de los cuadros')} <strong className="mono">{props.opacity} %</strong>
         </label>
         <input
           id="map-opacity"
@@ -241,27 +275,27 @@ function FiltersBody(props: MapFiltersProps) {
           max={OPACITY_MAX}
           step={5}
           value={props.opacity}
-          aria-valuetext={`${props.opacity} percent`}
+          aria-valuetext={t(`${props.opacity} percent`, `${props.opacity} por ciento`)}
           onChange={stopThen((event) => props.onOpacity(Number(event.target.value)))}
         />
         {props.bordersAvailable && (
           <>
             <label className="check-row">
               <input type="checkbox" checked={props.bordersOn} onChange={(event) => props.onBorders(event.target.checked)} />
-              Country borders
+              {t('Country borders', 'Fronteras de países')}
             </label>
-            <p className="small muted">Natural Earth, for orientation only.</p>
+            <p className="small muted">{t('Natural Earth, for orientation only.', 'Natural Earth, solo para orientarse.')}</p>
           </>
         )}
       </div>
 
       <fieldset className="fsec">
-        <legend>Base map</legend>
+        <legend>{t('Base map', 'Mapa base')}</legend>
         {props.basemaps.map((b) => (
           <label key={b.id} className="radio-row">
             <input type="radio" name="basemap" value={b.id} checked={props.basemap.id === b.id} onChange={() => props.onBasemap(b.id)} />
-            <span className="radio-label">{b.label}</span>
-            <span className="radio-help">{b.note}</span>
+            <span className="radio-label">{t(b.label, b.labelEs)}</span>
+            <span className="radio-help">{t(b.note, b.noteEs)}</span>
           </label>
         ))}
       </fieldset>
@@ -273,14 +307,16 @@ function FiltersBody(props: MapFiltersProps) {
 
       {!hintDismissed && (
         <div className="fsec hint">
-          <p className="small">Click any square to see its numbers and how they changed.</p>
+          <p className="small">
+            {t('Click any square to see its numbers and how they changed.', 'Haz clic en cualquier cuadro para ver sus cifras y cómo cambiaron.')}
+          </p>
           {props.onStartCase && (
             <button type="button" className="btn" onClick={props.onStartCase}>
-              Start with a documented case: La Pampa gold mining, Peru
+              {t('Start with a documented case: La Pampa gold mining, Peru', 'Empieza con un caso documentado: minería de oro en La Pampa, Perú')}
             </button>
           )}
           <button type="button" className="link-btn" onClick={dismiss}>
-            Dismiss
+            {t('Dismiss', 'Ocultar')}
           </button>
         </div>
       )}
@@ -289,6 +325,7 @@ function FiltersBody(props: MapFiltersProps) {
 }
 
 export function MapFilters(props: MapFiltersProps) {
+  const { t } = useLang()
   const mobile = useMediaQuery('(max-width: 767px)')
   const sheetRef = useRef<HTMLDialogElement>(null)
   const openSheet = useCallback(() => sheetRef.current?.showModal(), [])
@@ -296,8 +333,8 @@ export function MapFilters(props: MapFiltersProps) {
 
   if (!mobile) {
     return (
-      <aside className="map-filters" aria-label="Map filters">
-        <h2 className="sr-only">Map filters</h2>
+      <aside className="map-filters" aria-label={t('Map filters', 'Filtros del mapa')}>
+        <h2 className="sr-only">{t('Map filters', 'Filtros del mapa')}</h2>
         <FiltersBody {...props} />
       </aside>
     )
@@ -307,22 +344,22 @@ export function MapFilters(props: MapFiltersProps) {
     <>
       <div className="map-bar">
         <button type="button" className="btn" aria-haspopup="dialog" onClick={openSheet}>
-          Filters
+          {t('Filters', 'Filtros')}
         </button>
         <div className="map-bar-legend">{props.compactLegend}</div>
       </div>
       <dialog
         ref={sheetRef}
         className="sheet"
-        aria-label="Map filters"
+        aria-label={t('Map filters', 'Filtros del mapa')}
         onClick={(event) => {
           if (event.target === event.currentTarget) closeSheet()
         }}
       >
         <div className="sheet-head">
-          <h2>Map filters</h2>
+          <h2>{t('Map filters', 'Filtros del mapa')}</h2>
           <button type="button" className="btn" onClick={closeSheet}>
-            Done
+            {t('Done', 'Listo')}
           </button>
         </div>
         <FiltersBody {...props} />

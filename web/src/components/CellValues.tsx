@@ -6,6 +6,7 @@
 
 import { formatNumber, slopeText, type MeasureRow, type TrendEntry } from '../lib/cellView.ts'
 import { formatPValue } from '../lib/format.ts'
+import { useLang } from '../lib/i18n.ts'
 
 interface Props {
   rows: MeasureRow[]
@@ -23,25 +24,26 @@ function cellText(row: MeasureRow, year: number): string {
   return r.status === 'incomplete' ? `${text}*` : r.status === 'suspect' ? `${text} ⚑` : text
 }
 
-const VERDICT: Record<TrendEntry['status'], string> = {
-  falling: 'Falling',
-  rising: 'Rising',
-  none: 'No clear trend',
-  untested: 'Not tested',
-  loading: 'Loading',
-  error: 'Could not load',
+const VERDICT: Record<TrendEntry['status'], [string, string]> = {
+  falling: ['Falling', 'Baja'],
+  rising: ['Rising', 'Sube'],
+  none: ['No clear trend', 'Sin tendencia clara'],
+  untested: ['Not tested', 'Sin probar'],
+  loading: ['Loading', 'Cargando'],
+  error: ['Could not load', 'No se pudo cargar'],
 }
 
 export function CellValues({ rows, years, from, to, entries, alpha }: Props) {
+  const { t } = useLang()
   const ready = rows.filter((r) => r.state === 'ready' && !r.message)
   return (
     <div className="cv-values">
-      <div className="cv-scroll" tabIndex={0} role="region" aria-label="Yearly values of this area">
+      <div className="cv-scroll" tabIndex={0} role="region" aria-label={t('Yearly values of this area', 'Valores anuales de esta área')}>
         <table className="cv-table cv-exact">
-          <caption className="sr-only">Every yearly value of this area</caption>
+          <caption className="sr-only">{t('Every yearly value of this area', 'Todos los valores anuales de esta área')}</caption>
           <thead>
             <tr>
-              <th scope="col">Year</th>
+              <th scope="col">{t('Year', 'Año')}</th>
               {ready.map((r) => (
                 <th key={r.id} scope="col">
                   {r.column}
@@ -62,23 +64,25 @@ export function CellValues({ rows, years, from, to, entries, alpha }: Props) {
         </table>
       </div>
       <p className="small muted">
-        * incomplete year (left out of differences and tests) · ⚑ suspect value · – no value. Yearly values of the monthly
-        measures are the mean (NDVI, EVI, temperature) or the total (rain, burned share) of the 12 months.
+        {t(
+          '* incomplete year (left out of differences and tests) · ⚑ suspect value · – no value. Yearly values of the monthly measures are the mean (NDVI, EVI, temperature) or the total (rain, burned share) of the 12 months.',
+          '* año incompleto (fuera de las diferencias y de los tests) · ⚑ valor dudoso · – sin valor. Los valores anuales de las medidas mensuales son la media (NDVI, EVI, temperatura) o el total (lluvia, fracción quemada) de los 12 meses.',
+        )}
       </p>
 
-      <h4 className="subhead">Trend test results</h4>
-      <div className="cv-scroll" tabIndex={0} role="region" aria-label="Trend test results of this area">
+      <h4 className="subhead">{t('Trend test results', 'Resultados del test de tendencia')}</h4>
+      <div className="cv-scroll" tabIndex={0} role="region" aria-label={t('Trend test results of this area', 'Resultados del test de tendencia de esta área')}>
         <table className="cv-table cv-exact">
-          <caption className="sr-only">Trend test result of each measure in this area</caption>
+          <caption className="sr-only">{t('Trend test result of each measure in this area', 'Resultado del test de tendencia de cada medida en esta área')}</caption>
           <thead>
             <tr>
-              <th scope="col">Measure</th>
-              <th scope="col">Years tested</th>
-              <th scope="col">Months used</th>
-              <th scope="col">Change per decade</th>
-              <th scope="col">p-value (raw)</th>
-              <th scope="col">Significant after FDR</th>
-              <th scope="col">Direction</th>
+              <th scope="col">{t('Measure', 'Medida')}</th>
+              <th scope="col">{t('Years tested', 'Años probados')}</th>
+              <th scope="col">{t('Months used', 'Meses usados')}</th>
+              <th scope="col">{t('Change per decade', 'Cambio por década')}</th>
+              <th scope="col">{t('p-value (raw)', 'Valor p (sin corregir)')}</th>
+              <th scope="col">{t('Significant after FDR', 'Significativo tras FDR')}</th>
+              <th scope="col">{t('Direction', 'Dirección')}</th>
             </tr>
           </thead>
           <tbody>
@@ -89,20 +93,22 @@ export function CellValues({ rows, years, from, to, entries, alpha }: Props) {
                   {e.years[0]}–{e.years[1]}
                 </td>
                 <td>{e.validMonths ?? '–'}</td>
-                <td>{slopeText(e) || '–'}</td>
+                <td>{slopeText(e, t) || '–'}</td>
                 <td>{e.result ? formatPValue(e.result.pValue) : '–'}</td>
-                <td>{e.status === 'falling' || e.status === 'rising' ? 'Yes' : e.status === 'none' ? 'No' : '–'}</td>
-                <td>{VERDICT[e.status]}</td>
+                <td>{e.status === 'falling' || e.status === 'rising' ? t('Yes', 'Sí') : e.status === 'none' ? t('No', 'No') : '–'}</td>
+                <td>{t(...VERDICT[e.status])}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
       <p className="small muted">
-        Mann-Kendall test on yearly values, Sen slope per decade
-        {alpha !== null ? `, α = ${alpha}` : ''}. The p-value is the raw one; “significant” is decided after correcting for
-        the many squares tested at once (Benjamini-Hochberg false discovery rate). Hansen tree cover is not tested: it can
-        only go down.
+        {t('Mann-Kendall test on yearly values, Sen slope per decade', 'Test de Mann-Kendall sobre valores anuales, pendiente de Sen por década')}
+        {alpha !== null ? `, α = ${alpha}` : ''}.{' '}
+        {t(
+          'The p-value is the raw one; “significant” is decided after correcting for the many squares tested at once (Benjamini-Hochberg false discovery rate). Hansen tree cover is not tested: it can only go down.',
+          'El valor p es el original; “significativo” se decide tras corregir por los muchos cuadros probados a la vez (tasa de falsos descubrimientos de Benjamini-Hochberg). La cobertura de Hansen no se prueba: solo puede bajar.',
+        )}
       </p>
     </div>
   )

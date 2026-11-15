@@ -6,6 +6,7 @@
 
 import { useState, type PointerEvent } from 'react'
 import { formatKm2, formatPercent } from '../lib/format.ts'
+import { useLang } from '../lib/i18n.ts'
 
 const W = 640
 const H = 190
@@ -50,6 +51,7 @@ function path(values: (number | null)[], x: (i: number) => number, y: (v: number
 }
 
 export function CoverChart({ years, hansen, modis, selectedYear, flaggedModisYears, label }: CoverChartProps) {
+  const { t } = useLang()
   const { hover, onMove, clear } = useYearHover(years, W, PAD.left, PAD.right)
   const n = years.length
   const x = (i: number) => PAD.left + (i / Math.max(1, n - 1)) * (W - PAD.left - PAD.right)
@@ -90,15 +92,15 @@ export function CoverChart({ years, hansen, modis, selectedYear, flaggedModisYea
         {years.map((year, i) =>
           flagged(year) && modis[i] !== null ? (
             <circle key={`f${year}`} className="dot-hollow" cx={x(i)} cy={y(modis[i] as number)} r={4.5}>
-              <title>{`MODIS ${year}: suspect value (see the note)`}</title>
+              <title>{t(`MODIS ${year}: suspect value (see the note)`, `MODIS ${year}: valor dudoso (ver la nota)`)}</title>
             </circle>
           ) : null,
         )}
         {shown >= 0 && hansen[shown] !== null && <circle className="hover-dot" cx={x(shown)} cy={y(hansen[shown] as number)} r={3.5} />}
       </svg>
       <figcaption>
-        <span className="key-line solid" /> Hansen (solid) · <span className="key-line dashed" /> MODIS (dashed) ·
-        hollow dot: flagged year · gaps are missing values
+        <span className="key-line solid" /> {t('Hansen (solid)', 'Hansen (continua)')} · <span className="key-line dashed" />{' '}
+        {t('MODIS (dashed)', 'MODIS (discontinua)')} · {t('hollow dot: flagged year · gaps are missing values', 'punto hueco: año marcado · los huecos son valores faltantes')}
       </figcaption>
     </figure>
   )
