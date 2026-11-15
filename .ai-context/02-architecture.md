@@ -79,6 +79,23 @@ language switch.
 longer exist. In that case the page reloads once to get the new files. If loading fails again within a minute,
 `components/ViewLoadError.tsx` shows a message and a reload button instead of a blank page (no reload loop).
 
+**Guide (first visit).** `components/GuideTour.tsx` with texts and cases in `lib/guide.ts` (design B chosen by
+José: a tour over the real interface). Four steps ring a real element and explain it in a bubble: pick a measure
+(filters), read the map (legend: colour, dotted, hatched), open a square (map), is the change real? (Trends link, false
+discovery rate in plain words). A fifth step lists three demo cases that set the URL state (`?view=map&map=trend&var=`,
+`&show=significant`, `&cell=`): daytime temperature, NDVI with opposite signs, La Pampa. Their numbers come from
+`validation.json` (`trendChecks.variables`, `v3KnownPlaces`); nothing is counted in the browser. Burned area is left out
+until the method review closes r24c13. Behaviour:
+
+- **When it opens.** By itself on the first visit to the map view (remembered in `localStorage`, `signo.guideSeen`);
+  never on a link that opens a square or another view, or with `?guide=0` (pitch, video); `?guide=1` forces it. The
+  Guide button in the top bar opens it again. It always switches the map to the trend map, so the texts match the screen.
+- **Layout.** Desktop: the bubble sits beside the ring (right, below, left or above, else inside the ring's corner).
+  Below 768 px it docks at the bottom of the screen, or at the top when the ringed element is in the lower half (the map
+  bar). The page is dimmed by four panels around the ring.
+- **Accessibility.** The bubble is a modal dialog: focus on its title at each step, Tab stays inside, Escape closes and
+  focus returns. The page under it takes no clicks.
+
 **Page translators.** Chrome or Edge "Translate this page" and similar extensions replace the page's text nodes with
 their own elements, which React does not know about. Two consequences, both handled:
 

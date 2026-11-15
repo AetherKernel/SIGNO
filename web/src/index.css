@@ -1782,3 +1782,155 @@ body {
     font-size: var(--t-h3);
   }
 }
+
+/* Guide (components/GuideTour.tsx): a tour over the map view. The page is dimmed except for a ring around the element
+   the step explains; the bubble sits beside it (desktop) or at the bottom of the screen (below 768 px). Above every
+   overlay of the map (Leaflet stays inside .map's own stacking context). */
+.guidebtn {
+  min-height: 32px;
+  padding: 0 calc(var(--u) * 1.25);
+  gap: 6px;
+}
+
+.guide {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+}
+
+.guide-backdrop {
+  position: absolute;
+  inset: 0;
+}
+
+.guide-backdrop.dim,
+.guide-dim {
+  background: rgb(8 12 14 / 0.6);
+}
+
+.guide-dim {
+  position: fixed;
+  pointer-events: none;
+}
+
+.guide-ring {
+  position: fixed;
+  border-radius: var(--r-s);
+  outline: 3px solid var(--accent);
+  outline-offset: 0;
+  pointer-events: none;
+}
+
+.guide-bubble {
+  position: fixed;
+  width: min(380px, calc(100vw - 24px));
+  max-height: calc(100vh - 24px);
+  overflow: auto;
+  display: grid;
+  gap: var(--u);
+  padding: calc(var(--u) * 2.5);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+
+.guide-bubble.centred {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(520px, calc(100vw - 24px));
+}
+
+.guide-bubble.docked {
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  width: auto;
+  max-height: 62vh;
+}
+
+.guide-bubble.docked.top {
+  top: 12px;
+  bottom: auto;
+}
+
+.guide-count {
+  font-family: var(--f-data);
+  font-size: var(--t-caption);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.guide-bubble h2 {
+  font-size: var(--t-h3);
+}
+
+.guide-bubble h2:focus {
+  outline: none;
+}
+
+.guide-bubble h2:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.guide-body {
+  display: grid;
+  gap: var(--u);
+}
+
+.guide-cases {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: calc(var(--u) * 1.5);
+}
+
+.guide-cases li {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+  padding: calc(var(--u) * 1.5);
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+  background: var(--bg);
+}
+
+.guide-case-title {
+  font-weight: 600;
+}
+
+.guide-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--u);
+  margin-top: var(--u);
+}
+
+.guide-spacer {
+  flex: 1;
+}
+
+@media (max-width: 767px) {
+  .guidebtn span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .guide-bubble:not(.centred) {
+    transition:
+      left 160ms ease,
+      top 160ms ease;
+  }
+}

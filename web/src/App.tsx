@@ -6,13 +6,15 @@
 // Map is the default, also for old links without ?view=. Trends, Cross-checks and Method are loaded on demand.
 // Data comes only from hooks (src/hooks) → service (src/services) → API v1 (published by server/).
 
-import { Suspense, useEffect, useRef } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import type { Hotspot, ValidationCase } from '../shared/contracts.ts'
+import { GuideTour } from './components/GuideTour.tsx'
 import { MapScreen } from './components/MapScreen.tsx'
 import { TopBar } from './components/TopBar.tsx'
 import { ViewLoadError } from './components/ViewLoadError.tsx'
 import { useCover, useManifest, useValidation } from './hooks/useSignoData.ts'
 import { useUrlParams } from './hooks/useUrlParam.ts'
+import { markGuideSeen, shouldAutoOpenGuide, type GuideCase } from './lib/guide.ts'
 import { LangContext, parseLang, translator, type Lang } from './lib/i18n.ts'
 import { lazyView } from './lib/lazyView.ts'
 import { APP_VIEWS, parseAppView, type AppView } from './lib/viewState.ts'
@@ -79,6 +81,27 @@ function App() {
       },
       { push: true },
     )
+  // The guide (lib/guide.ts): opens by itself on the first visit to the map; the Guide button opens it again. It always
+  // runs on the trend map, so its texts match what is on screen.
+  const [guideOpen, setGuideOpen] = useState(() => shouldAutoOpenGuide(params))
+  const [flyRequest, setFlyRequest] = useState<{ lat: number; lon: number } | null>(null)
+  useEffect(() => {
+    if (!guideOpen) return
+    markGuideSeen()
+    setParams({ view: 'map', map: 'trend', cell: null, from: null, to: null, guide: null })
+  }, [guideOpen]) // eslint-disable-line react-hooks/exhaustive-deps
+  const openGuide = () => {
+    if (view !== 'map') navigate('map')
+    setGuideOpen(true)
+  }
+  const showCase = (demo: GuideCase) => {
+    setGuideOpen(false)
+    setParams(demo.patch, { push: true })
+    const lat = Number(demo.patch.lat)
+    const lon = Number(demo.patch.lon)
+    if (demo.patch.lat && demo.patch.lon && Number.isFinite(lat) && Number.isFinite(lon)) setFlyRequest({ lat, lon })
+  }
+
   const flaggedModisYears = (cover.data?.flags ?? []).filter((f) => f.source.toLowerCase() === 'modis').map((f) => f.year)
 
   return (
@@ -90,13 +113,16 @@ function App() {
         hrefFor={hrefFor}
         onNavigate={navigate}
         onLang={chooseLang}
+        onGuide={openGuide}
       />
 
       <main id="main" ref={mainRef} tabIndex={-1} className={`view view-${view}`}>
         {manifest.loading && <p className="muted page-status">{t('Loading…', 'Cargando…')}</p>}
         {manifest.error && <p className="error page-status">{manifest.error}</p>}
 
-        {manifest.data && view === 'map' && <MapScreen manifest={manifest.data} cover={cover} validation={validation} />}
+        {manifest.data && view === 'map' && (
+          <MapScreen manifest={manifest.data} cover={cover} validation={validation} flyRequest={flyRequest} />
+        )}
 
         {manifest.data && view !== 'map' && (
           <Suspense fallback={<p className="muted page-status">{t('Loading…', 'Cargando…')}</p>}>
@@ -116,6 +142,10 @@ function App() {
           </Suspense>
         )}
       </main>
+
+      {guideOpen && manifest.data && view === 'map' && (
+        <GuideTour validation={validation.data} onClose={() => setGuideOpen(false)} onCase={showCase} />
+      )}
     </div>
     </LangContext.Provider>
   )

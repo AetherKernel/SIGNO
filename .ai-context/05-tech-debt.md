@@ -31,6 +31,13 @@
 
 ## Done
 
+- 2026-11-15: first-visit guide (design B, José), for the challenge's "simple definitions" and "demo examples".
+  - **What:** a four-step tour over the real interface plus three demo cases that open the map already set up; English
+    by default, Spanish with ES. Numbers from `validation.json`, none computed in the browser (`check:layers` passes).
+  - **Verified** on `build:real` (105 tests pass), lint and types clean: desktop 1440 and 1280 px (light), 375 px
+    (dark, Spanish), keyboard (focus on each step, Tab wraps, Escape closes), first visit opens once and not again on
+    reload, the Guide button reopens it, La Pampa opens square r08c09 on the loss trend. No console errors.
+  - **Not touched:** `cellView.ts` (P-033), `ValidationPanel.tsx` and the legend (P-034, P-035).
 - 2026-11-15: the team logo in the top bar and as the favicon (Kiara, approved by José).
   - **What:** the pixel-art leaf logo (proposal 02 "Hoja Cartografica", generated with Gemini; source and every
     version in Drive, `docs/design-system/marca/logo/`) replaces the text "SIGNO". `SignoLogo.tsx` draws it as inline

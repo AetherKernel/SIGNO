@@ -7,7 +7,7 @@
 // On phones the views take a second row that scrolls sideways.
 // The name is the team's logo (SignoLogo, generated with Gemini; see that file), 2026-11-15.
 
-import { IconLanguage } from '@tabler/icons-react'
+import { IconHelpCircle, IconLanguage } from '@tabler/icons-react'
 import type { MouseEvent } from 'react'
 import type { Manifest } from '../../shared/contracts.ts'
 import { LANGS, useLang, type Lang } from '../lib/i18n.ts'
@@ -22,9 +22,11 @@ interface Props {
   hrefFor: (view: AppView) => string
   onNavigate: (view: AppView) => void
   onLang: (lang: Lang) => void
+  /** Opens the guide (a tour over the map view) again. */
+  onGuide: () => void
 }
 
-export function TopBar({ manifest, view, hrefFor, onNavigate, onLang }: Props) {
+export function TopBar({ manifest, view, hrefFor, onNavigate, onLang, onGuide }: Props) {
   const { lang, t } = useLang()
   const go = (event: MouseEvent<HTMLAnchorElement>, target: AppView) => {
     // Let the browser handle new-tab and new-window clicks.
@@ -57,6 +59,10 @@ export function TopBar({ manifest, view, hrefFor, onNavigate, onLang }: Props) {
       </nav>
       <div className="topactions">
         {manifest && <DataStatusBanner status={manifest.dataStatus} />}
+        <button type="button" className="btn ghost guidebtn" onClick={onGuide}>
+          <IconHelpCircle size={18} stroke={1.75} aria-hidden="true" />
+          <span>{t('Guide', 'Guía')}</span>
+        </button>
         <div className="langswitch" role="group" aria-label={t('Language', 'Idioma')}>
           <IconLanguage size={18} stroke={1.75} aria-hidden="true" />
           {LANGS.map((l) => (

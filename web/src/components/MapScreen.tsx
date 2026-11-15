@@ -42,6 +42,8 @@ interface Props {
   manifest: Manifest
   cover: Remote<CoverLayer>
   validation: Remote<ValidationReport>
+  /** A place to fly to, asked from outside the map (the guide's demo cases). A new object flies again. */
+  flyRequest?: { lat: number; lon: number } | null
 }
 
 /** Moves keyboard focus back to a square (or to the map) after the viewer closed. */
@@ -51,12 +53,17 @@ function focusCell(cellId: string) {
   target?.focus({ preventScroll: true })
 }
 
-export function MapScreen({ manifest, cover, validation }: Props) {
+export function MapScreen({ manifest, cover, validation, flyRequest = null }: Props) {
   const { lang, t } = useLang()
   const [params, setParams] = useUrlParams()
   const extras = manifest.extras
   const [initialView] = useState<MapView | null>(() => parseView(params.get('z'), params.get('lat'), params.get('lon')))
   const [flyTo, setFlyTo] = useState<{ lat: number; lon: number } | null>(null)
+  const [lastRequest, setLastRequest] = useState(flyRequest)
+  if (flyRequest !== lastRequest) {
+    setLastRequest(flyRequest)
+    if (flyRequest) setFlyTo(flyRequest)
+  }
 
   const basemaps = useMemo(() => listBasemaps(), [])
   const baseParam = params.get('base')
