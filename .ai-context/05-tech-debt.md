@@ -37,7 +37,7 @@
     old text stayed on screen. On the map view the translator also made React crash (blank page).
   - **Fix:** `lib/translationGuard.ts` (no crash), and every text that changes is the only child of its own element:
     area trends, legend title and ends, opacity, yearly-values line, Trends chart title and source, zone readout, method
-    findings and rules, alpha in Method.
+    findings and rules, alpha in Method, in the area values and in the Trends lead.
   - **Verified** on `build:real` with a simulated translator (every text node wrapped in `<font>` as it appears),
     compared with a clean copy: map, area, trend map, loss map, Trends (two zones), Cross-checks, Method, in English and
     Spanish, on load and after changing years, variable and opacity. No stale text and no errors. Lint and types pass.

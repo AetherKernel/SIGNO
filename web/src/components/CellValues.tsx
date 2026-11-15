@@ -103,8 +103,8 @@ export function CellValues({ rows, years, from, to, entries, alpha }: Props) {
         </table>
       </div>
       <p className="small muted">
-        {t('Mann-Kendall test on yearly values, Sen slope per decade', 'Test de Mann-Kendall sobre valores anuales, pendiente de Sen por década')}
-        {alpha !== null ? `, α = ${alpha}` : ''}.{' '}
+        {/* One string: alpha arrives after loading, and must replace whole under a page translator. */}
+        <span>{`${t('Mann-Kendall test on yearly values, Sen slope per decade', 'Test de Mann-Kendall sobre valores anuales, pendiente de Sen por década')}${alpha !== null ? `, α = ${alpha}` : ''}.`}</span>{' '}
         {t(
           'The p-value is the raw one; “significant” is decided after correcting for the many squares tested at once (Benjamini-Hochberg false discovery rate). Hansen tree cover is not tested: it can only go down.',
           'El valor p es el original; “significativo” se decide tras corregir por los muchos cuadros probados a la vez (tasa de falsos descubrimientos de Benjamini-Hochberg). La cobertura de Hansen no se prueba: solo puede bajar.',

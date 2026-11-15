@@ -139,11 +139,12 @@ function TrendsDashboard({ report, validation }: { report: ZonesReport; validati
         <div>
           <h1>{t(`How has the ${heading} changed since 2001?`, `¿Cómo ha cambiado la ${heading} desde 2001?`)}</h1>
           <p className="muted tr-lead">
-            {t(
-              'Yearly values and a trend test for each measure: Mann-Kendall test on yearly values, Sen slope per decade',
-              'Valores anuales y un test de tendencia por medida: test de Mann-Kendall sobre valores anuales, pendiente de Sen por década',
-            )}
-            , α = {report.alpha}.{' '}
+            <span>
+              {`${t(
+                'Yearly values and a trend test for each measure: Mann-Kendall test on yearly values, Sen slope per decade',
+                'Valores anuales y un test de tendencia por medida: test de Mann-Kendall sobre valores anuales, pendiente de Sen por década',
+              )}, α = ${report.alpha}.`}
+            </span>{' '}
             <a href="#how-it-works">{t('How the test works and how we checked it', 'Cómo funciona el test y cómo lo comprobamos')}</a>
           </p>
           {report.dataStatus === 'mock' && (
