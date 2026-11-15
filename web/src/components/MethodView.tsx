@@ -78,7 +78,7 @@ export function MethodView({ manifest, coverTrendMethod }: MethodViewProps) {
             <>
               <div>
                 <dt>{t('Significance level', 'Nivel de significancia')}</dt>
-                <dd className="mono">α = {layer?.method.alpha ?? '…'}</dd>
+                <dd className="mono">{`α = ${layer?.method.alpha ?? '…'}`}</dd>
               </div>
               <div>
                 <dt>{t('What “significant” means here', 'Qué significa “significativo” aquí')}</dt>

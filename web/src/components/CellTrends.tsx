@@ -106,8 +106,9 @@ export function CellTrends({ entries, variables, series, from, to, onRetry }: Pr
                 <span className="cv-trend-icon" aria-hidden="true">
                   {ICON[entry.status]}
                 </span>
+                {/* Each text in its own element: React then replaces it whole, even if a page translator rewrote it. */}
                 <span>
-                  {headline} <span className="muted">{detail}</span>
+                  <span>{headline}</span> <span className="muted">{detail}</span>
                 </span>
               </summary>
               {variable && slot?.state === 'ready' && <SeriesTrendChart variable={variable} series={slot.data} slot={slot} from={from} to={to} sen={entry.result?.line} />}

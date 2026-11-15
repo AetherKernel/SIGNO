@@ -79,6 +79,17 @@ language switch.
 longer exist. In that case the page reloads once to get the new files. If loading fails again within a minute,
 `components/ViewLoadError.tsx` shows a message and a reload button instead of a blank page (no reload loop).
 
+**Page translators.** Chrome or Edge "Translate this page" and similar extensions replace the page's text nodes with
+their own elements, which React does not know about. Two consequences, both handled:
+
+- **No crash.** `web/src/lib/translationGuard.ts`, installed in `main.tsx` before the first render, makes
+  `removeChild` and `insertBefore` tolerant of a node moved into a translator's wrapper. Without it the map view went
+  blank (React issue facebook/react#11538). It changes nothing when no translator is active.
+- **No stale text.** A text that changes after loading or on interaction is written as the only child of its own
+  element, as one string (`{`${a} ${b}`}` or `<span>{text}</span>`), never as loose text next to other text or elements.
+  React then replaces the element's whole content. Loose text kept the old value under a translator (for example
+  "Rainfall: loading…" next to a loaded verdict).
+
 The app has four views, chosen with `?view=` (default `map`). The top bar links them, and each link works in a new tab.
 
 | View | `?view=` | What it shows |
@@ -136,7 +147,9 @@ for multiple tests. The count of squares uses the corrected verdicts. Satellite 
 
 **Layout.** Desktop: filters on the left, the map in the centre, the area viewer as a dialog. Below 768 px the map
 bar (Filters button and compact legend) sits above the map, and the filters open as a sheet. The other views are one
-column. Views that are not the map load on demand (`React.lazy`).
+column. Views that are not the map load on demand (`React.lazy`). The Map view is full width. Trends, Cross-checks and
+Method & sources share one rule (`.page` in `index.css`): a centred 1200 px container with the same side margins, and
+running text (`p`, `li`, `dd`) limited to 75 characters per line, aligned left; tables and charts use the full width.
 
 **Colours in SVG.** They are set with `style`, never as SVG attributes, because `fill="var(--x)"` does not resolve
 and paints black.

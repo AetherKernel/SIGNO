@@ -232,7 +232,7 @@ function TrendsDashboard({ report, validation }: { report: ZonesReport; validati
         <section ref={detailRef} aria-labelledby="tr-detail-title" className="tr-section tr-detail">
           <div className="tr-detail-chart">
             <h2 id="tr-detail-title">
-              {measureName(selected.measure, t)}, {heading}
+              {`${measureName(selected.measure, t)}, ${heading}`}
             </h2>
             <p className="tr-small muted tr-units">
               {selected.variable.units === 'unitless'
@@ -247,7 +247,7 @@ function TrendsDashboard({ report, validation }: { report: ZonesReport; validati
               onYear={(y) => setPicked({ key: yearKey, year: y })}
             />
             <p className="tr-small muted">
-              {t('Source', 'Fuente')}: {selected.measure.source}
+              {`${t('Source', 'Fuente')}: ${selected.measure.source}`}
             </p>
           </div>
           <aside className="tr-detail-text" aria-labelledby="tr-means-title">

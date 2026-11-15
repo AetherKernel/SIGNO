@@ -203,7 +203,7 @@ function FiltersBody(props: MapFiltersProps) {
       {mapType === 'trend' && trend && (
         <div className="fsec">
           <p className="small muted">
-            {t('Yearly values', 'Valores anuales')}, {trend.years[0]}–{trend.years[1]}
+            {`${t('Yearly values', 'Valores anuales')}, ${trend.years[0]}–${trend.years[1]}`}
           </p>
         </div>
       )}
@@ -266,7 +266,7 @@ function FiltersBody(props: MapFiltersProps) {
 
       <div className="fsec">
         <label className="fsec-label" htmlFor="map-opacity">
-          {t('Square opacity', 'Opacidad de los cuadros')} <strong className="mono">{props.opacity} %</strong>
+          {t('Square opacity', 'Opacidad de los cuadros')} <strong className="mono">{`${props.opacity} %`}</strong>
         </label>
         <input
           id="map-opacity"

@@ -81,12 +81,15 @@ export function TrendMethod({ report, validation, measure }: TrendMethodProps) {
             </li>
             <li>
               <strong>{t('Rules fixed before looking.', 'Reglas fijadas antes de mirar.')}</strong>{' '}
-              {design
-                ? t(
-                    `A square needs at least ${percent(design.minCompleteShare)} of its years complete. If more than ${percent(design.autocorrelationRuleThreshold)} of the squares of a measure show year-to-year memory, a variant of the test that allows for it is used. `,
-                    `Un cuadro necesita al menos ${percent(design.minCompleteShare)} de sus años completos. Si más del ${percent(design.autocorrelationRuleThreshold)} de los cuadros de una medida muestra memoria de un año a otro, se usa una variante del test que la tiene en cuenta. `,
-                  )
-                : ''}
+              {/* In its own element: it appears after loading, and must replace whole under a page translator. */}
+              <span>
+                {design
+                  ? t(
+                      `A square needs at least ${percent(design.minCompleteShare)} of its years complete. If more than ${percent(design.autocorrelationRuleThreshold)} of the squares of a measure show year-to-year memory, a variant of the test that allows for it is used. `,
+                      `Un cuadro necesita al menos ${percent(design.minCompleteShare)} de sus años completos. Si más del ${percent(design.autocorrelationRuleThreshold)} de los cuadros de una medida muestra memoria de un año a otro, se usa una variante del test que la tiene en cuenta. `,
+                    )
+                  : ''}
+              </span>
               {t(
                 'If the satellite’s overpass time drifts along with a measure, its test stops in 2020.',
                 'Si la hora de paso del satélite deriva junto con una medida, su test se detiene en 2020.',
@@ -132,24 +135,28 @@ export function TrendMethod({ report, validation, measure }: TrendMethodProps) {
                     `We shuffled the years of every square at random, ${design?.permutations ?? 'many'} times, and ran the whole procedure again. With no real order in time the test should flag almost nothing.`,
                     `Barajamos al azar los años de cada cuadro, ${design?.permutations ?? 'muchas'} veces, y repetimos todo el procedimiento. Sin un orden real en el tiempo, el test casi no debería marcar nada.`,
                   )}
-                  {falseAlarm
-                    ? t(
-                        ` For ${name} it flagged ${formatShare(falseAlarm.meanShareSignificant)} of the squares on average, and ${formatShare(falseAlarm.maxShareSignificant)} in the worst run.`,
-                        ` Para ${name} marcó el ${formatShare(falseAlarm.meanShareSignificant)} de los cuadros en promedio, y el ${formatShare(falseAlarm.maxShareSignificant)} en la peor ronda.`,
-                      )
-                    : t(' The numbers for every measure are in the table below.', ' Las cifras de cada medida están en la tabla de abajo.')}
+                  <span>
+                    {falseAlarm
+                      ? t(
+                          ` For ${name} it flagged ${formatShare(falseAlarm.meanShareSignificant)} of the squares on average, and ${formatShare(falseAlarm.maxShareSignificant)} in the worst run.`,
+                          ` Para ${name} marcó el ${formatShare(falseAlarm.meanShareSignificant)} de los cuadros en promedio, y el ${formatShare(falseAlarm.maxShareSignificant)} en la peor ronda.`,
+                        )
+                      : t(' The numbers for every measure are in the table below.', ' Las cifras de cada medida están en la tabla de abajo.')}
+                  </span>
                 </p>
               </li>
               <li>
                 <h4>{t('Does it find a real change? Often, but not always.', '¿Encuentra un cambio real? A menudo, pero no siempre.')}</h4>
                 <p>
                   {t('Then we added a made-up trend of the typical size to the shuffled series.', 'Luego añadimos una tendencia inventada de tamaño típico a las series barajadas.')}
-                  {detection
-                    ? t(
-                        ` For ${name} the test found it in ${percent(detection.meanShareDetected)} of the squares on average (${percent(detection.minShareDetected)} in the weakest run).`,
-                        ` Para ${name} el test la encontró en el ${percent(detection.meanShareDetected)} de los cuadros en promedio (${percent(detection.minShareDetected)} en la ronda más débil).`,
-                      )
-                    : null}{' '}
+                  <span>
+                    {detection
+                      ? t(
+                          ` For ${name} the test found it in ${percent(detection.meanShareDetected)} of the squares on average (${percent(detection.minShareDetected)} in the weakest run).`,
+                          ` Para ${name} el test la encontró en el ${percent(detection.meanShareDetected)} de los cuadros en promedio (${percent(detection.minShareDetected)} en la ronda más débil).`,
+                        )
+                      : null}
+                  </span>{' '}
                   {t(
                     'So the test is careful: it can miss a real change, and “no clear trend” means “not shown beyond doubt”, not “nothing happened”.',
                     'Así que el test es prudente: puede pasar por alto un cambio real, y “sin tendencia clara” significa “no demostrado sin duda”, no “no pasó nada”.',

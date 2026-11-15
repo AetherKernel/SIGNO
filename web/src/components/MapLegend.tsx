@@ -141,8 +141,7 @@ export function MapLegend({ mapType, year, trend, compact = false }: Props) {
     return (
       <section className={compact ? 'legend compact' : 'legend'} aria-labelledby={titleId}>
         <h3 id={titleId} className="legend-title">
-          {isLoss ? t(`Tree cover lost in ${year}`, `Cobertura perdida en ${year}`) : t(`Area burned in ${year}`, `Superficie quemada en ${year}`)}{' '}
-          {t('(km² per square)', '(km² por cuadro)')}
+          {`${isLoss ? t(`Tree cover lost in ${year}`, `Cobertura perdida en ${year}`) : t(`Area burned in ${year}`, `Superficie quemada en ${year}`)} ${t('(km² per square)', '(km² por cuadro)')}`}
         </h3>
         <AmountBar
           prefix={isLoss ? 'loss' : 'burn'}
@@ -182,8 +181,7 @@ export function MapLegend({ mapType, year, trend, compact = false }: Props) {
   return (
     <section className={compact ? 'legend compact' : 'legend'} aria-labelledby={titleId}>
       <h3 id={titleId} className="legend-title">
-        {t('Change per decade', 'Cambio por década')}, {name}
-        {trend ? ` (${units})` : ''}
+        {`${t('Change per decade', 'Cambio por década')}, ${name}${trend ? ` (${units})` : ''}`}
       </h3>
       <div className="legend-ends">
         <span>{t('Falling', 'Baja')}</span>
@@ -202,15 +200,10 @@ export function MapLegend({ mapType, year, trend, compact = false }: Props) {
         ))}
       </div>
       <div className="legend-ticks" aria-hidden="true">
-        <span>
-          {clippedLow ? '≤ ' : ''}
-          {formatSigned(breaks[0])}
-        </span>
+        {/* One string per label, so a page translator cannot leave an old value behind (lib/translationGuard.ts). */}
+        <span>{`${clippedLow ? '≤ ' : ''}${formatSigned(breaks[0])}`}</span>
         <span>0</span>
-        <span>
-          {clippedHigh ? '≥ ' : ''}
-          {formatSigned(breaks[SLOPE_CLASSES])}
-        </span>
+        <span>{`${clippedHigh ? '≥ ' : ''}${formatSigned(breaks[SLOPE_CLASSES])}`}</span>
       </div>
       {!compact && (
         <>

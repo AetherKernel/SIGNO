@@ -287,9 +287,10 @@ export function ZoneChart({ variable, measure, year, onYear }: ZoneChartProps) {
       <figcaption id={readoutId} className="tr-readout" aria-live="polite">
         {current && year !== null ? (
           <>
-            <strong>{year}:</strong> {valueSentence(measure, current.value as number, units, t)}
-            {currentState && currentState !== 'used' ? ` (${stateReason(currentState, variable, measure, t)})` : ''}.{' '}
-            {range}
+            {/* One string per element: the readout changes with the year, also under a page translator. */}
+            <strong>{`${year}:`}</strong>{' '}
+            <span>{`${valueSentence(measure, current.value as number, units, t)}${currentState && currentState !== 'used' ? ` (${stateReason(currentState, variable, measure, t)})` : ''}.`}</span>{' '}
+            <span>{range}</span>
           </>
         ) : (
           t('Choose a year on the chart to read its value.', 'Elige un año en el gráfico para leer su valor.')

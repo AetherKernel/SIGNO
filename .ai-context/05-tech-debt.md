@@ -31,6 +31,20 @@
 
 ## Done
 
+- 2026-11-15: texts stuck on "loading…" and a blank map under a page translator.
+  - **Problem:** José saw "Rainfall: loading…" next to a loaded verdict in the area viewer. Rendering, not data: every
+    API file loaded (200). With a page translator active, React updated text nodes the translator had replaced, so the
+    old text stayed on screen. On the map view the translator also made React crash (blank page).
+  - **Fix:** `lib/translationGuard.ts` (no crash), and every text that changes is the only child of its own element:
+    area trends, legend title and ends, opacity, yearly-values line, Trends chart title and source, zone readout, method
+    findings and rules, alpha in Method.
+  - **Verified** on `build:real` with a simulated translator (every text node wrapped in `<font>` as it appears),
+    compared with a clean copy: map, area, trend map, loss map, Trends (two zones), Cross-checks, Method, in English and
+    Spanish, on load and after changing years, variable and opacity. No stale text and no errors. Lint and types pass.
+- 2026-11-15: one layout rule for Trends, Cross-checks and Method & sources (José). They had different widths (1200,
+  1040 and 760 px), so the margins jumped between tabs. Now all three share the 1200 px container and the same margins;
+  running text is limited to 75 characters per line. Checked at 1440, 1024 and 375 px, with no horizontal scroll. The
+  Map view stays full width.
 - 2026-11-15: a tab opened across a deploy no longer goes blank.
   - **Problem:** opening Trends, Cross-checks or Method after a deploy asked for a file of the previous build (404), and
     the page went blank. Seen in production.

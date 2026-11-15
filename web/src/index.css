@@ -248,8 +248,13 @@ body {
   padding: calc(var(--u) * 3);
 }
 
-/* Reading views: one centred column */
+/* Reading views (Trends, Cross-checks, Method & sources): one rule for all three, so the side margins and the title
+   do not move when switching tabs. Same 1200 px centred container; long running text keeps a readable line length
+   (75 characters) and stays aligned to the left edge; tables and charts use the full width. The Map view is full width
+   and does not use .page. */
 .page {
+  width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
   padding: calc(var(--u) * 4) calc(var(--u) * 3) calc(var(--u) * 8);
   display: grid;
@@ -261,16 +266,10 @@ body {
   font-size: var(--t-h1);
 }
 
-.page-checks {
-  max-width: 1040px;
-}
-
-.page-method {
-  max-width: 760px;
-}
-
-.page-trends {
-  max-width: 1200px;
+.page p,
+.page li,
+.page dd {
+  max-width: 75ch;
 }
 
 .page-section {
