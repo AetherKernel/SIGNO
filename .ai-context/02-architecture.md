@@ -127,6 +127,10 @@ map opens framed on the region; outside it the imagery stays visible under a tra
 space), and pan and zoom stay inside the region (José, 2026-11-15). The scan sweep runs when the layer changes and is
 off with `prefers-reduced-motion`.
 
+**Map credits on phones.** Below 768 px the Leaflet credits (Leaflet, NASA GIBS, Natural Earth) take one compact line
+cut with "…", so they do not crowd the Filters bar; a tap, or keyboard focus on one of their links, shows them in full
+(`TrendMap.tsx` and `index.css`). They stay on the map, as the licences ask. Desktop is unchanged.
+
 **Opening a square.** Mouse: a click opens its file. Keyboard: Tab to the map, arrows, Enter. Touch (`TrendMap.tsx`):
 the first tap shows the square's readout under the map with an **"Open this area's file"** button (44 px); a second tap
 on the same square also opens it. The button was added at José's request (15 Nov): a second tap alone was hard to

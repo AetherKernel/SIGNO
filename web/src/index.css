@@ -845,6 +845,27 @@ body {
   color: #0f6b66;
 }
 
+/* Phones: the map credits take one compact line (cut with "…") so they do not crowd the Filters bar; a tap, or focus on
+   one of their links, shows them in full (TrendMap.tsx). The credits stay on the map, as the licences ask. */
+@media (max-width: 767px) {
+  .map.leaflet-container .leaflet-control-attribution {
+    max-width: calc(100vw - 16px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 10px;
+    line-height: 18px;
+    padding: 0 6px;
+    cursor: pointer;
+  }
+
+  .map.leaflet-container .leaflet-control-attribution.is-open,
+  .map.leaflet-container .leaflet-control-attribution:focus-within {
+    white-space: normal;
+    cursor: default;
+  }
+}
+
 /* Area file */
 .area-head {
   display: grid;

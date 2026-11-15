@@ -104,6 +104,18 @@ export function TrendMap(props: Props) {
       maxBoundsViscosity: 1,
     })
     map.attributionControl.setPrefix('<a href="https://leafletjs.com">Leaflet</a>')
+    // Phones: the credits are one compact line (CSS) so they never crowd the Filters bar; a tap shows them in full
+    // (the first tap opens them instead of following a link). Desktop: always in full, nothing changes.
+    const credits = map.attributionControl.getContainer()
+    credits?.addEventListener('click', (event) => {
+      if (!window.matchMedia('(max-width: 767px)').matches) return
+      if (!credits.classList.contains('is-open')) {
+        event.preventDefault()
+        credits.classList.add('is-open')
+      } else if (!(event.target instanceof HTMLAnchorElement)) {
+        credits.classList.remove('is-open')
+      }
+    })
     L.control.zoom({ position: 'topright', zoomInTitle: 'Zoom in', zoomOutTitle: 'Zoom out' }).addTo(map)
 
     // Room around the region, with extra space at the bottom for the readout.

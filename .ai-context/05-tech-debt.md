@@ -31,6 +31,10 @@
 
 ## Done
 
+- 2026-11-15: phones, map credits crowding the Filters bar (José). The credits took two or more full-width lines right
+  above the Filters bar. Now they take one compact line (cut with "…") that opens in full on a tap. Checked at 360 × 640
+  and 320 × 568 (one 18 px line, clear of the readout and the bar, no sideways scroll) and on desktop (unchanged), on
+  `build:real` (105 tests); lint and types clean. This also covers the "credit over the legend title" part of P-034.
 - 2026-11-15: phones, opening a square (José). The first tap showed the readout and only a second tap opened the file,
   which was hard to discover. The readout now has an "Open this area's file" button (44 px tall); the second tap still
   works. Checked at 375 px with a touch tap (readout, button reachable, the file opens and the button goes away) on
