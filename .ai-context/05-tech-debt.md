@@ -26,6 +26,17 @@
 
 ## Done
 
+- 2026-11-15: blank page when the map mounts with no size. If the map container measured 0 px (page or pane hidden
+  while loading) or less than the frame padding (48 × 96 px), Leaflet computed a NaN zoom and threw `Invalid LatLng
+  (NaN, NaN)`; the error was not caught, so React unmounted the whole app.
+  - **Fix**, approved by José (option A): `TrendMap.tsx` fits the region only when the container has room. Until then
+    it sets a provisional view, and the existing `ResizeObserver` fits the region once the container has a size.
+  - **Verified** on the real-data build (`build:real`, 102 tests, layers, lint):
+    - the app renders in a 0 × 0 and a 40 × 40 iframe, with no console errors;
+    - growing the iframe from 0 to 900 × 650 frames the region;
+    - 375 px in light and dark: region framed, no horizontal scroll.
+  - **Not covered:** no error boundary around the map. Another map failure would still blank the app (option B, not
+    applied).
 - 2026-11-15: trend test applied (ADR-006, `pipeline/trends.py`, step 8). Mann-Kendall on yearly values per 1° cell and
   per zone, Sen's slope, Benjamini-Hochberg FDR per variable, α = 0.05. D1 drift check: r = 0.85 for NDVI and EVI, so
   both end in 2020. Results and V1–V4 in `pipeline/README.md` (*Trend test*). Written: `web/server/data/trends/`,
