@@ -10,12 +10,15 @@
     "dev:real": "npm run api:build:real && vite",
     "build": "npm run api:build && npm run check:layers && npm test && tsc -b && vite build",
     "build:real": "npm run api:build:real && npm run check:layers && npm test && tsc -b && vite build",
-    "test": "node --test server/validate.test.ts server/summary.test.ts server/periods.test.ts server/cover.test.ts server/annual.test.ts server/trends.test.ts",
+    "test": "node --test server/validate.test.ts server/summary.test.ts server/periods.test.ts server/cover.test.ts server/annual.test.ts server/trends.test.ts server/cellBundle.test.ts",
     "check:layers": "node scripts/checkLayers.ts",
     "lint": "oxlint",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource-variable/source-serif-4": "5.3.1",
+    "@fontsource/jetbrains-mono": "5.3.0",
+    "@fontsource/source-sans-3": "5.3.1",
     "leaflet": "^1.9.4",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"

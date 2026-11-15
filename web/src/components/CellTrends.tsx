@@ -1,4 +1,5 @@
-// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15. Reviewed and owned by team AETHER.
+// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15 (monthly values loaded on demand, same day).
+// Reviewed and owned by team AETHER.
 //
 // "Trends in this area" of the cell viewer: one line per measure in plain language (direction, slope per decade, tested
 // years, and whether the team's test calls it a clear trend after correcting for many squares at once). Each line opens
@@ -6,8 +7,9 @@
 // browser never tests, fits or averages. Hansen tree cover is listed as not tested (it can only go down).
 
 import { useState } from 'react'
-import type { CellSeries, SenLine, Variable } from '../../shared/contracts.ts'
+import type { CellYearlySeries, SenLine, Variable } from '../../shared/contracts.ts'
 import type { Slot } from '../hooks/useCellProfile.ts'
+import { useCellSeries } from '../hooks/useSignoData.ts'
 import { annualByYear, describeTrend, formatNumber, formatValue, seriesRow, type TrendEntry } from '../lib/cellView.ts'
 import { SeriesChart } from './SeriesChart.tsx'
 import { ViewLink } from './ViewLink.tsx'
@@ -16,7 +18,7 @@ import { YearChart, type ChartSeries, type PointKind } from './YearChart.tsx'
 interface Props {
   entries: TrendEntry[]
   variables: Variable[]
-  series: Record<string, Slot<CellSeries>>
+  series: Record<string, Slot<CellYearlySeries>>
   from: number
   to: number
   onRetry: () => void
@@ -25,8 +27,10 @@ interface Props {
 const ICON: Record<TrendEntry['status'], string> = { falling: '↓', rising: '↑', none: '–', untested: '?', loading: '…', error: '!' }
 
 /** Yearly chart of a monthly variable in this square: tested years shaded, incomplete years hollow, later years muted. */
-function SeriesTrendChart({ variable, series, slot, from, to, sen }: { variable: Variable; series: CellSeries; slot: Slot<CellSeries>; from: number; to: number; sen?: SenLine }) {
+function SeriesTrendChart({ variable, series, slot, from, to, sen }: { variable: Variable; series: CellYearlySeries; slot: Slot<CellYearlySeries>; from: number; to: number; sen?: SenLine }) {
   const [monthly, setMonthly] = useState(false)
+  // The monthly points are not in the per-cell file: the series file loads only when the reader asks for it.
+  const monthlySeries = useCellSeries(monthly ? variable.id : null, series.cellId)
   const row = seriesRow(variable, slot)
   const annual = annualByYear(series)
   const years = [...annual.keys()]
@@ -68,7 +72,9 @@ function SeriesTrendChart({ variable, series, slot, from, to, sen }: { variable:
       <button type="button" className="cv-link" aria-expanded={monthly} onClick={() => setMonthly((on) => !on)}>
         {monthly ? 'Hide monthly values' : 'Show monthly values'}
       </button>
-      {monthly && <SeriesChart series={series} variable={variable} compare={null} />}
+      {monthly && monthlySeries.data && <SeriesChart series={monthlySeries.data} variable={variable} compare={null} />}
+      {monthly && monthlySeries.loading && <p className="muted small">Loading the monthly values…</p>}
+      {monthly && monthlySeries.error && <p className="error small">Could not load the monthly values. {monthlySeries.error}</p>}
     </div>
   )
 }

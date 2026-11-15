@@ -1,9 +1,10 @@
-// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-14. Reviewed and owned by team AETHER.
+// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-14 (per-cell file added 2026-11-15). Reviewed and
+// owned by team AETHER.
 //
 // Typed service for the SIGNO API v1. Views reach data only through hooks that call this service.
 
 import { apiPaths } from '../../shared/apiPaths.ts'
-import type { CellSeries, CoverLayer, Manifest, RasterIndex, TrendLayer, ValidationReport } from '../../shared/contracts.ts'
+import type { CellBundle, CellSeries, CoverLayer, Manifest, RasterIndex, TrendLayer, ValidationReport } from '../../shared/contracts.ts'
 import { getJson } from './apiClient.ts'
 
 export const signoApi = {
@@ -14,6 +15,9 @@ export const signoApi = {
 
   getCellSeries: (variableId: string, cellId: string, signal?: AbortSignal): Promise<CellSeries> =>
     getJson<CellSeries>(apiPaths.series(variableId, cellId), signal),
+
+  /** Every variable's series and trend row of one cell, in one file (the area viewer). */
+  getCellBundle: (cellId: string, signal?: AbortSignal): Promise<CellBundle> => getJson<CellBundle>(apiPaths.cell(cellId), signal),
 
   // Optional files: only request them when manifest.extras says the API serves them.
   getCover: (signal?: AbortSignal): Promise<CoverLayer> => getJson<CoverLayer>(apiPaths.cover(), signal),

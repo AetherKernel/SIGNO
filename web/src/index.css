@@ -5,7 +5,17 @@
  * Source Serif 4 / Source Sans 3 / JetBrains Mono, balanced type scale (presentation mode = wide scale),
  * 8 px spacing unit, 10 px radius, one motion moment (scan sweep on variable change).
  * Layout (2026-11-15): top bar with four views; the Map view is a filter panel and the map; the cell viewer is a dialog over the map.
+ * Fonts (2026-11-15, P-015): served by the site itself from the Fontsource packages (SIL Open Font License 1.1), not from
+ * Google Fonts. Vite copies the woff2 files into /assets with hashed names; each file covers one script (unicode-range), so
+ * the browser downloads only the scripts a page uses. Source Serif 4 is the variable cut with the optical-size axis (opsz).
  */
+@import '@fontsource-variable/source-serif-4/opsz.css';
+@import '@fontsource/source-sans-3/400.css';
+@import '@fontsource/source-sans-3/600.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
+@import '@fontsource/jetbrains-mono/700.css';
+
 :root {
   /* Colour roles (WCAG AA checked for text on --bg, --surface and --raised) */
   --bg: #eef1ee;
@@ -32,7 +42,7 @@
   --puor-5: #542788;
 
   /* Type */
-  --f-display: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --f-display: 'Source Serif 4 Variable', 'Source Serif 4', Georgia, 'Times New Roman', serif;
   --f-body: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --f-data: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
   --t-caption: 0.6875rem; /* 11 */

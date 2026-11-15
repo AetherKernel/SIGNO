@@ -1,4 +1,5 @@
-// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-14. Reviewed and owned by team AETHER.
+// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-14 (per-cell files added 2026-11-15). Reviewed
+// and owned by team AETHER.
 //
 // Backend entry point: reads the selected data source, validates it against the contract and publishes the
 // read-only API v1 as static JSON under public/api/v1 (served by Vite in development and by Vercel in
@@ -12,6 +13,7 @@ import { API_BASE_PATH, apiPaths } from '../shared/apiPaths.ts'
 import { API_VERSION } from '../shared/contracts.ts'
 import type { CellSeries, CoverLayer, Manifest, RasterIndex, TrendLayer, ValidationReport, ZonesReport } from '../shared/contracts.ts'
 import { computeAnnual } from './annual.ts'
+import { CellBundleCollector } from './cellBundle.ts'
 import { computeSemesters } from './periods.ts'
 import { createDataSource } from './sources/index.ts'
 import type { SourceTrendLayer } from './sources/types.ts'
@@ -52,6 +54,7 @@ async function main(): Promise<void> {
 
   let files = 0
   let firstLayer: SourceTrendLayer | null = null
+  const cellBundles = new CellBundleCollector()
   for (const variable of variables) {
     const layer = await source.getTrendLayer(variable.id)
     validateTrendLayer(layer, variable, region)
@@ -69,6 +72,7 @@ async function main(): Promise<void> {
     write(apiPaths.trends(variable.id), trendLayer)
     files += 1
 
+    const trendRows = new Map(layer.cells.map((c) => [c.cellId, c]))
     for (const [cellId, points] of Object.entries(series)) {
       const cellSeries: CellSeries = {
         apiVersion: API_VERSION,
@@ -81,8 +85,15 @@ async function main(): Promise<void> {
         annual: computeAnnual(points, variable.semesterAggregation),
       }
       write(apiPaths.series(variable.id, cellId), cellSeries)
+      cellBundles.add(cellSeries, trendRows.get(cellId) ?? null)
       files += 1
     }
+  }
+
+  // One file per cell for the area viewer: the series and trend rows above, regrouped (nothing new is computed).
+  for (const bundle of cellBundles.bundles(source.status, variables.map((v) => v.id))) {
+    write(apiPaths.cell(bundle.cellId), bundle)
+    files += 1
   }
 
   // Optional extras (tree cover, validation report, raster index): published only when the source has them.

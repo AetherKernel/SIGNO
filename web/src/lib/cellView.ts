@@ -7,7 +7,7 @@
 
 import type {
   AnnualValue,
-  CellSeries,
+  CellYearlySeries,
   CellTrend,
   CoverCell,
   CoverLayer,
@@ -188,7 +188,7 @@ export function coverRows(cover: CoverLayer, cell: CoverCell | null): MeasureRow
   ]
 }
 
-// Monthly variables: the yearly value comes from CellSeries.annual (mean or total of the 12 months, by the backend).
+// Monthly variables: the yearly value comes from CellSeries.annual (served in the per-cell file) (mean or total of the 12 months, by the backend).
 
 const DRIFT_IDS = new Set(['ndvi', 'evi', 'lst_day'])
 const WORDS: Record<string, [string, string]> = {
@@ -204,7 +204,7 @@ export function yearlyUnit(variable: Variable): string {
   return variable.units === 'unitless' ? '' : variable.units.replace(/\/month$/, '')
 }
 
-export function annualByYear(series: CellSeries | null): Map<number, AnnualValue> {
+export function annualByYear(series: CellYearlySeries | null): Map<number, AnnualValue> {
   return new Map((Array.isArray(series?.annual) ? series.annual : []).map((a) => [a.year, a]))
 }
 
@@ -213,7 +213,7 @@ export function shortName(variable: Variable): string {
   return /\(([^)]+)\)/.exec(variable.name)?.[1] ?? variable.name
 }
 
-export function seriesRow(variable: Variable, slot: Slot<CellSeries>): MeasureRow {
+export function seriesRow(variable: Variable, slot: Slot<CellYearlySeries>): MeasureRow {
   const kind = variable.semesterAggregation === 'sum' ? 'total' : 'mean'
   const unit = yearlyUnit(variable)
   const startYear = yearOf(variable.period.start)
