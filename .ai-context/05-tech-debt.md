@@ -23,9 +23,30 @@
 | P-027 | Done (15 Nov) | Trend test decisions, answered by the team | The trend test is the solution itself: under the Space Apps AI rule only the team may choose it (P-002) | Answers recorded in `docs/plan-tests-tendencia.md` (section 2) and implemented as ADR-006. Questions the answers do not cover are open in P-029 |
 | P-028 | High | Team confirmation of ADR-006 | Alexis recorded the decision on 15 Nov. José and Kiara have not yet confirmed it | Each of them confirms ADR-006, including the parameters delegated to Claude (listed there). Then ADR-006 is confirmed by the whole team |
 | P-029 | High | Gaps in the trend test before submission | Not in the answers or in V1–V4: the comparison with NASA Giovanni (P-007, C3); a confidence interval for the slope (the team kit asks to show uncertainty; only p-values and V1–V2 are shown); the grid answer (A3: 1° is used, not recorded) | The team decides. Giovanni needs the Giovanni web tool. Not started |
+| P-030 | High | Frontend: the area summary hides significant trends | `buildSummary` in `web/src/lib/cellView.ts` keeps only the first 3 significant trends (`.slice(0, 3)`), then counts only the "no clear trend" ones. In square r12c16 it drops the temperature rise (+0.58 °C per decade) and says "3 other measures show no clear trend", so 1 of the 7 tested measures disappears from the summary. Found in the data review of 15 Nov | José's direction: name every significant trend; if there is no room, the summary names the first ones and an "Others" dropdown lets the reader choose which measures to see. Keep the order (falling first) and count the hidden ones ("and 1 more clear trend"). Owner: José (front) |
+| P-031 | Medium | Frontend: map legend at phone width and dark mode | At 375 px the legend under the map ends 8 px below the screen (its numbers are cut) and the Leaflet credit covers its title. In dark mode the "no significant trend" squares use `var(--surface)`, which is dark there, so they weigh more than the coloured squares | Give the legend bar room under the credit (or move the credit) at phone width; use a light neutral for the dotted squares in both themes, or a token decided by José. Check in light and dark at 375 px |
+| P-032 | Medium | Frontend: wording that does not match what the app does | Cross-checks says a place opens "in the tree cover view", but it opens the tree cover loss map. The Method view prints the pipeline text "in unitless per decade" for NDVI and EVI. The area viewer subtracts NDVI and EVI between 2001 and 2025 although 2021–2025 are satellite drift years (labelled, but used in the difference) | Fix the Cross-checks sentence in `ValidationPanel.tsx`. Ask Alexis to change the method text in the pipeline (`trends.py`), or format it in the UI. The team decides whether drift years count in the A-to-B difference or are left out like suspect years |
 
 ## Done
 
+- 2026-11-15: the trend legend shows when its ends are clipped. The colour scale ends at the 90th percentile of the
+  significant slopes, so stronger squares took the end colour without saying so (rainfall: scale ±428.03, a square at
+  −524.19; NDVI: ±0.016 against −0.052). `MapLegend.tsx` now marks a clipped end with "≤" or "≥" and, under the bar,
+  gives the real range of the coloured squares; `makeTrendPaint` (`trendMap.ts`) passes that range. Approved by José.
+  Verified on `build:real` (102 tests, layers, lint) for six of the seven trend measures (all but EVI) against the
+  JSON files, in light and dark, at 375 px.
+
+- 2026-11-15: blank page when the map mounts with no size. If the map container measured 0 px (page or pane hidden
+  while loading) or less than the frame padding (48 × 96 px), Leaflet computed a NaN zoom and threw `Invalid LatLng
+  (NaN, NaN)`; the error was not caught, so React unmounted the whole app.
+  - **Fix**, approved by José (option A): `TrendMap.tsx` fits the region only when the container has room. Until then
+    it sets a provisional view, and the existing `ResizeObserver` fits the region once the container has a size.
+  - **Verified** on the real-data build (`build:real`, 102 tests, layers, lint):
+    - the app renders in a 0 × 0 and a 40 × 40 iframe, with no console errors;
+    - growing the iframe from 0 to 900 × 650 frames the region;
+    - 375 px in light and dark: region framed, no horizontal scroll.
+  - **Not covered:** no error boundary around the map. Another map failure would still blank the app (option B, not
+    applied).
 - 2026-11-15: trend test applied (ADR-006, `pipeline/trends.py`, step 8). Mann-Kendall on yearly values per 1° cell and
   per zone, Sen's slope, Benjamini-Hochberg FDR per variable, α = 0.05. D1 drift check: r = 0.85 for NDVI and EVI, so
   both end in 2020. Results and V1–V4 in `pipeline/README.md` (*Trend test*). Written: `web/server/data/trends/`,

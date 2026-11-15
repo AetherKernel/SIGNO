@@ -1,4 +1,5 @@
-// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15. Reviewed and owned by team AETHER.
+// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15 (legend range passed through, 2026-11-15).
+// Reviewed and owned by team AETHER.
 //
 // The Map view (?view=map): a filter panel on the left and the map, nothing else. Map types: tree cover, tree cover loss
 // and burned area (yearly, from cover.json) and trend (one measure at a time, from trends/{id}.json or from the cover
@@ -150,6 +151,7 @@ export function MapScreen({ manifest, cover, validation }: Props) {
           name: trendOption.name,
           slopeUnits: trendOption.slopeUnits,
           maxAbs: trendInfo?.maxAbs ?? 0,
+          range: trendInfo?.range ?? null,
           pending: trendInfo?.pending ?? false,
         }
       : null

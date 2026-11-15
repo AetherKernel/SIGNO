@@ -1,4 +1,5 @@
-// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15. Reviewed and owned by team AETHER.
+// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15; clipped trend ends ("≤", "≥") and the real
+// range of the coloured squares added 2026-11-15. Reviewed and owned by team AETHER.
 //
 // Legend of the map, one per map type. The title is a sentence with its units; below it one swatch row, end labels and
 // the extra keys (no data, none, dotted). Colour is never the only cue: the labels, the dots and the hatch carry the
@@ -15,8 +16,10 @@ export interface TrendLegendInfo {
   name: string
   /** Units of the slope, already "per decade" (Variable.slopeUnits). */
   slopeUnits: string
-  /** Largest |slope|: the classes are symmetric around zero. */
+  /** End of the colour scale (90th percentile of |significant slopes|): the classes are symmetric around zero. */
   maxAbs: number
+  /** Real lowest and highest slope of the coloured squares; slopes beyond ±maxAbs take the end colour. */
+  range: { min: number; max: number } | null
   /** The trend test has no result for any square. */
   pending: boolean
 }
@@ -152,6 +155,10 @@ export function MapLegend({ mapType, year, trend, compact = false }: Props) {
   const breaks = legendBreaks(maxAbs)
   const name = trend?.name ?? 'the measure'
   const units = trend?.slopeUnits ?? 'per decade'
+  // The scale ends at ±maxAbs so typical slopes show; say so when real squares go beyond it ("≤ −428.03").
+  const range = trend?.range ?? null
+  const clippedLow = range !== null && range.min < -maxAbs
+  const clippedHigh = range !== null && range.max > maxAbs
   return (
     <section className={compact ? 'legend compact' : 'legend'} aria-labelledby={titleId}>
       <h3 id={titleId} className="legend-title">
@@ -165,19 +172,31 @@ export function MapLegend({ mapType, year, trend, compact = false }: Props) {
       <div
         className="legend-bar"
         role="img"
-        aria-label={`Six colour classes from ${formatSigned(-maxAbs)} to ${formatSigned(maxAbs)} ${units}: orange falls, purple rises`}
+        aria-label={`Six colour classes from ${clippedLow ? 'at most ' : ''}${formatSigned(-maxAbs)} to ${clippedHigh ? 'at least ' : ''}${formatSigned(maxAbs)} ${units}: orange falls, purple rises`}
       >
         {Array.from({ length: SLOPE_CLASSES }, (_, k) => (
           <i key={k} style={{ background: `var(--puor-${k})` }} />
         ))}
       </div>
       <div className="legend-ticks" aria-hidden="true">
-        <span>{formatSigned(breaks[0])}</span>
+        <span>
+          {clippedLow ? '≤ ' : ''}
+          {formatSigned(breaks[0])}
+        </span>
         <span>0</span>
-        <span>{formatSigned(breaks[SLOPE_CLASSES])}</span>
+        <span>
+          {clippedHigh ? '≥ ' : ''}
+          {formatSigned(breaks[SLOPE_CLASSES])}
+        </span>
       </div>
       {!compact && (
         <>
+          {range && (
+            <p className="small muted">
+              Coloured squares range from {formatSigned(range.min)} to {formatSigned(range.max)} (same units).
+              {(clippedLow || clippedHigh) && ' Squares beyond the ends of the scale take the end colour.'}
+            </p>
+          )}
           {!trend?.pending && <Key icon={<Dotted />}>Dotted: no significant trend</Key>}
           <Key icon={<Hatch />}>Hatched: not tested</Key>
           <p className="small muted">

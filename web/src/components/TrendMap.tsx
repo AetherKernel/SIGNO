@@ -1,5 +1,6 @@
 // AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-14; redesigned 2026-11-15; tree cover, loss, burned and
-// transparent cells with country borders added 2026-11-15. Reviewed and owned by team AETHER.
+// transparent cells with country borders added 2026-11-15; guard against a zero-size container added 2026-11-15.
+// Reviewed and owned by team AETHER.
 //
 // The map (ADR-005). Leaflet draws NASA GIBS imagery underneath; the 1-degree cells are an SVG overlay that React renders
 // into Leaflet's SVG layer. The SVG uses Web Mercator y-units so cells line up with the imagery at every zoom.
@@ -105,11 +106,20 @@ export function TrendMap(props: Props) {
 
     // Room around the region, with extra space at the bottom for the readout.
     const frame: L.FitBoundsOptions = { paddingTopLeft: [24, 24], paddingBottomRight: [24, 72], animate: false }
-    const fitRegion = () => map.setMinZoom(map.getBoundsZoom(bounds, false, L.point(48, 96)))
+    const padding = L.point(48, 96)
+    // Leaflet derives the zoom from the container's size. With no room for the padding (0 px while the page or its pane
+    // is hidden, or a container smaller than the padding) it computes NaN and throws, which blanked the whole app. So the
+    // region is fitted only when there is room; until then a provisional view keeps the map valid, and the
+    // ResizeObserver below fits the region as soon as the container has a size.
+    const hasRoom = () => container.clientWidth > padding.x && container.clientHeight > padding.y
+    const fitRegion = () => {
+      if (hasRoom()) map.setMinZoom(map.getBoundsZoom(bounds, false, padding))
+    }
     fitRegion()
     const start = initialViewRef.current
     if (start) map.setView([start.lat, start.lon], Math.max(start.zoom, map.getMinZoom()))
-    else map.fitBounds(bounds, frame)
+    else if (hasRoom()) map.fitBounds(bounds, frame)
+    else map.setView(bounds.getCenter(), 3, { animate: false })
 
     // Outside the region the imagery stays visible under a veil (context, not focus), and the region's edge is drawn.
     // Pan and zoom stay inside the region (maxBounds + minZoom above). The region is the API's bounding box until the
@@ -152,7 +162,7 @@ export function TrendMap(props: Props) {
     const resize = new ResizeObserver(() => {
       map.invalidateSize()
       fitRegion()
-      if (!touchedRef.current) map.fitBounds(bounds, frame)
+      if (!touchedRef.current && hasRoom()) map.fitBounds(bounds, frame)
     })
     resize.observe(container)
 
