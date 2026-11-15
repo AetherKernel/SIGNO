@@ -1,4 +1,5 @@
-// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-14. Reviewed and owned by team AETHER.
+// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-14 (CellBundle added 2026-11-15). Reviewed and
+// owned by team AETHER.
 //
 // SIGNO data contract (API v1). This file is the single source of truth shared by the backend (`server/`) and the
 // frontend (`src/`). It holds types and constants only: no logic, no imports.
@@ -181,6 +182,32 @@ export interface CellSeries {
   /** Calendar years computed by the backend from `points` (never in the browser). Chronological, first to last year of the series. */
   annual: AnnualValue[]
 }
+
+/**
+ * GET /api/v1/cells/{cellId}.json (added 2026-11-15): what the area viewer shows first about one cell, in one file.
+ * For each variable that has a series for this cell: the yearly values of series/{variableId}/{cellId}.json and the
+ * cell's row of trends/{variableId}.json. It replaces one request per variable and the download of every trend layer
+ * just to read one row. The monthly points stay in the series file (loaded only when the viewer asks for them).
+ * Published by the backend from the same validated data; it adds no value of its own.
+ */
+export interface CellBundle {
+  apiVersion: typeof API_VERSION
+  cellId: string
+  dataStatus: DataStatus
+  /** By variable id, in the manifest's variable order. A variable without a series for this cell is absent. */
+  variables: Record<string, CellBundleVariable>
+}
+
+export interface CellBundleVariable {
+  units: string
+  /** Same as CellSeries.annual. */
+  annual: AnnualValue[]
+  /** This cell's row of the variable's trend layer; null when the layer has no row for it. */
+  trend: CellTrend | null
+}
+
+/** The yearly part of a CellSeries: what the area viewer reads from the per-cell file. */
+export type CellYearlySeries = Pick<CellSeries, 'variableId' | 'cellId' | 'units' | 'annual'>
 
 /**
  * One calendar year of one cell and variable, aggregated with the variable's `semesterAggregation`.

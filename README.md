@@ -39,7 +39,7 @@ SIGNO/
 
 The backend reads the data through a swappable source, validates it against the shared contract and publishes a
 read-only, versioned **static API** (`/api/v1/manifest.json`, `/api/v1/trends/{variable}.json`,
-`/api/v1/series/{variable}/{cell}.json`, and the optional `cover.json`, `validation.json`, `zones.json` and
+`/api/v1/series/{variable}/{cell}.json`, `/api/v1/cells/{cell}.json`, and the optional `cover.json`, `validation.json`, `zones.json` and
 `rasters.json`). The frontend only talks to that API; the country borders are a static file. The live site is built from
 the pipeline export (`npm run build:real`, `dataStatus: real`); `npm run build` keeps clearly labelled **synthetic
 sample data** for development. The pipeline's export format is in
@@ -201,7 +201,7 @@ Next Generation, MODIS Terra Corrected Reflectance (true colour) and MODIS Terra
 
 **Software and fonts.** Map engine: [Leaflet](https://leafletjs.com) (BSD-2-Clause). Data colour scale: ColorBrewer
 PuOr (Cynthia Brewer, Penn State). Fonts under the SIL Open Font License: Source Serif 4, Source Sans 3 (Adobe) and
-JetBrains Mono (JetBrains).
+JetBrains Mono (JetBrains), served by the site itself from the [Fontsource](https://fontsource.org) packages.
 
 ## Use of AI
 

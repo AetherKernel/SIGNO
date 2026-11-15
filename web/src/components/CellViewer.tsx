@@ -1,4 +1,5 @@
-// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15. Reviewed and owned by team AETHER.
+// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15 (one data file per square, same day). Reviewed
+// and owned by team AETHER.
 //
 // The cell viewer (UX spec section 3): a dialog over the map that tells what happened in one 1° square, in plain words.
 // A native <dialog> opened with showModal() gives the focus trap, the inert background and Esc. Closing (Esc, Close
@@ -8,7 +9,7 @@
 // each monthly variable, with B minus A), small yearly charts, the team's trend result for each measure, exact values and
 // links. Every number is published by the backend; the browser formats them and subtracts two of them (B minus A).
 // Data: cover.json and validation.json arrive through props; the series and trend row of each monthly variable load
-// here through useCellProfile (each file on its own, so one failure only blanks its own rows).
+// here through useCellProfile, from the square's one API file (cells/{cellId}.json, since 2026-11-15).
 
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { API_BASE_PATH, apiPaths } from '../../shared/apiPaths.ts'
@@ -296,6 +297,11 @@ function CellContent({ cell, manifest, cover, validation, titleId, summaryId, he
             <details className="cv-menu">
               <summary className="btn">Download this area’s data (JSON)</summary>
               <ul>
+                <li>
+                  <a href={`${API_BASE_PATH}/${apiPaths.cell(cell.cellId)}`} target="_blank" rel="noreferrer">
+                    All measures of this area (one file)
+                  </a>
+                </li>
                 {variables.map((v) => (
                   <li key={v.id}>
                     <a href={seriesUrl(v.id)} target="_blank" rel="noreferrer">

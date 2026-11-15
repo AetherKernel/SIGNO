@@ -11,7 +11,7 @@ API (`/api/v1/…`) and one static file (the country borders). It never runs the
 | Area | State |
 |---|---|
 | Interface | Four views: the map (filters, squares, area viewer), Trends, Cross-checks, and Method & sources. The trend test is applied (ADR-006): the Trend type of the map, the zone trends and the trust checks are published with the pipeline data |
-| Checks | 102 backend unit tests, lint, layer check, type check, mock and real builds, and a local serve of `/`, the manifest and the optional files |
+| Checks | 105 backend unit tests, lint, layer check, type check, mock and real builds, and a local serve of `/`, the manifest and the optional files |
 | Live site | Real data: Vercel builds with `npm run build:real` (pipeline export) since 2026-11-15 |
 | Not built | Raster overlays (P-024); the forest-context charts and the small multiples of the Trends view (P-026) |
 | Not done yet | Browser check at 375 px, in dark mode, with the keyboard and in the console (P-025) |
@@ -29,13 +29,16 @@ warning).
 | `npm run build` | sample | Publishes the API, checks layers, runs tests and type check, builds the site |
 | `npm run build:real` | pipeline export | Same as `build`, with the pipeline export |
 | `npx vite preview` | last build | Serves the production build on http://localhost:4173 |
-| `npm test` | none | 102 backend unit tests in six files |
+| `npm test` | none | 105 backend unit tests in seven files |
 | `npm run lint` | none | oxlint |
 
 Each run replaces `web/public/api/v1/` (git-ignored), so the last command decides which data the local site serves.
 
-Internet is needed for the NASA GIBS map tiles and the Google Fonts. Without it the trend and tree cover squares still
-work, the map shows a warning, and the fonts fall back to system fonts.
+Internet is needed only for the NASA GIBS map tiles. The fonts are served by the site itself (Fontsource packages, SIL
+OFL 1.1). Without internet the trend and tree cover squares still work and the map shows a warning.
+
+Caching (`vercel.json`): build files under `/assets/` for a year (their names change with each build), API files for an
+hour plus a day of background refresh, `/data/` for a day.
 
 ## Check the views locally
 
@@ -111,7 +114,8 @@ The browser reads only the API. `web/server/buildApi.ts` publishes it from one o
 |---|---|---|---|
 | `/api/v1/manifest.json` | `Manifest` | always | data status, region, variables with their products, `slopeUnits` and `trendYears`, `extras` (cover, validation, rasters, zones, borders) |
 | `/api/v1/trends/{variable}.json` | `TrendLayer` | always | per cell: slope per decade, raw p-value, `significant` (after the correction), Sen line; the method; summary counts |
-| `/api/v1/series/{variable}/{cell}.json` | `CellSeries` | always | monthly points, six-month `semesters`, calendar years `annual` |
+| `/api/v1/series/{variable}/{cell}.json` | `CellSeries` | always | monthly points, six-month `semesters`, calendar years `annual`; the area viewer loads it only for "Show monthly values" |
+| `/api/v1/cells/{cell}.json` | `CellBundle` | always | per variable: `units`, yearly `annual` and the cell's `trend` row; the one file the area viewer loads when a square opens |
 | `/api/v1/cover.json` | `CoverLayer` | `extras.cover` | yearly Hansen and MODIS tree cover, Hansen loss, burned area, flags; per cell `trends` for loss and MODIS tree cover; `trendMethod` |
 | `/api/v1/validation.json` | `ValidationReport` | `extras.validation` | descriptive cross-checks per zone and documented cases (no p-values there); `trendChecks` (drift check D1, checks V1–V4) |
 | `/api/v1/zones.json` | `ZonesReport` | `extras.zones` | per zone: yearly values, lowest and highest month per year, zone trend (no correction), cell counts |
@@ -204,7 +208,7 @@ discovery rate 5 %). Satellite drift years (NDVI, EVI, daytime temperature after
 | P-029 | Comparison with NASA Giovanni, and a confidence interval for the slope (not in the product yet) |
 | P-013 | Land cover from MapBiomas: not added (a data decision with Alexis) |
 | P-014 | Crop to the real Amazon boundary (after P-008) |
-| P-015, P-016 | Self-host the fonts; place names over the map (the country borders are drawn since 15 Nov, the labels are not) |
+| P-016 | Place names over the map (the country borders are drawn since 15 Nov, the labels are not) |
 
 Tracking: [`.ai-context/05-tech-debt.md`](../.ai-context/05-tech-debt.md).
 

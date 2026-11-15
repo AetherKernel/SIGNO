@@ -1,91 +1,72 @@
-// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15. Reviewed and owned by team AETHER.
+// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15; one file per square (cells/{cellId}.json)
+// instead of one series file per variable plus every trend layer, 2026-11-15. Reviewed and owned by team AETHER.
 //
-// Data of the cell viewer: for one square, the series file of every monthly variable (its yearly values) and that
-// square's trend result from each variable's trend layer. Each file loads on its own, so one failed file only blanks
-// its own rows (with a Retry), never the whole viewer. Series requests are cancelled when the square changes; the trend
-// layers (the same files the map uses) are shared and kept for the session. Nothing is computed here.
+// Data of the cell viewer: for one square, the yearly values of every monthly variable and that square's trend result
+// for each variable. Both come from the square's one API file, published by the backend from the same
+// validated series and trend layers. A variable missing from the file only blanks its own rows; a failed file shows a
+// Retry. The request is cancelled when the square changes. Nothing is computed here.
 
 import { useCallback, useEffect, useState } from 'react'
-import type { CellSeries, CellTrend, TrendLayer } from '../../shared/contracts.ts'
+import type { CellBundle, CellTrend, CellYearlySeries } from '../../shared/contracts.ts'
 import { signoApi } from '../services/signoApi.ts'
 
 /** One file: loading, loaded, or failed with a message. */
 export type Slot<T> = { state: 'loading' } | { state: 'ready'; data: T } | { state: 'error'; message: string }
 
 export interface CellProfile {
-  /** Monthly series and yearly values of this square, by variable id. */
-  series: Record<string, Slot<CellSeries>>
+  /** Yearly values of this square, by variable id (the monthly points load on demand, from the series file). */
+  series: Record<string, Slot<CellYearlySeries>>
   /** This square's row of each variable's trend layer (null = the layer has no row for it), by variable id. */
   trends: Record<string, Slot<CellTrend | null>>
-  /** Load the failed files again. */
+  /** Load the square's file again after an error. */
   retry: () => void
 }
 
-const layers = new Map<string, Promise<TrendLayer>>()
-
-function loadLayer(variableId: string): Promise<TrendLayer> {
-  let layer = layers.get(variableId)
-  if (!layer) {
-    layer = signoApi.getTrendLayer(variableId)
-    layers.set(variableId, layer)
-    layer.catch(() => layers.delete(variableId))
-  }
-  return layer
-}
-
-interface State {
-  key: string
-  series: Record<string, Slot<CellSeries>>
-  trends: Record<string, Slot<CellTrend | null>>
-}
+type Loaded = { key: string } & ({ state: 'ready'; data: CellBundle } | { state: 'error'; message: string })
 
 const message = (error: unknown) => (error instanceof Error ? error.message : 'Could not load the data.')
 
+/** The variable's yearly values in the square's file, or null when the file has none for it. */
+function seriesOf(bundle: CellBundle, variableId: string): CellYearlySeries | null {
+  const v = bundle.variables[variableId]
+  return v ? { variableId, cellId: bundle.cellId, units: v.units, annual: v.annual } : null
+}
+
 export function useCellProfile(cellId: string | null, variableIds: string[]): CellProfile {
   const [attempts, setAttempts] = useState(0)
-  const [state, setState] = useState<State>({ key: '', series: {}, trends: {} })
-  const ids = variableIds.join(',')
-  const key = cellId ? `${cellId}|${ids}` : ''
-
-  const patch = useCallback(
-    (key: string, kind: 'series' | 'trends', id: string, slot: Slot<CellSeries> | Slot<CellTrend | null>) =>
-      setState((current) => {
-        const base = current.key === key ? current : { key, series: {}, trends: {} }
-        return { ...base, [kind]: { ...base[kind], [id]: slot } }
-      }),
-    [],
-  )
+  const [loaded, setLoaded] = useState<Loaded | null>(null)
+  const key = cellId ? `${cellId}|${attempts}` : ''
 
   useEffect(() => {
     if (!cellId) return
     const controller = new AbortController()
-    let active = true // answers that arrive after the square changed are ignored
-    const put = (kind: 'series' | 'trends', id: string, slot: Slot<CellSeries> | Slot<CellTrend | null>) => {
-      if (active) patch(key, kind, id, slot)
-    }
-    for (const id of ids.split(',').filter(Boolean)) {
-      signoApi
-        .getCellSeries(id, cellId, controller.signal)
-        .then((data) => put('series', id, { state: 'ready', data }))
-        .catch((error: Error) => {
-          if (error.name !== 'AbortError') put('series', id, { state: 'error', message: message(error) })
-        })
-      loadLayer(id)
-        .then((layer) => put('trends', id, { state: 'ready', data: layer.cells.find((c) => c.cellId === cellId) ?? null }))
-        .catch((error: Error) => put('trends', id, { state: 'error', message: message(error) }))
-    }
-    return () => {
-      active = false
-      controller.abort()
-    }
-    // `key` identifies the square and the variables; `attempts` re-runs the loads after a Retry.
-  }, [key, attempts]) // eslint-disable-line react-hooks/exhaustive-deps
+    signoApi
+      .getCellBundle(cellId, controller.signal)
+      .then((data) => setLoaded({ key, state: 'ready', data }))
+      .catch((error: Error) => {
+        if (error.name !== 'AbortError') setLoaded({ key, state: 'error', message: message(error) })
+      })
+    return () => controller.abort()
+    // `key` identifies the square and the attempt (a Retry loads the file again).
+  }, [key]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // A Retry loads this square's files again (the files are small and the browser caches the ones that worked).
   const retry = useCallback(() => setAttempts((n) => n + 1), [])
 
-  const current = state.key === key
-  const slots = <T,>(source: Record<string, Slot<T>>): Record<string, Slot<T>> =>
-    Object.fromEntries(variableIds.map((id) => [id, (current ? source[id] : undefined) ?? { state: 'loading' as const }]))
-  return { series: slots(state.series), trends: slots(state.trends), retry }
+  const current = loaded !== null && loaded.key === key ? loaded : null
+  const series: Record<string, Slot<CellYearlySeries>> = {}
+  const trends: Record<string, Slot<CellTrend | null>> = {}
+  for (const id of variableIds) {
+    if (!current) {
+      series[id] = { state: 'loading' }
+      trends[id] = { state: 'loading' }
+    } else if (current.state === 'error') {
+      series[id] = { state: 'error', message: current.message }
+      trends[id] = { state: 'error', message: current.message }
+    } else {
+      const s = seriesOf(current.data, id)
+      series[id] = s ? { state: 'ready', data: s } : { state: 'error', message: 'This area has no series for this measure.' }
+      trends[id] = { state: 'ready', data: current.data.variables[id]?.trend ?? null }
+    }
+  }
+  return { series, trends, retry }
 }

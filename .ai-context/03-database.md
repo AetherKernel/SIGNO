@@ -61,6 +61,7 @@ erDiagram
 | | `complete` | boolean | True only with all six months |
 | | `changeVsPreviousYear` | number \| null | Absolute difference (variable units, never a percentage) vs the same half one year earlier. Only when both are complete |
 | CellSeries | `annual[]` | AnnualValue | Calendar years computed by the backend from `points` (`web/server/annual.ts`). `value` is the mean of the valid months ("mean") or their total ("sum", only when complete); `complete` only with all 12 months. Used by the area viewer (the trend test works from the monthly values in the pipeline) |
+| CellBundle (`cells/{cellId}.json`, 2026-11-15) | `variables` | Record<variableId, {units, annual, trend}> | Per cell, for each variable with a series: the same `annual` as CellSeries and the cell's row of the trend layer (`trend`, CellTrend or null). Regrouped by `web/server/cellBundle.ts`; no new value. The area viewer loads this file; the monthly `points` stay in the series file |
 | CoverLayer | `years`, `lossYears`, `burnedYears` | number[] | Years of the tree cover arrays (2000–2025), of the loss arrays (2001–2025) and of the burned arrays (2001–2025) |
 | | `definitions` | Record<string, string> | Plain-language definition of each measure |
 | | `flags` | {source, year, note}[] | Known problems, e.g. the suspect MOD44B 2025 |
