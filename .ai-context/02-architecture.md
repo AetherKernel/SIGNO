@@ -32,23 +32,54 @@ flowchart LR
 |---|---|---|---|
 | Contract | `web/shared/` | Data contract types (`contracts.ts`) and the API route map (`apiPaths.ts`). No logic | Nothing |
 | Backend | `web/server/` | Data source port and adapters (`sources/`), contract validation (`validate.ts`), business rules such as the summary counts (`summary.ts`), API publisher (`buildApi.ts`) | `shared/`, Node built-ins |
-| Frontend | `web/src/` | `services/` (the only HTTP code), `hooks/` (data and URL state), `components/` + `App.tsx` (views only: no `fetch`, no API client), `lib/` (formatting and colours) | `shared/` |
+| Frontend | `web/src/` | `services/` (the only HTTP code), `hooks/` (data and URL state), `components/` + `App.tsx` (views only: no `fetch`, no API client), `lib/` (formatting, colour classes, URL view state, base map config) | `shared/`, `leaflet` |
 
 **Data source switch.** `SIGNO_DATA_SOURCE=mock` (default) or `files` (reads `SIGNO_DATA_DIR`, default
 `web/server/data/`). It is the only change needed when Alexis's export arrives; the export format is in
 `web/server/data/README.md`. Mock data is flagged `dataStatus: "mock"` end to end, and the UI shows a "Sample data"
 banner.
 
-**Frontend routes.** One route, `/`. View state lives in the query string: `?variable=<variableId>&cell=<cellId>`,
-so any view can be shared as a link.
+**Frontend routes.** One route, `/`. View state lives in the query string, so any view can be shared as a link:
+`variable`, `cell`, `filter` (`significant` · `decreasing` · `increasing`), `compare=1`, `base` (base map:
+`truecolor` · `ndvi` · `none`; Blue Marble when absent) and, once the user moves the map, `z`, `lat`, `lon`. Old links
+with only `variable` and `cell` still work.
 
 ## Components
 
 | Component | Folder | State |
 |---|---|---|
-| Web app (React 19 + Vite 8 + TypeScript, ADR-003) | `web/src/` | Variable picker, trend grid map with a "only significant" toggle, summary counts, monthly series of a selected cell. Runs on mock data |
+| Web app (React 19 + Vite 8 + TypeScript, ADR-003) | `web/src/` | One working screen (see "Interface" below): case file panel, trend map over NASA GIBS imagery (Leaflet, ADR-005), area file panel, method and sources drawer. Runs on mock data |
 | API publisher (ADR-004) | `web/server/` | Publishes API v1 (06) from the mock or the pipeline export, after validating it |
 | Data processing and analysis | not created yet | Alexis's exploration; method and variables pending (05, P-002) |
+
+### Interface (redesign of 2026-11-15)
+
+Design decisions by José on 2026-11-14 (concept "analysis room", case-file vocabulary, expert audience; references
+NASA Worldview for the map and Global Forest Watch for the area panel). The tokens live in `web/src/index.css`.
+
+| Piece | File | What it does |
+|---|---|---|
+| Top bar | `components/TopBar.tsx`, `DataStatusBanner.tsx` | Case name, "Sample data" notice while `dataStatus` is `mock`, Method, Sources, Data (manifest JSON), Present (wide type scale) |
+| Case file (left) | `CaseFilePanel.tsx`, `VariablePicker.tsx`, `TrendSummaryPanel.tsx`, `MapLegend.tsx` | Variable, summary counts that filter the map, period comparison switch, base map, legend |
+| Map (centre) | `TrendMap.tsx`, `lib/basemaps.ts` | GIBS imagery underneath, trend grid as an SVG overlay in Web Mercator, cropped to the region box, zoom limited to the layer's deepest level, live coordinates, scan sweep on variable change |
+| Area file (right) | `CellDetails.tsx`, `SeriesChart.tsx` | Verdict stamp, trend, p, α, valid months, monthly series (gaps kept, optional second period shaded), copy link, series JSON |
+| Brief | `CaseBrief.tsx` | Shown on a first visit without parameters: the team's question and three counts |
+| Method drawer | `MethodDrawer.tsx` | Method, sources (products, DOI, region, base map) and limits, all from the API or tab 01 |
+
+Rules kept by the views:
+- **Data and verdicts.** They show the backend's verdict and counts as they are; nothing statistical is computed in
+  the browser.
+- **Colours.** Data colours are ColorBrewer PuOr: orange decreases, purple increases. Not significant is marked by
+  dots, not by colour alone.
+- **Accessibility:**
+  - The grid is one Tab stop; arrow keys move between cells, Enter or Space opens one.
+  - The drawer is a native `<dialog>`.
+  - Contrast is AA in light and dark.
+  - `prefers-reduced-motion` turns off the sweep.
+- **Layout.** Desktop is a fixed screen with scrolling panels. Below 768 px the page scrolls: map, coordinate
+  strip, area file, then case file.
+- **Colours in SVG.** They are set with `style`, never as SVG attributes, because `fill="var(--x)"` does not resolve
+  and paints black.
 
 Commands, run inside `web/`: `npm install`, `npm run dev` (publishes the API, then starts Vite), `npm run build`
 (API, layer check, type check, Vite build), `npm run lint`, `npm run api:build`, `npm run check:layers`.

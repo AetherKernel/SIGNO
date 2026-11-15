@@ -9,9 +9,20 @@
 | P-005 | Medium | Final AI-usage statement | Space Apps AI rule | Update README "Use of AI" before submission |
 | P-009 | High | Replace the mock with Alexis's pipeline export | The site shows synthetic data (flagged "Sample data") | Pipeline writes `web/server/data/` per its README; build with `SIGNO_DATA_SOURCE=files` locally, then set it in Vercel and redeploy (ADR-004) |
 | P-007 | High | Validation plan for the trend test | Judges reward validated methods (2025 "Best Use of Data" winner); Validity criterion | Show the method does not invent trends where there are none, finds trends already documented in the literature, and matches NASA Giovanni for the same area; the team defines the concrete checks |
+| P-012 | High | Period comparison values in the area file | The redesign shades a second period in the series, but the mean of each period and their difference must not be computed in the browser | Pipeline or backend publishes the period aggregates; agree the contract change with Alexis. Temperature is compared as an absolute difference, never as a percentage |
+| P-013 | Medium | Land cover context in the area file (MapBiomas Amazonía) | José wants Global Forest Watch-style data for the selected area; MapBiomas is 30 m, annual 1985–2023, CC BY-SA, not NASA data | Data decision with Alexis; cite it as complementary and respect share-alike |
+| P-014 | High | Crop the map to the real Amazon boundary | Today the crop follows the approximate bounding box (ADR-005) | After P-008, add the boundary geometry to the contract and use it for the crop and the edge |
+| P-015 | Low | Self-host the fonts | The UI loads Source Serif 4, Source Sans 3 and JetBrains Mono from Google Fonts (SIL OFL); a venue without internet or privacy rules would fall back to system fonts | Put the woff2 files and their licence in `web/public/fonts` |
+| P-016 | Low | Borders and place names over the map | GIBS `Reference_Labels_15m` answered HTTP 500 and painted the map black, so it was removed | Retry another reference layer or a vector boundary once P-008 is decided |
+| P-017 | Medium | Fill the Drive design-system core with the decided tokens | Hybrid route chosen by José: 01 essence, 04 colour, 05 type in `tokens.json`, with `css_producto` pointing at `web/src/index.css` | Run `ds-generar` and `ds-validar` in Estudio-Contenido |
 
 ## Done
 
+- 2026-11-15: interface redesign.
+  - **Map:** one working screen with a GIBS map cropped to the region (ADR-005).
+  - **Panels:** a case file panel, an area file panel, and a method and sources drawer.
+  - **Design tokens:** José's decisions of 2026-11-14.
+  - **Verified:** build, lint, keyboard access, light and dark mode, 375 px, and no console errors.
 - 2026-11-14: repository cloned outside Drive and documented (ADR-001).
 - 2026-11-14: P-001, repository made public (Space Apps links must open without login).
 - 2026-11-14: layered architecture with static API v1 and swappable data source (ADR-004). Verified in production

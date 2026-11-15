@@ -99,3 +99,41 @@ Vercel runs no long processes and the link must never sleep (ADR-002). The pipel
 - Vercel must use Node 22.x (`package.json` engines) so the build can run the TypeScript backend.
 - The production build runs the contract validation, the layer check and the unit tests. If any of them fails,
   the deploy fails and the previous version stays live.
+
+## ADR-005: Leaflet map with NASA GIBS imagery, cropped to the study region
+
+- **Date:** 2026-11-15
+- **Status:** Accepted (José)
+
+**Context.** José chose NASA Worldview as the reference for the map, with scroll zoom and SIGNO's own interface on
+top. Worldview's embed mode cannot be customised and is disabled for non-NASA sites unless Earthdata enables it.
+Worldview draws its imagery from NASA GIBS, which serves WMTS tiles without credentials. This was checked on
+2026-11-14 against GetCapabilities. José also asked that the map show only the Amazon.
+
+**Decision.**
+
+- The map uses **Leaflet 1.9** (`leaflet`, plus `@types/leaflet` for development). José approved it as the only new
+  dependency. Leaflet was chosen over OpenLayers and MapLibre GL because it is light and simple.
+- Base maps are GIBS layers, configured in `web/src/lib/basemaps.ts`:
+  - Blue Marble Next Generation (default);
+  - MODIS Terra true colour, two days ago;
+  - MODIS Terra NDVI, monthly;
+  - none.
+
+  Each layer's deepest level is the map's zoom limit, and the UI says so.
+- The trend grid is an SVG overlay rendered by React in Web Mercator units, so it lines up with the imagery.
+- **Crop to the region.**
+  - Outside the region box is covered with the map background, and the region edge is drawn.
+  - The map cannot be panned or zoomed out beyond the region.
+  - The box is the API's `region.bbox` until the team picks the boundary (P-008).
+
+**Consequences.**
+
+- About 140 kB more JavaScript (Leaflet). The page loads images from `gibs.earthdata.nasa.gov`; if GIBS fails, the
+  trend cells still work and the map says so.
+- Imagery is context only: the analysed data still comes from the API. GIBS is credited on the map and in the
+  README.
+- The GIBS borders and labels overlay was tried and dropped: `Reference_Labels_15m` answered HTTP 500 for several
+  tiles, and the failed tiles painted the map black (05, P-016).
+- When P-008 is decided, the crop must follow the real boundary. That needs the geometry in the contract (05, P-014).
+

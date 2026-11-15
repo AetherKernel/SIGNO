@@ -53,6 +53,15 @@ with its DOI or product page.
 
 To be completed as datasets are chosen. Every NASA product used is cited here with its full reference.
 
+**Base map imagery (context only, not analysed).** We acknowledge the use of imagery provided by services from NASA's
+Global Imagery Browse Services (GIBS), part of NASA's Earth Science Data and Information System (ESDIS): Blue Marble
+Next Generation, MODIS Terra Corrected Reflectance (true colour) and MODIS Terra NDVI (monthly), served at
+<https://gibs.earthdata.nasa.gov>.
+
+**Software and fonts.** Map engine: [Leaflet](https://leafletjs.com) (BSD-2-Clause). Data colour scale: ColorBrewer
+PuOr (Cynthia Brewer, Penn State). Fonts under the SIL Open Font License: Source Serif 4, Source Sans 3 (Adobe) and
+JetBrains Mono (JetBrains).
+
 ## Use of AI
 
 The team uses AI tools to speed up the work, following the Space Apps rules: AI is not used to come up with how to
@@ -60,7 +69,9 @@ solve the challenge, and design decisions are made by the team.
 
 - **Claude (Anthropic), via Claude Code:** set up this repository's structure and documentation, and wrote the web
   app's code to the team's architecture brief: the shared contract, the backend (data sources, validation, API
-  publisher), the frontend and the synthetic mock data. Each of those files starts with a header comment saying so.
+  publisher), the frontend and the synthetic mock data. It also implemented the interface redesign of 15 Nov 2026
+  following the visual decisions made by José (concept, palette, type, layout, user journey). Each of those files
+  starts with a header comment saying so.
   The statistical method is not AI-designed: it is the team's decision and is not implemented yet.
 - **Gemini (Google):** literature and data-source exploration.
 

@@ -1,22 +1,36 @@
-// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-14. Reviewed and owned by team AETHER.
+// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-14; redesigned 2026-11-15. Reviewed and owned
+// by team AETHER.
 //
-// Monthly time series of one cell. Missing months (null) break the line instead of being invented.
+// Monthly time series of one cell. Missing months (null) break the line instead of being invented. The optional
+// comparison only shades a second date range; it computes nothing.
 
-import type { CellSeries, Variable } from '../../shared/contracts.ts'
+import { useState, type PointerEvent } from 'react'
+import type { CellSeries, Period, Variable } from '../../shared/contracts.ts'
 
 const W = 640
-const H = 200
-const PAD = { left: 48, right: 12, top: 12, bottom: 28 }
+const H = 240
+const PAD = { left: 52, right: 12, top: 14, bottom: 30 }
 
-export function SeriesChart({ series, variable }: { series: CellSeries; variable: Variable }) {
+interface Props {
+  series: CellSeries
+  variable: Variable
+  /** When set, the second period is shaded. */
+  compare: [Period, Period] | null
+}
+
+export function SeriesChart({ series, variable, compare }: Props) {
+  const [hover, setHover] = useState<number | null>(null)
   const values = series.points.map((p) => p.value).filter((v): v is number => v !== null)
-  if (values.length === 0) return <p className="muted">No valid months for this area.</p>
+  if (values.length === 0) return <p className="muted small">No valid months for this area.</p>
 
   const min = Math.min(...values)
   const max = Math.max(...values)
   const span = max - min || 1
-  const x = (i: number) => PAD.left + (i / Math.max(1, series.points.length - 1)) * (W - PAD.left - PAD.right)
-  const y = (v: number) => PAD.top + (1 - (v - min) / span) * (H - PAD.top - PAD.bottom)
+  const lo = min - span * 0.05
+  const hi = max + span * 0.05
+  const n = series.points.length
+  const x = (i: number) => PAD.left + (i / Math.max(1, n - 1)) * (W - PAD.left - PAD.right)
+  const y = (v: number) => PAD.top + (1 - (v - lo) / (hi - lo)) * (H - PAD.top - PAD.bottom)
 
   const segments: string[] = []
   let current = ''
@@ -30,33 +44,66 @@ export function SeriesChart({ series, variable }: { series: CellSeries; variable
   })
   if (current) segments.push(current)
 
+  const yTicks = [0, 1, 2, 3].map((k) => lo + ((hi - lo) * k) / 3)
+  const digits = span < 1 ? 2 : 1
   const years = series.points
-    .map((p, i) => ({ year: p.month.slice(0, 4), i, isJanuary: p.month.endsWith('-01') }))
-    .filter((t) => t.isJanuary && Number(t.year) % 5 === 0)
-  const unit = variable.units === 'unitless' ? '' : ` ${variable.units}`
-  const missing = series.points.length - values.length
+    .map((p, i) => ({ year: Number(p.month.slice(0, 4)), i, january: p.month.endsWith('-01') }))
+    .filter((t) => t.january && t.year % 5 === 0)
+  const missing = n - values.length
+  const unit = variable.units === 'unitless' ? 'NDVI' : variable.units
+  const bandStart = compare ? series.points.findIndex((p) => p.month >= compare[1].start) : -1
+
+  const onMove = (event: PointerEvent<SVGSVGElement>) => {
+    const box = event.currentTarget.getBoundingClientRect()
+    const px = ((event.clientX - box.left) / box.width) * W
+    const i = Math.round(((px - PAD.left) / (W - PAD.left - PAD.right)) * (n - 1))
+    setHover(i >= 0 && i < n ? i : null)
+  }
+  const point = hover !== null ? series.points[hover] : null
 
   return (
     <figure className="chart">
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Monthly ${variable.name}, ${series.points.length} months`}>
-        <line className="axis" x1={PAD.left} y1={H - PAD.bottom} x2={W - PAD.right} y2={H - PAD.bottom} />
-        <text className="tick" x={PAD.left - 6} y={y(max) + 4} textAnchor="end">
-          {max.toFixed(2)}
-        </text>
-        <text className="tick" x={PAD.left - 6} y={y(min) + 4} textAnchor="end">
-          {min.toFixed(2)}
-        </text>
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        role="img"
+        aria-label={`Monthly ${variable.name} for this area, ${series.points[0]?.month} to ${series.points[n - 1]?.month}, ${missing} missing months`}
+        onPointerMove={onMove}
+        onPointerLeave={() => setHover(null)}
+      >
+        {bandStart > 0 && (
+          <>
+            <rect className="band" x={x(bandStart)} y={PAD.top} width={x(n - 1) - x(bandStart)} height={H - PAD.top - PAD.bottom} />
+            <line className="band-edge" x1={x(bandStart)} x2={x(bandStart)} y1={PAD.top} y2={H - PAD.bottom} />
+          </>
+        )}
+        {yTicks.map((t) => (
+          <g key={t}>
+            <line className="grid" x1={PAD.left} x2={W - PAD.right} y1={y(t)} y2={y(t)} />
+            <text className="tick" x={PAD.left - 6} y={y(t) + 3} textAnchor="end">
+              {t.toFixed(digits)}
+            </text>
+          </g>
+        ))}
         {years.map((t) => (
-          <text key={t.year} className="tick" x={x(t.i)} y={H - 8} textAnchor="middle">
+          <text key={t.year} className="tick" x={x(t.i)} y={H - 10} textAnchor="middle">
             {t.year}
           </text>
         ))}
         {segments.map((d, i) => (
           <path key={i} className="line" d={d} />
         ))}
+        {point && point.value !== null && hover !== null && (
+          <>
+            <circle className="hover-dot" cx={x(hover)} cy={y(point.value)} r={4} />
+            <text className="tick" x={Math.min(W - PAD.right, Math.max(PAD.left + 60, x(hover)))} y={PAD.top - 2} textAnchor="middle">
+              {point.month}: {point.value.toFixed(digits + 1)}
+            </text>
+          </>
+        )}
       </svg>
-      <figcaption className="muted">
-        Monthly values{unit} · {missing} missing month{missing === 1 ? '' : 's'} (e.g. clouds) shown as gaps
+      <figcaption>
+        Monthly values ({unit}) · {missing} missing month{missing === 1 ? '' : 's'} (for example clouds) shown as gaps
+        {compare ? ` · shaded: ${compare[1].start} to ${compare[1].end}` : ''}
       </figcaption>
     </figure>
   )

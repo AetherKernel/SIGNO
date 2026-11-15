@@ -1,4 +1,5 @@
-// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-14. Reviewed and owned by team AETHER.
+// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-14; restyled 2026-11-15. Reviewed and owned
+// by team AETHER.
 
 import type { Variable } from '../../shared/contracts.ts'
 
@@ -11,7 +12,7 @@ interface Props {
 export function VariablePicker({ variables, value, onChange }: Props) {
   return (
     <fieldset className="picker">
-      <legend>1. Choose what to investigate</legend>
+      <legend className="kicker">Variable</legend>
       {variables.map((variable) => (
         <label key={variable.id} className={variable.id === value ? 'option selected' : 'option'}>
           <input
@@ -24,8 +25,8 @@ export function VariablePicker({ variables, value, onChange }: Props) {
           <span className="option-name">{variable.name}</span>
           <span className="option-description">{variable.description}</span>
           <span className="option-source">
-            {variable.product.kind === 'satellite' ? 'Satellite observation' : 'Model output'} · NASA{' '}
-            {variable.product.shortName} v{variable.product.version} ({variable.product.provider})
+            {variable.product.kind === 'satellite' ? 'Satellite' : 'Model'} · {variable.product.shortName} v
+            {variable.product.version} · {variable.product.provider}
           </span>
         </label>
       ))}
