@@ -53,11 +53,8 @@
 .tr-head > div:first-child {
   display: grid;
   gap: var(--u);
-  max-width: 62ch;
-}
-
-.tr-lead {
-  max-width: 62ch;
+  /* Takes the free space next to the zone selector (no line-length cap). */
+  flex: 1 1 28rem;
 }
 
 .tr-seg {
@@ -708,13 +705,11 @@
 
 .tr-findings p {
   margin: 0;
-  max-width: 68ch;
 }
 
 .tr-foot {
   display: grid;
   gap: var(--u);
-  max-width: 80ch;
 }
 
 /* Loading */

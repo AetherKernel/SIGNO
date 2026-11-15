@@ -79,10 +79,6 @@
 }
 
 /* Body */
-.cv-summary {
-  max-width: 70ch;
-}
-
 .cv-section {
   display: grid;
   gap: calc(var(--u) * 1.5);
@@ -91,10 +87,6 @@
 
 .cv-section > h3 {
   font-size: var(--t-h3);
-}
-
-.cv-case {
-  max-width: 70ch;
 }
 
 .cv-link {

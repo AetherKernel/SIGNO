@@ -148,8 +148,10 @@ for multiple tests. The count of squares uses the corrected verdicts. Satellite 
 **Layout.** Desktop: filters on the left, the map in the centre, the area viewer as a dialog. Below 768 px the map
 bar (Filters button and compact legend) sits above the map, and the filters open as a sheet. The other views are one
 column. Views that are not the map load on demand (`React.lazy`). The Map view is full width. Trends, Cross-checks and
-Method & sources share one rule (`.page` in `index.css`): a centred 1200 px container with the same side margins, and
-running text (`p`, `li`, `dd`) limited to 75 characters per line, aligned left; tables and charts use the full width.
+Method & sources share one rule (`.page` in `index.css`): a centred 1200 px container with the same side margins. Text,
+tables and charts use the container's full width: no line-length cap on paragraphs anywhere in the site, also not in the
+area viewer (José's decision, 15 Nov). In the Trends header the title block takes the free space next to the zone
+selector (`flex: 1 1 28rem`).
 
 **Colours in SVG.** They are set with `style`, never as SVG attributes, because `fill="var(--x)"` does not resolve
 and paints black.

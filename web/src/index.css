@@ -249,9 +249,8 @@ body {
 }
 
 /* Reading views (Trends, Cross-checks, Method & sources): one rule for all three, so the side margins and the title
-   do not move when switching tabs. Same 1200 px centred container; long running text keeps a readable line length
-   (75 characters) and stays aligned to the left edge; tables and charts use the full width. The Map view is full width
-   and does not use .page. */
+   do not move when switching tabs. Same 1200 px centred container; text, tables and charts use its full width (no
+   per-paragraph line-length cap, José's decision). The Map view is full width and does not use .page. */
 .page {
   width: 100%;
   max-width: 1200px;
@@ -264,12 +263,6 @@ body {
 
 .page > h1 {
   font-size: var(--t-h1);
-}
-
-.page p,
-.page li,
-.page dd {
-  max-width: 75ch;
 }
 
 .page-section {

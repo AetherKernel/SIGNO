@@ -50,8 +50,10 @@
     Spanish, on load and after changing years, variable and opacity. No stale text and no errors. Lint and types pass.
 - 2026-11-15: one layout rule for Trends, Cross-checks and Method & sources (José). They had different widths (1200,
   1040 and 760 px), so the margins jumped between tabs. Now all three share the 1200 px container and the same margins;
-  running text is limited to 75 characters per line. Checked at 1440, 1024 and 375 px, with no horizontal scroll. The
-  Map view stays full width.
+  text uses the full width. Checked at 1440, 1024 and 375 px, with no horizontal scroll. The Map view stays full width.
+  - **Line-length caps removed (José).** A first version capped paragraphs at 75 characters; José removed it. The same
+    kind of cap was also removed everywhere else: Trends header, lead, findings and footnote (62, 68 and 80 characters)
+    and the area viewer's summary and case text (70 characters). No `max-width` in `ch` is left in the CSS.
 - 2026-11-15: a tab opened across a deploy no longer goes blank.
   - **Problem:** opening Trends, Cross-checks or Method after a deploy asked for a file of the previous build (404), and
     the page went blank. Seen in production.
