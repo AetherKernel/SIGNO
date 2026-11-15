@@ -66,7 +66,7 @@ export function TopBar({ manifest, view, hrefFor, onNavigate, onLang }: Props) {
               lang={l.id}
               className="langbtn"
               aria-pressed={lang === l.id}
-              aria-label={l.name}
+              aria-label={`${l.label} - ${l.name}`}
               title={l.name}
               onClick={() => onLang(l.id)}
             >
