@@ -204,6 +204,14 @@ Next Generation, MODIS Terra Corrected Reflectance (true colour) and MODIS Terra
 under the SIL Open Font License: Source Serif 4, Source Sans 3 (Adobe) and JetBrains Mono (JetBrains), served by the site
 itself from the [Fontsource](https://fontsource.org) packages.
 
+## Next steps
+
+Planned after the hackathon (details in `.ai-context/05-tech-debt.md`):
+
+- **Language by region:** offer the interface language from the visitor's region, with a confirmation and a selector in
+  the footer. Today the switch is manual, and English is the default.
+- **Spanish data texts:** publish variable names, method descriptions and notes in Spanish from the data pipeline.
+
 ## Use of AI
 
 The team uses AI tools to speed up the work, following the Space Apps rules: AI is not used to come up with how to

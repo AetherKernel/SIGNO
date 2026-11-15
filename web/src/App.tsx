@@ -6,18 +6,21 @@
 // Map is the default, also for old links without ?view=. Trends, Cross-checks and Method are loaded on demand.
 // Data comes only from hooks (src/hooks) → service (src/services) → API v1 (published by server/).
 
-import { lazy, Suspense, useEffect, useRef } from 'react'
+import { Suspense, useEffect, useRef } from 'react'
 import type { Hotspot, ValidationCase } from '../shared/contracts.ts'
 import { MapScreen } from './components/MapScreen.tsx'
 import { TopBar } from './components/TopBar.tsx'
+import { ViewLoadError } from './components/ViewLoadError.tsx'
 import { useCover, useManifest, useValidation } from './hooks/useSignoData.ts'
 import { useUrlParams } from './hooks/useUrlParam.ts'
 import { LangContext, parseLang, translator, type Lang } from './lib/i18n.ts'
+import { lazyView } from './lib/lazyView.ts'
 import { APP_VIEWS, parseAppView, type AppView } from './lib/viewState.ts'
 
-const TrendsView = lazy(() => import('./components/TrendsView.tsx').then((m) => ({ default: m.TrendsView })))
-const ChecksView = lazy(() => import('./components/ChecksView.tsx').then((m) => ({ default: m.ChecksView })))
-const MethodView = lazy(() => import('./components/MethodView.tsx').then((m) => ({ default: m.MethodView })))
+// Loaded on demand; after a deploy an open tab reloads once to fetch the new files (lib/lazyView.ts).
+const TrendsView = lazyView(() => import('./components/TrendsView.tsx').then((m) => m.TrendsView), ViewLoadError)
+const ChecksView = lazyView(() => import('./components/ChecksView.tsx').then((m) => m.ChecksView), ViewLoadError)
+const MethodView = lazyView(() => import('./components/MethodView.tsx').then((m) => m.MethodView), ViewLoadError)
 
 function App() {
   const manifest = useManifest()

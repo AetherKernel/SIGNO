@@ -74,6 +74,11 @@ the decimal point. Text that comes from the API (variable names, method descript
 the pipeline publishes it in Spanish (05). Icons: Tabler Icons (`@tabler/icons-react`, MIT), so far only in the
 language switch.
 
+**Views loaded on demand.** Trends, Cross-checks and Method & sources load their own files the first time they open
+(`web/src/lib/lazyView.ts`). File names change with each deploy, so a tab opened before a deploy asks for files that no
+longer exist. In that case the page reloads once to get the new files. If loading fails again within a minute,
+`components/ViewLoadError.tsx` shows a message and a reload button instead of a blank page (no reload loop).
+
 The app has four views, chosen with `?view=` (default `map`). The top bar links them, and each link works in a new tab.
 
 | View | `?view=` | What it shows |

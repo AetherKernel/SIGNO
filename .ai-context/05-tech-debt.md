@@ -31,6 +31,12 @@
 
 ## Done
 
+- 2026-11-15: a tab opened across a deploy no longer goes blank.
+  - **Problem:** opening Trends, Cross-checks or Method after a deploy asked for a file of the previous build (404), and
+    the page went blank. Seen in production.
+  - **Fix:** `lib/lazyView.ts` reloads once; on a second failure `ViewLoadError` shows a message with a reload button.
+  - **Verified** on `build:real` with the Method file removed: one reload, then the message (no loop); with the file
+    back, the reload button opens the view. No console errors.
 - 2026-11-15: Spanish interface (ADR-007).
   - **Default and switch:** English by default; ES in the top bar (`?lang=es`).
   - **What was checked:** every view and the area viewer, in Spanish and in English.
