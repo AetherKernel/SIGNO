@@ -1,4 +1,5 @@
-// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15. Reviewed and owned by team AETHER.
+// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15; range of the coloured squares for the legend
+// added 2026-11-15. Reviewed and owned by team AETHER.
 //
 // The trend map: which measures can be mapped as a trend, and how their cells are painted. A trend comes from the
 // backend only (slope per decade, p-value, "significant" after the false discovery rate correction): the browser
@@ -115,10 +116,18 @@ function legendRange(results: TrendResult[]): number {
   return sig[Math.min(sig.length - 1, Math.floor(0.9 * (sig.length - 1)))]
 }
 
+/** Lowest and highest slope among the coloured (significant, non-zero) squares; null when none is coloured. */
+function coloredRange(results: TrendResult[]): { min: number; max: number } | null {
+  const slopes = results.filter((r) => r.significant && r.slopePerDecade !== null && r.slopePerDecade !== 0).map((r) => r.slopePerDecade as number)
+  return slopes.length === 0 ? null : { min: Math.min(...slopes), max: Math.max(...slopes) }
+}
+
 export interface TrendPaintInfo {
   paint: CellPaint
   /** Legend range (90th percentile of |significant slopes|): the legend is symmetric around zero; larger slopes take the end colour. */
   maxAbs: number
+  /** Real lowest and highest slope of the coloured squares, so the legend can say when its ends are clipped. */
+  range: { min: number; max: number } | null
   /** No cell was tested. */
   pending: boolean
 }
@@ -152,5 +161,5 @@ export function makeTrendPaint(option: TrendOption, results: Map<string, TrendRe
     describe: (cell) => `${formatCoordinates(cell.lat, cell.lon)}: ${readout(cell)}`,
     readout,
   }
-  return { paint, maxAbs, pending: noneTested(results) }
+  return { paint, maxAbs, range: coloredRange([...results.values()]), pending: noneTested(results) }
 }

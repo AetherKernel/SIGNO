@@ -150,7 +150,9 @@ Four views, chosen with `?view=` (map, trends, checks, method). The top bar link
 **Map types.** **Tree cover** (default): Hansen canopy cover, six green classes (0–20 to 90–100 % of the square). The map
 uses Hansen; MODIS (MOD44B) is in the area viewer and the cross-checks. **Tree cover loss** and **Burned area**: one year at
 a time. **Trend**: NDVI, EVI, daytime temperature, rainfall, burned area, Hansen tree cover loss and MODIS tree cover, in
-slope colours per decade (orange falling, purple rising). Dotted squares are not significant. Opacity defaults: 55 % for
+slope colours per decade (orange falling, purple rising). Dotted squares are not significant. The colour scale ends at
+the 90th percentile of the significant slopes; when squares go beyond it, the legend marks the end with "≤" or "≥" and
+gives the real range of the coloured squares. Opacity defaults: 55 % for
 tree cover, 70 % for trend, 80 % for loss and burned area (adjustable).
 
 **Area viewer** (a dialog over the map). A summary; the documented-case note (La Pampa, with its 0.05° numbers and the
