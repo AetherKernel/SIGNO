@@ -662,6 +662,14 @@ body {
   max-width: calc(100% - 24px);
 }
 
+/* Touch: the readout's button that opens the square's file (44 px tall, easy to hit). */
+.readout-open {
+  justify-self: start;
+  min-height: 44px;
+  margin-top: 4px;
+  font-family: var(--f-body);
+}
+
 .zoom-note {
   right: 56px;
   top: 12px;

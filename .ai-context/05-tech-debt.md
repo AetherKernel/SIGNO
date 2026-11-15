@@ -31,6 +31,10 @@
 
 ## Done
 
+- 2026-11-15: phones, opening a square (José). The first tap showed the readout and only a second tap opened the file,
+  which was hard to discover. The readout now has an "Open this area's file" button (44 px tall); the second tap still
+  works. Checked at 375 px with a touch tap (readout, button reachable, the file opens and the button goes away) on
+  `build:real` (105 tests); lint and types clean. Mouse and keyboard are unchanged.
 - 2026-11-15: P-033 and two parts of P-035 fixed (José).
   - **P-033:** the area summary no longer drops clear trends. It names the first three (falling first), counts the rest
     and lists them under "Other clear trends". Checked on r12c16 (the temperature rise, +0.58 °C per decade, now

@@ -80,7 +80,7 @@ export function TrendMap(props: Props) {
   const [cursor, setCursor] = useState<{ lat: number; lon: number } | null>(null)
   const [focusId, setFocusId] = useState<string | null>(null)
   const [focused, setFocused] = useState(false)
-  /** Touch: the first tap on a square shows its readout, the second opens it. */
+  /** Touch: the first tap on a square shows its readout with an "Open" button; a second tap also opens it. */
   const [touchId, setTouchId] = useState<string | null>(null)
   const [tileErrorFor, setTileErrorFor] = useState<string | null>(null)
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, '')
@@ -407,9 +407,22 @@ export function TrendMap(props: Props) {
         {readoutCell && (
           <span className="muted">
             {touchCell && readoutCell === touchCell
-              ? t('Tap again to open this area', 'Toca otra vez para abrir esta área')
+              ? t('Open its file with the button, or tap the square again', 'Abre su ficha con el botón, o toca el cuadro otra vez')
               : t('Click to open this area', 'Haz clic para abrir esta área')}
           </span>
+        )}
+        {/* Touch: a visible way to open the square's file, instead of relying on a second tap (José, 15 Nov). */}
+        {touchCell && readoutCell === touchCell && (
+          <button
+            type="button"
+            className="btn primary readout-open"
+            onClick={() => {
+              setTouchId(null)
+              callbacks.current.onSelect(touchCell.cellId)
+            }}
+          >
+            {t('Open this area’s file', 'Abrir la ficha de esta área')}
+          </button>
         )}
       </div>
 

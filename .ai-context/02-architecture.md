@@ -127,6 +127,11 @@ map opens framed on the region; outside it the imagery stays visible under a tra
 space), and pan and zoom stay inside the region (José, 2026-11-15). The scan sweep runs when the layer changes and is
 off with `prefers-reduced-motion`.
 
+**Opening a square.** Mouse: a click opens its file. Keyboard: Tab to the map, arrows, Enter. Touch (`TrendMap.tsx`):
+the first tap shows the square's readout under the map with an **"Open this area's file"** button (44 px); a second tap
+on the same square also opens it. The button was added at José's request (15 Nov): a second tap alone was hard to
+discover on phones.
+
 **Area viewer** (dialog over the map, `CellViewer.tsx`): the summary in one paragraph, which names the first three
 clear trends (falling first) and counts the rest, listed under "Other clear trends" (`buildSummary`,
 `SUMMARY_NAMED_TRENDS`); the documented-case note (La Pampa:
