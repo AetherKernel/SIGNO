@@ -137,3 +137,89 @@ Worldview draws its imagery from NASA GIBS, which serves WMTS tiles without cred
   tiles, and the failed tiles painted the map black (05, P-016).
 - When P-008 is decided, the crop must follow the real boundary. That needs the geometry in the contract (05, P-014).
 
+## ADR-006: Trend test: Mann-Kendall on yearly values
+
+- **Date:** 2026-11-15
+- **Status:** Accepted (team decision, Alexis, 2026-11-15). Confirmation by José and Kiara pending (05, P-028)
+
+**Context.** The trend test is the core of SIGNO: it decides which change is real and which is noise (01). Under the
+Space Apps AI rule the team chooses the method, and the AI assistant only implements what the team decided. The team
+answered the questions of `docs/plan-tests-tendencia.md` (section 2) on 2026-11-15. Where an answer left a parameter
+open, the value comes from the team kit (*Tools* and *Technical Points Judges Will Check*) and was delegated to Claude.
+
+**Decision.**
+
+| Parameter | Value | Source |
+|---|---|---|
+| Variables | All that add information: NDVI, EVI, daytime LST, rainfall, burned area, Hansen tree cover loss (km²), MODIS tree cover (MOD44B) | Team (A1) |
+| Time step | Yearly | Team (A4) |
+| Yearly value | Mean of the 12 months (NDVI, EVI, LST) or total (rainfall, burned area). A year counts only when all 12 months have a value | Team (B2 and the kit) |
+| Seasonality | Not modelled. Per zone and year, the lowest and highest month are published as information | Team (B2) |
+| Test | Mann-Kendall, `pymannkendall.original_test`, per 1° cell and per zone | Team (B1) |
+| Trend size | Sen's slope × 10, per decade, in the variable's yearly units | Team kit (delegated) |
+| Autocorrelation | Original test, unless more than 20 % of a variable's tested cells have lag-1 residual autocorrelation (see pre-registered rules); then Hamed–Rao | Team (B3); rule written in the specification |
+| Multiple testing | Benjamini–Hochberg false discovery rate (`statsmodels`, `fdr_bh`) over all tested cells of one variable. The two cover measures are corrected separately | Team kit (delegated) |
+| Significance level | α = 0.05. A cell is significant when its adjusted q is below α; the published `pValue` is the raw p | Team kit (delegated) |
+| Minimum data | At least 80 % of the variable's years complete; otherwise `pValue` and slope are null and `significant` is false | Team kit (delegated) |
+| Grid | 1° cells (566 in the Amazon) | Implementation; answer A3 is not recorded (see docs/plan-tests-tendencia.md) |
+
+Periods:
+
+- NDVI and EVI: 2001–2020 (rule D1, below).
+- Daytime LST: 2001–2020 (team rule B1, Terra orbit drift).
+- Rainfall: 2001–2024 (2025 ends in September).
+- Burned area: 2001–2025.
+- Hansen tree cover loss (km²): 2001–2025.
+- MODIS tree cover: 2000–2024 (2025 excluded, rule D2).
+
+Hansen tree cover itself is **not tested**: it cannot rise by construction (regrowth is not counted), so a test on it would be biased.
+
+**Pre-registered rules.** Written down in the team's specification before the first run. File times on 15 Nov 2026
+(local): specification 04:40, configuration 04:42, first run 05:36:
+
+- **Autocorrelation.** Lag-1 autocorrelation of each cell's residuals around the Sen line; a cell has it when its absolute
+  value exceeds 1.96/√n. If more than 20 % of the tested cells of a variable have it, that variable uses the Hamed–Rao
+  modified test.
+- **D1, satellite drift.** Pearson r between the yearly Terra overpass time and the NDVI/EVI anomaly, 2015–2025, at zone
+  level. If |r| ≥ 0.5, that variable's test ends in 2020. Measured: r = 0.85 for NDVI and for EVI (n = 11), so both end in 2020.
+- **D2.** MODIS tree cover 2025 is excluded (flagged suspect).
+- **D3.** The NDVI/EVI reliability values 0 and 1 are kept as exported.
+- **D4.** Night LST is not exported; no action.
+
+**Zone level.** Mann-Kendall and Sen on the yearly series of the whole Amazon, Brazil and Peru, with no multiple-testing
+correction (three zones). The UI and the README say so.
+
+**Validation (own code, team answer C).** Results go to `web/server/data/validation.json` under `trendChecks`.
+
+- V1, false positives: the years of every cell are shuffled (fixed seed, 20 repetitions), and the whole procedure runs again.
+- V2, detection: a linear trend of the median size of the significant cells is added to the shuffled series.
+- V3, known places: the cross-check hotspots and the La Pampa cell r08c09 (loss expected to rise, MODIS cover to fall).
+- V4, zones: the zone tests, with no correction.
+
+The comparison with NASA Giovanni (P-007, C3) is not part of V1–V4 (05, P-029).
+
+**Display.** The map keeps the slope colours (PuOr) and marks non-significant cells with dots (team answer E1).
+
+**Implementation.** `pipeline/trends.py` (step 8), `pipeline/test_trends.py` (7 tests on synthetic series), settings
+`TREND_*` in `pipeline/config.py`. Outputs: `web/server/data/trends/`, `cover.json` (`trends`), `zones.json` and
+`validation.json` (`trendChecks`). API fields: 03 and 06.
+
+**Consequences.**
+
+- The app shows trend results: the Trend type of the map, the Trends view and the area viewer. The browser shows the
+  pipeline's verdicts and never tests, fits or averages.
+- A trend is a pattern in the measurements. No page names a cause. Loss includes fire, logging, mining and clearing.
+- A result that is not significant is not proof of no change: V2 finds the made-up trend in 53–92 % of the cells on
+  average, depending on the variable.
+- Known limits of the method: the Mann-Kendall p-value ignores the gap of a missing year (only burned-area cells have one,
+  per the first run); neighbouring cells are not independent; no confidence interval of the slope is published yet (the
+  kit asks to show uncertainty; 05, P-029).
+- `trends` runs last. Re-running `export_api`, `export_cover` or `validate` removes its results (`pipeline/README.md`).
+- The Colab notebook does not run this step yet (05, P-018).
+- The first run's numbers are in `pipeline/README.md` (*Trend test*). The numbers can change on a re-run, so the validation file is the source.
+
+**AI rule.** The team chose the test family, the variables, the periods, the pre-registered rules and the validation plan.
+The AI did not choose the method. The parameters the team left open are the team kit's values, listed above as
+delegated. Claude wrote `pipeline/trends.py`, `pipeline/test_trends.py` and `pipeline/export_borders.py` (each with a
+header comment) and Claude Opus 5.5 reviewed them. The README (*Use of AI*) declares this.
+

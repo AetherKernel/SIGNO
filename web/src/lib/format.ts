@@ -1,17 +1,36 @@
 // AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-14; redesigned 2026-11-15. Reviewed and owned
-// by team AETHER.
+// by team AETHER (extended 2026-11-15).
 //
 // Presentation helpers only (number formatting, colour classes, date ranges for display). No data access and no
 // statistics here: significance and slopes come from the backend data as they are.
 
-import type { CellTrend, Period, YearMonth } from '../../shared/contracts.ts'
+import type { Period, TrendLayer, Variable, YearMonth } from '../../shared/contracts.ts'
 
 /** Number of colour classes in the diverging scale (ColorBrewer PuOr): 0-2 decrease, 3-5 increase. */
 export const SLOPE_CLASSES = 6
 
-export function formatSlope(slope: number | null, units: string): string {
-  if (slope === null) return 'not enough data'
+/** True when the team's trend test has not been applied to this layer (no cell was tested). Read from the summary. */
+export function isTrendTestPending(layer: TrendLayer): boolean {
+  return layer.summary.cellsTested === 0
+}
+
+/** Unit label for a variable: its own units, or its own name when it is unitless (NDVI, EVI...). */
+export function unitLabel(variable: Variable): string {
+  return variable.units === 'unitless' ? variable.name : variable.units
+}
+
+export function formatSlope(slope: number | null, units: string, testPending = false): string {
+  if (slope === null) return testPending ? 'not computed yet' : 'too few valid months'
   return `${formatSigned(slope)}${unitSuffix(units)} per decade`
+}
+
+/**
+ * A trend slope with the backend's slope units: "−0.012 per decade" (unitless), "+0.3 °C per decade",
+ * "+31 mm per year, per decade". `slopeUnits` is Variable.slopeUnits (it already says "per decade").
+ */
+export function formatTrendSlope(slope: number, slopeUnits: string): string {
+  const units = slopeUnits.replace(/^unitless\s*/, '').trim()
+  return `${formatSigned(slope)} ${units === '' ? 'per decade' : units}`
 }
 
 /** Signed number with a true minus sign and precision that suits small slopes. */
@@ -34,11 +53,11 @@ export function formatPValue(p: number | null): string {
 export function formatCoordinates(lat: number, lon: number, digits = 1): string {
   const ns = lat >= 0 ? 'N' : 'S'
   const ew = lon >= 0 ? 'E' : 'W'
-  return `${Math.abs(lat).toFixed(digits)}°${ns} ${Math.abs(lon).toFixed(digits)}°${ew}`
+  return `${Math.abs(lat).toFixed(digits)}° ${ns}, ${Math.abs(lon).toFixed(digits)}° ${ew}`
 }
 
 /** Largest |slope| in a layer: the legend and colour classes are symmetric around zero. */
-export function maxAbsSlope(cells: CellTrend[]): number {
+export function maxAbsSlope(cells: { slopePerDecade: number | null }[]): number {
   return Math.max(0, ...cells.map((c) => Math.abs(c.slopePerDecade ?? 0)))
 }
 
@@ -90,4 +109,39 @@ export function formatPeriod(period: Period): string {
 
 export function formatYears(period: Period): string {
   return `${period.start.slice(0, 4)}–${period.end.slice(0, 4)}`
+}
+
+/** Percent with one decimal and a non-breaking space, e.g. "23.0 %". */
+export function formatPercent(value: number | null): string {
+  return value === null ? 'no data' : `${value.toFixed(1)} %`
+}
+
+/** Share 0..1 as a whole percent, e.g. 0.584 -> "58 %". */
+export function formatShare(share: number): string {
+  return `${Math.round(share * 100)} %`
+}
+
+export function formatKm2(value: number | null): string {
+  if (value === null) return 'no data'
+  return `${value >= 100 ? Math.round(value).toLocaleString('en-US') : value.toFixed(1)} km²`
+}
+
+/** Points of percent (a difference between two percents): "−22.5 points". */
+export function formatPoints(value: number): string {
+  return `${formatSigned(value)} points`
+}
+
+export type Half = 'H1' | 'H2'
+
+/** "2025-H2" -> { year: 2025, half: "H2" }, or null if the key is malformed. */
+export function parseSemester(key: string): { year: number; half: Half } | null {
+  const match = /^(\d{4})-(H1|H2)$/.exec(key)
+  return match ? { year: Number(match[1]), half: match[2] as Half } : null
+}
+
+export const HALF_NAMES: Record<Half, string> = { H1: 'January to June', H2: 'July to December' }
+
+export function semesterLabel(key: string): string {
+  const s = parseSemester(key)
+  return s ? `${HALF_NAMES[s.half]} ${s.year}` : key
 }

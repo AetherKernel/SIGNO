@@ -1,159 +1,111 @@
-// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-14; redesigned 2026-11-15. Reviewed and owned
-// by team AETHER.
+// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-14; redesigned 2026-11-15; views (?view=) added 2026-11-15.
+// Reviewed and owned by team AETHER.
 //
-// One working screen (the journey approved by José on 2026-11-14): top bar, "Case file" panel, map, "Area file" panel.
-// View state lives in the query string (?variable=&cell=&filter=&z=&lat=&lon=&base=&compare=) so any view is a link.
+// The shell: top bar, four views and the data every view shares. The view lives in the query string (?view=map|trends|checks|
+// method), so any view is a link; changing view pushes one history entry (Back and Forward work) and moves focus to <main>.
+// Map is the default, also for old links without ?view=. Trends, Cross-checks and Method are loaded on demand.
 // Data comes only from hooks (src/hooks) → service (src/services) → API v1 (published by server/).
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { TrendLayer } from '../shared/contracts.ts'
-import { CaseBrief } from './components/CaseBrief.tsx'
-import { CaseFilePanel } from './components/CaseFilePanel.tsx'
-import { CellDetails } from './components/CellDetails.tsx'
-import { MethodDrawer } from './components/MethodDrawer.tsx'
-import { TopBar, type DrawerTab } from './components/TopBar.tsx'
-import { TrendMap } from './components/TrendMap.tsx'
-import { useManifest, useTrendLayer } from './hooks/useSignoData.ts'
-import { useUrlParam } from './hooks/useUrlParam.ts'
-import { basemaps as listBasemaps, isBasemapId } from './lib/basemaps.ts'
-import { parseFilter, parseView, type CellFilter, type MapView } from './lib/viewState.ts'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import type { Hotspot, ValidationCase } from '../shared/contracts.ts'
+import { MapScreen } from './components/MapScreen.tsx'
+import { TopBar } from './components/TopBar.tsx'
+import { useCover, useManifest, useValidation } from './hooks/useSignoData.ts'
+import { useUrlParams } from './hooks/useUrlParam.ts'
+import { APP_VIEWS, parseAppView, type AppView } from './lib/viewState.ts'
+
+const TrendsView = lazy(() => import('./components/TrendsView.tsx').then((m) => ({ default: m.TrendsView })))
+const ChecksView = lazy(() => import('./components/ChecksView.tsx').then((m) => ({ default: m.ChecksView })))
+const MethodView = lazy(() => import('./components/MethodView.tsx').then((m) => ({ default: m.MethodView })))
 
 function App() {
   const manifest = useManifest()
-  const [variableParam, setVariableParam] = useUrlParam('variable')
-  const [cellParam, setCellParam] = useUrlParam('cell')
-  const [filterParam, setFilterParam] = useUrlParam('filter')
-  const [baseParam, setBaseParam] = useUrlParam('base')
-  const [compareParam, setCompareParam] = useUrlParam('compare')
-  const [zParam, setZParam] = useUrlParam('z')
-  const [latParam, setLatParam] = useUrlParam('lat')
-  const [lonParam, setLonParam] = useUrlParam('lon')
-
-  // Read once: the map only uses the URL view to start; afterwards the map owns its view and writes it back.
-  const [initialView] = useState<MapView | null>(() => parseView(zParam, latParam, lonParam))
-  const [briefOpen, setBriefOpen] = useState(() => !variableParam && !cellParam)
-  const [drawer, setDrawer] = useState<{ open: boolean; tab: DrawerTab }>({ open: false, tab: 'method' })
+  const [params, setParams] = useUrlParams()
+  const view = parseAppView(params.get('view'))
   const [present, setPresent] = useState(false)
+  const mainRef = useRef<HTMLElement>(null)
+  const shownView = useRef(view)
 
-  const basemaps = useMemo(() => listBasemaps(), [])
-  const basemap = basemaps.find((b) => b.id === (isBasemapId(baseParam) ? baseParam : 'bluemarble')) ?? basemaps[0]
-  const filter = parseFilter(filterParam)
-  const compare = compareParam === '1'
-
-  const variables = manifest.data?.variables ?? []
-  const variable = variables.find((v) => v.id === variableParam) ?? variables[0] ?? null
-  const layer = useTrendLayer(variable?.id ?? null)
-  // Keep showing the previous layer while the next one loads, so the map (and its zoom) is never torn down.
-  const [lastLayer, setLastLayer] = useState<TrendLayer | null>(null)
-  if (layer.data && layer.data !== lastLayer) setLastLayer(layer.data)
-  const shownLayer = layer.data ?? lastLayer
-  const cell = shownLayer?.cells.find((c) => c.cellId === cellParam) ?? null
+  // Shared by the views: the yearly layer (map, cross-checks) and the cross-check report (hint, cell viewer, cross-checks).
+  const extras = manifest.data?.extras
+  const cover = useCover(extras?.cover === true)
+  const validation = useValidation(extras?.validation === true)
 
   useEffect(() => {
     document.documentElement.classList.toggle('present', present)
   }, [present])
 
-  const closeBrief = useCallback(() => setBriefOpen(false), [])
-  const openDrawer = (tab: DrawerTab) => setDrawer({ open: true, tab })
+  // A new view: move focus to <main> so keyboard and screen reader users start at its content, and name the page.
+  useEffect(() => {
+    document.title = `SIGNO · ${APP_VIEWS.find((v) => v.id === view)?.label ?? 'Map'}`
+    if (shownView.current !== view) {
+      shownView.current = view
+      mainRef.current?.focus({ preventScroll: true })
+    }
+  }, [view])
 
-  // The selected area is kept when the variable changes, so greenness and temperature can be compared in one place.
-  const chooseVariable = (variableId: string) => {
-    setVariableParam(variableId)
-    setBriefOpen(false)
+  const hrefFor = (target: AppView) => {
+    const next = new URLSearchParams(params)
+    next.set('view', target)
+    if (target !== 'map') for (const key of ['cell', 'from', 'to']) next.delete(key)
+    return `?${next.toString()}`
   }
-  const chooseFilter = (next: CellFilter) => setFilterParam(next === 'all' ? null : next)
-  const chooseCell = (cellId: string) => {
-    setCellParam(cellId)
-    setBriefOpen(false)
-  }
-  const onViewChange = useCallback(
-    (view: MapView) => {
-      setZParam(String(Number(view.zoom.toFixed(1))))
-      setLatParam(view.lat.toFixed(2))
-      setLonParam(view.lon.toFixed(2))
-    },
-    [setZParam, setLatParam, setLonParam],
-  )
+  const navigate = (target: AppView) =>
+    setParams(target === 'map' ? { view: target } : { view: target, cell: null, from: null, to: null }, { push: true })
 
-  const period = shownLayer?.period ?? variable?.period ?? null
+  // A hotspot or documented place chosen in the cross-checks: show it on the loss map, in its year, with its square open.
+  const showOnMap = (place: { lat: number; lon: number; cellId: string; year: number }) =>
+    setParams(
+      {
+        view: 'map',
+        map: 'loss',
+        year: String(place.year),
+        cell: place.cellId,
+        z: '6',
+        lat: place.lat.toFixed(2),
+        lon: place.lon.toFixed(2),
+        from: null,
+        to: null,
+      },
+      { push: true },
+    )
+  const flaggedModisYears = (cover.data?.flags ?? []).filter((f) => f.source.toLowerCase() === 'modis').map((f) => f.year)
 
   return (
     <div className="app">
       <TopBar
         manifest={manifest.data}
-        period={period}
+        view={view}
+        hrefFor={hrefFor}
+        onNavigate={navigate}
         present={present}
         onTogglePresent={() => setPresent((p) => !p)}
-        onOpenDrawer={openDrawer}
       />
 
-      {manifest.loading && <p className="muted" style={{ padding: 24 }}>Loading the case…</p>}
-      {manifest.error && (
-        <p className="error" style={{ padding: 24 }}>
-          {manifest.error}
-        </p>
-      )}
+      <main id="main" ref={mainRef} tabIndex={-1} className={`view view-${view}`}>
+        {manifest.loading && <p className="muted page-status">Loading…</p>}
+        {manifest.error && <p className="error page-status">{manifest.error}</p>}
 
-      {manifest.data && variable && (
-        <main className={cell ? 'workspace with-area' : 'workspace'}>
-          <CaseFilePanel
-            variables={variables}
-            variable={variable}
-            layer={shownLayer}
-            layerError={layer.error}
-            filter={filter}
-            compare={compare}
-            basemaps={basemaps}
-            basemap={basemap}
-            regionName={manifest.data.region.name}
-            onVariable={chooseVariable}
-            onFilter={chooseFilter}
-            onCompare={(on) => setCompareParam(on ? '1' : null)}
-            onBasemap={(id) => setBaseParam(id === 'bluemarble' ? null : id)}
-            onOpenMethod={() => openDrawer('method')}
-          />
+        {manifest.data && view === 'map' && <MapScreen manifest={manifest.data} cover={cover} validation={validation} />}
 
-          <div className="map-wrap">
-            {shownLayer ? (
-              <TrendMap
-                layer={shownLayer}
-                region={manifest.data.region}
-                variable={variable}
-                basemap={basemap}
-                filter={filter}
-                selectedCellId={cell?.cellId ?? null}
-                initialView={initialView}
-                onSelect={chooseCell}
-                onViewChange={onViewChange}
+        {manifest.data && view !== 'map' && (
+          <Suspense fallback={<p className="muted page-status">Loading…</p>}>
+            {view === 'trends' && <TrendsView manifest={manifest.data} />}
+            {view === 'checks' && (
+              <ChecksView
+                manifest={manifest.data}
+                validation={validation}
+                flaggedModisYears={flaggedModisYears}
+                onShowHotspot={(h: Hotspot) => showOnMap({ lat: h.lat, lon: h.lon, cellId: h.apiCellId, year: h.peakLossYear })}
+                onShowCase={(place: ValidationCase, peakYear: number) =>
+                  showOnMap({ lat: place.lat, lon: place.lon, cellId: place.apiCellId, year: peakYear })
+                }
               />
-            ) : (
-              <p className="map-overlay map-status">{layer.error ?? 'Loading the trend map…'}</p>
             )}
-            {briefOpen && <CaseBrief layer={shownLayer} dataStatus={manifest.data.dataStatus} onClose={closeBrief} />}
-          </div>
-
-          {cell && shownLayer && (
-            <CellDetails
-              cell={cell}
-              variable={variable}
-              layer={shownLayer}
-              compare={compare}
-              onClose={() => setCellParam(null)}
-              onOpenMethod={() => openDrawer('method')}
-            />
-          )}
-
-          <MethodDrawer
-            open={drawer.open}
-            tab={drawer.tab}
-            manifest={manifest.data}
-            layer={shownLayer}
-            basemap={basemap}
-            onTab={(tab) => setDrawer({ open: true, tab })}
-            onClose={() => setDrawer((d) => ({ ...d, open: false }))}
-          />
-        </main>
-      )}
+            {view === 'method' && <MethodView manifest={manifest.data} coverTrendMethod={cover.data?.trendMethod ?? null} />}
+          </Suspense>
+        )}
+      </main>
     </div>
   )
 }

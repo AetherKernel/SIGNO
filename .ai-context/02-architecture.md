@@ -6,8 +6,8 @@
 |---|---|---|
 | This repo, `C:\Users\DiNiCHi\dev\SIGNO`, remote `github.com/AetherKernel/SIGNO` | Code, notebooks, these docs | Outside Google Drive (ADR-001) |
 | Drive `03 Proyectos IA/SIGNO` | Team documents: research, notes, drafts, design system core | Team only, not code |
-| Drive `03 Proyectos IA/SIGNO/submission` | Submission material in English: demo video, slides, AI-generated images (watermarked), sources of the local data point | Public link, this folder only (same pattern as the 2025 winners) |
-| `data/` in this repo (git-ignored) | Downloaded NASA data | Too large to version; cited in README |
+| Drive `03 Proyectos IA/SIGNO/submission` | Submission material in English: demo video, slides, AI-generated images (watermarked), sources of the opening data point about the Amazon | Public link, this folder only (same pattern as the 2025 winners) |
+| `data/` in this repo (git-ignored except `data/README.md`) | Downloaded data | Too large to version, and some licenses forbid redistribution; `data/README.md` says where to get each file |
 
 ## Layers (ADR-004)
 
@@ -31,58 +31,106 @@ flowchart LR
 | Layer | Folder | Responsibility | May import |
 |---|---|---|---|
 | Contract | `web/shared/` | Data contract types (`contracts.ts`) and the API route map (`apiPaths.ts`). No logic | Nothing |
-| Backend | `web/server/` | Data source port and adapters (`sources/`), contract validation (`validate.ts`), business rules such as the summary counts (`summary.ts`), API publisher (`buildApi.ts`) | `shared/`, Node built-ins |
-| Frontend | `web/src/` | `services/` (the only HTTP code), `hooks/` (data and URL state), `components/` + `App.tsx` (views only: no `fetch`, no API client), `lib/` (formatting, colour classes, URL view state, base map config) | `shared/`, `leaflet` |
+| Backend | `web/server/` | Data source port and adapters (`sources/`), contract validation (`validate.ts`), business rules such as the summary counts (`summary.ts`), the six-month periods (`periods.ts`) and the calendar years (`annual.ts`), API publisher (`buildApi.ts`) | `shared/`, Node built-ins |
+| Frontend | `web/src/` | `services/` (the only HTTP code), `hooks/` (data and URL state), `components/` + `App.tsx` (views only: no `fetch`, no API client), `lib/` (formatting, colour classes, URL view state, base map config, zone trend presentation) | `shared/`, `leaflet` |
 
 **Data source switch.** `SIGNO_DATA_SOURCE=mock` (default) or `files` (reads `SIGNO_DATA_DIR`, default
-`web/server/data/`). It is the only change needed when Alexis's export arrives; the export format is in
-`web/server/data/README.md`. Mock data is flagged `dataStatus: "mock"` end to end, and the UI shows a "Sample data"
+`web/server/data/`; the maps come from `SIGNO_MAPS_DIR`, default `web/public/data/maps/`). The pipeline export is in
+place: `npm run dev:real` and `npm run build:real` use it. The export format is in `web/server/data/README.md`. Mock data is flagged `dataStatus: "mock"` end to end, and the UI shows a "Sample data"
 banner.
 
-**Frontend routes.** One route, `/`. View state lives in the query string, so any view can be shared as a link:
-`variable`, `cell`, `filter` (`significant` · `decreasing` · `increasing`), `compare=1`, `base` (base map:
-`truecolor` · `ndvi` · `none`; Blue Marble when absent) and, once the user moves the map, `z`, `lat`, `lon`. Old links
-with only `variable` and `cell` still work.
+**Frontend routes.** One route, `/`. The view and all the view state live in the query string, so any view can be
+shared as a link:
+
+- `view`: `map` (default) · `trends` · `checks` · `method`. Old links without `view` open the map.
+- On the map: `map` (`cover` · `loss` · `burned` · `trend`; tree cover is the default), `var` (trend variable), `year`,
+  `show` (`all` · `significant` · `decreasing` · `increasing`), `op` (square opacity, 20–100), `borders` (`0` hides the
+  country borders), `base` (`truecolor` · `ndvi` · `none`; Blue Marble when absent), `cell` (the square whose area viewer
+  is open), and `z`, `lat`, `lon` once the user moves the map.
+- In the area viewer: `from` and `to` (the two years compared).
+- On Trends: `zone` (`amazon` · `amazon_brazil` · `amazon_peru`) and `var` (the measure).
+- Legacy links still work: `variable` is read as `var`, `filter` as `show`; `src` and `compare` are dropped (see `MapScreen.tsx`).
 
 ## Components
 
 | Component | Folder | State |
 |---|---|---|
-| Web app (React 19 + Vite 8 + TypeScript, ADR-003) | `web/src/` | One working screen (see "Interface" below): case file panel, trend map over NASA GIBS imagery (Leaflet, ADR-005), area file panel, method and sources drawer. Runs on mock data |
+| Web app (React 19 + Vite 8 + TypeScript, ADR-003) | `web/src/` | Four views (see *Interface* below): the map with its filters and the area viewer, Trends, Cross-checks, and Method & sources. Runs on sample data by default; `dev:real` and `build:real` use the pipeline export |
 | API publisher (ADR-004) | `web/server/` | Publishes API v1 (06) from the mock or the pipeline export, after validating it |
-| Data processing and analysis | not created yet | Alexis's exploration; method and variables pending (05, P-002) |
+| Data pipeline | `pipeline/` | Complete for every source (15 Nov 2026): four monthly products (1,270 monthly files, 2026-11-14), MOD44B, MCD64A1, Hansen and GRACE (`tiles.py`, `hansen.py`, `grace.py`). Outputs: `export_json.py` (zone values → `web/public/data/*.json`), `export_maps.py` (0.05° PNG layers → `web/public/data/maps/`), `export_api.py` (1° API source → `web/server/data/`), `export_cover.py` (`cover.json`), `validate.py` (cross-checks → `validation.json` in both folders), `trends.py` (step 8: the team's trend test, ADR-006; fills the trend results, `zones.json` and `trendChecks`; must run last) and `export_borders.py` (step 9: `web/public/data/borders.json`, independent of the others). Monthly steps: `download.py` (earthaccess, one month at a time, up to 3 tries; reruns skip months already in `data/interim/`) → `clip_clean.py` (clip to the Amazon box, scale, units, checks; writes `data/interim/<PRODUCT>/<YYYY-MM>.nc`). Settings and team decisions in `pipeline/config.py`. Run from the repo root with `.venv` (`pipeline/requirements.txt`). Boundary zips go in `data/raw/boundaries/`. Details: `pipeline/README.md` |
+| Notebooks | `notebooks/` | `signo_pipeline_colab.ipynb` (16 sections, one cell per pipeline step, including `export_cover`) and the conventions in `notebooks/README.md`. Not yet run end to end in Colab, and it does not yet run `trends` or `export_borders`. Colab as the processing environment is not decided, so it is not recorded as an ADR (if adopted, ADR-007; 05, P-018) |
+| Trend analysis | `pipeline/trends.py`, `pipeline/test_trends.py` | Mann-Kendall test on yearly values, Sen's slope, Benjamini-Hochberg FDR, validation V1–V4 (ADR-006). Reads `web/server/data/` and `web/public/data/` |
 
-### Interface (redesign of 2026-11-15)
+**Data flow:** NASA Earthdata and Hansen/UMD (global files and tiles) → `data/raw/` (each file deleted after its step) → `data/interim/` (Amazon
+clip and 0.05° cell statistics, about 1.4–2.6 MB per MODIS month; failed months retried up to 3 times; logs per product in `data/interim/logs/`) → `web/server/data/` (API source: `export_api.py`, `export_cover.py`, `validate.py`, `trends.py`) and `web/public/data/` (JSON, PNG maps, `validation.json`, `borders.json`). Both are meant to be versioned (commit pending, P-023) → Vercel. Only these outputs are published;
+raw data, clips, masks, logs and boundary files (`data/raw/boundaries/`) stay out of git.
 
-Design decisions by José on 2026-11-14 (concept "analysis room", case-file vocabulary, expert audience; references
-NASA Worldview for the map and Global Forest Watch for the area panel). The tokens live in `web/src/index.css`.
+### Interface (views of 15 Nov 2026)
 
-| Piece | File | What it does |
+The app has four views, chosen with `?view=` (default `map`). The top bar links them, and each link works in a new tab.
+
+| View | `?view=` | What it shows |
 |---|---|---|
-| Top bar | `components/TopBar.tsx`, `DataStatusBanner.tsx` | Case name, "Sample data" notice while `dataStatus` is `mock`, Method, Sources, Data (manifest JSON), Present (wide type scale) |
-| Case file (left) | `CaseFilePanel.tsx`, `VariablePicker.tsx`, `TrendSummaryPanel.tsx`, `MapLegend.tsx` | Variable, summary counts that filter the map, period comparison switch, base map, legend |
-| Map (centre) | `TrendMap.tsx`, `lib/basemaps.ts` | GIBS imagery underneath, trend grid as an SVG overlay in Web Mercator, cropped to the region box, zoom limited to the layer's deepest level, live coordinates, scan sweep on variable change |
-| Area file (right) | `CellDetails.tsx`, `SeriesChart.tsx` | Verdict stamp, trend, p, α, valid months, monthly series (gaps kept, optional second period shaded), copy link, series JSON |
-| Brief | `CaseBrief.tsx` | Shown on a first visit without parameters: the team's question and three counts |
-| Method drawer | `MethodDrawer.tsx` | Method, sources (products, DOI, region, base map) and limits, all from the API or tab 01 |
+| Map | `map` | Left: the filters (`MapFilters.tsx`): map type, trend variable and filter, year with play, square opacity, country borders, base map, legend, and a first-visit hint with the La Pampa case. Centre: the map (`TrendMap.tsx`): NASA GIBS imagery under translucent 1° squares, cropped to the region. On phones the filters open as a bottom sheet from the **Filters** button, and the compact legend stays in the bar. Clicking a square opens the **area viewer** |
+| Trends | `trends` | Zone selector (whole Amazon, Brazilian Amazon, Peruvian Amazon), four headline cards (Hansen tree cover, tree cover loss, daytime temperature, rainfall), a table with one row per measure, a detail chart (yearly values, the Sen line, and a thin bar per year for the lowest and highest month), "What this means", and "How the test works and how we checked it" with the trust checks from `trendChecks` |
+| Cross-checks | `checks` | How the two tree cover sources agree, loss against fire, the hotspots and the La Pampa case (MAAP #233). A hotspot or the case opens its square on the map |
+| Method & sources | `method` | How the verdict is reached (method, α, what "significant" means), the method of the cover trends, status, the sources with their DOIs, and the limits |
 
-Rules kept by the views:
-- **Data and verdicts.** They show the backend's verdict and counts as they are; nothing statistical is computed in
-  the browser.
-- **Colours.** Data colours are ColorBrewer PuOr: orange decreases, purple increases. Not significant is marked by
-  dots, not by colour alone.
-- **Accessibility:**
-  - The grid is one Tab stop; arrow keys move between cells, Enter or Space opens one.
-  - The drawer is a native `<dialog>`.
-  - Contrast is AA in light and dark.
-  - `prefers-reduced-motion` turns off the sweep.
-- **Layout.** Desktop is a fixed screen with scrolling panels. Below 768 px the page scrolls: map, coordinate
-  strip, area file, then case file.
-- **Colours in SVG.** They are set with `style`, never as SVG attributes, because `fill="var(--x)"` does not resolve
-  and paints black.
+**Map types** (`?map=`; default tree cover).
 
-Commands, run inside `web/`: `npm install`, `npm run dev` (publishes the API, then starts Vite), `npm run build`
-(API, layer check, type check, Vite build), `npm run lint`, `npm run api:build`, `npm run check:layers`.
+- **Tree cover** (`cover`): Hansen canopy cover of each square, six green classes (0–20 to 90–100 %). The map uses Hansen only. MODIS (MOD44B) is in the area viewer and the cross-checks.
+- **Tree cover loss** (`loss`) and **burned area** (`burned`): one year at a time, from `cover.json`.
+- **Trend** (`trend`): one measure at a time, in slope colours (PuOr: orange falling, purple rising) per decade. A dot marks a cell that is not significant, so colour is never the only cue. The filter (`show`) keeps all cells, only the significant ones, the falling or the rising ones. The variables are NDVI, EVI, daytime LST, rainfall, burned area, Hansen tree cover loss and MODIS tree cover. Default opacity is 55 % for tree cover, 70 % for trend and 80 % for loss and burned area.
+
+Map layers, bottom to top: imagery · outside-region mask · squares · country borders · selected square outline. The
+map opens cropped to the region and cannot be zoomed out beyond it. The scan sweep runs when the layer changes and is
+off with `prefers-reduced-motion`.
+
+**Area viewer** (dialog over the map, `CellViewer.tsx`): the summary in one paragraph; the documented-case note (La Pampa:
+0.05° numbers and the MAAP reference) or the hotspot note; **year travel** (`YearTravel.tsx`): From and To, a play button
+and the `[` and `]` keys; **What changed from A to B** (`CellChanges.tsx`): each measure in A, in B and the difference
+B minus A in its own units; the tree cover, loss and burned charts (`YearChart.tsx`); **Trends in this area**
+(`CellTrends.tsx`): one line per measure with the backend's verdict; **Exact values** (`CellValues.tsx`): the yearly
+values and each test result; and links: open in Trends, the JSON files of the square, and copy link. Each
+measure's data loads on its own (`useCellProfile.ts`), so one failed file blanks only its own rows.
+
+**Trends view** (`TrendsView.tsx`, `ZoneChart.tsx`, `TrendMethod.tsx`): the numbers are the pipeline's
+(`zones.json`). The view tests, averages and counts nothing. "Clear trend" is the zone-level test, which is one test per zone and measure and is not corrected
+for multiple tests. The count of squares uses the corrected verdicts. Satellite drift years are greyed and the Terra note is shown next to them.
+
+**Copy rules** (the views keep them):
+
+- **Verdicts.** The pipeline decides significance. The browser shows the backend's verdicts and counts as they are. The
+  only arithmetic in the browser is B minus A on two backend values (area viewer) and the labels of the bars.
+- **Clear trend.** "Clear trend" or "Not clear" (zone tests) and "significant after the correction" (squares). A trend is a
+  pattern in the measurements. No page states a cause.
+- **Loss is not deforestation.** Hansen loss is stand-replacing loss (fire, logging, mining, clearing); the UI names no cause.
+- **Co-location is not causation.** Loss and burned area in one square show where they coincide.
+- **Two sources, two levels.** Hansen cover cannot rise (regrowth is not counted). MODIS reads lower over dense forest, so
+  it confirms where cover changed, not how much.
+- **Cross-check statistics are descriptive.** r has no p-value and no significance wording. The trust checks of the Trends
+  view state their own numbers (V1–V4).
+- **Differences are absolute** (units, points, °C, km²), never a percentage, and only same-period comparisons are made.
+- **Unitless indices** (NDVI, EVI) are labelled by name, not by a unit.
+- **Satellite drift.** NDVI, EVI and daytime temperature end in 2020 in the test; later years are greyed and labelled.
+
+**Accessibility:**
+
+- The grid is one Tab stop; arrow keys move between squares, Enter or Space opens one.
+- The area viewer and the phone filters are native `<dialog>` elements, with Esc to close.
+- Contrast is designed to AA in light and dark; a browser check is pending (P-025).
+- `prefers-reduced-motion` turns off the scan sweep and the map's zoom animation.
+
+**Layout.** Desktop: filters on the left, the map in the centre, the area viewer as a dialog. Below 768 px the map
+bar (Filters button and compact legend) sits above the map, and the filters open as a sheet. The other views are one
+column. Views that are not the map load on demand (`React.lazy`).
+
+**Colours in SVG.** They are set with `style`, never as SVG attributes, because `fill="var(--x)"` does not resolve
+and paints black.
+
+Commands, run inside `web/`: `npm ci`, `npm run dev` (sample data: publishes the API, then starts Vite), `npm run dev:real`
+(pipeline export), `npm run build` (API, layer check, unit tests, type check, Vite build), `npm run build:real` (same, pipeline
+export), `npm run lint`, `npm run api:build`, `npm run check:layers`. Steps for a local check: `web/README.md`.
 
 ### Options that were evaluated
 
@@ -95,7 +143,7 @@ additions: `VITE_API_BASE_URL` can point the same frontend at a runtime API late
 | 2. Option 1 + small serverless function | One light on-demand query on Vercel | Not now: time/size limits, credentials online |
 | 3. Option 1 or 2 + LLM explainer | An LLM explains variables (allowed by the challenge text) | Not now; would never decide significance and must be declared |
 
-Whatever the option, the statistical test is the product's core and must be transparent and validated (05, P-007).
+Whatever the option, the statistical test is the product's core and must be transparent and validated (ADR-006; 05, P-007).
 
 ## Environments
 
@@ -103,7 +151,7 @@ Whatever the option, the statistical test is the product's core and must be tran
 |---|---|---|
 | Local | Windows 11, Node 22.21, Python 3.13 via `py` | `npm run dev` on port 5173 (Vite default) |
 | Preview | Vercel, one URL per pull request | Team review before merging |
-| Production | Vercel, deployed from `main`: <https://signo-chi-pink.vercel.app/> | Public link for the submission (ADR-002); verified without login on 2026-11-14. Build settings in `web/vercel.json`; Node `22.x` from `package.json` engines (needed to run the TypeScript backend directly) |
+| Production | Vercel, deployed from `main`: <https://signo-chi-pink.vercel.app/> | Public link for the submission (ADR-002); verified without login on 2026-11-14. Build settings in `web/vercel.json`; Node `22.x` from `package.json` engines (needed to run the TypeScript backend directly). Until Vercel builds with `SIGNO_DATA_SOURCE=files` (or `build:real`), the site shows sample data (P-009) |
 
 Vercel does not run long processes or Streamlit, so heavy data work stays outside it (ADR-002). Access to NASA data
 requires an Earthdata Login account per member; credentials never go in the repo.
@@ -112,10 +160,11 @@ requires an Earthdata Login account per member; credentials never go in the repo
 
 | Check | Command | What it proves |
 |---|---|---|
-| Contract validation | `npm run api:build` | Every published file matches the contract; bad pipeline data stops the build with the file, cell and problem |
+| Contract validation | `npm run api:build` (or `npm run api:build:real` for the pipeline data) | Every published file matches the contract; bad pipeline data stops the build with the file, cell and problem |
 | Layer boundaries | `npm run check:layers` | `shared/` imports nothing, `server/` never imports `src/`, `src/` never imports `server/` or Node, views never call `fetch` |
 | Types | `tsc -b` (in `npm run build`) | `tsconfig.app.json` (src + shared), `tsconfig.server.json` (server + shared + scripts), `tsconfig.node.json` |
-| Unit tests | `npm test` (in `npm run build`) | 26 tests with `node:test`: `server/validate.test.ts` (contract rules) and `server/summary.test.ts` (summary counts, mock source satisfies the contract and is deterministic, source selection) |
+| Unit tests | `npm test` (in `npm run build`) | 102 backend tests with `node:test`, in six files: `server/validate.test.ts` (contract rules), `server/summary.test.ts` (summary counts, mock source satisfies the contract and is deterministic, source selection), `server/periods.test.ts` (six-month periods), `server/annual.test.ts` (calendar years), `server/cover.test.ts` (cover checks, validation report, raster index) and `server/trends.test.ts` (trend fields of `cover.json` and `trendChecks`, `zones.json`, `borders.json`, `slopeUnits` and `trendYears`) |
+| Trend test (pipeline) | `python -m pipeline.test_trends` | 7 tests on synthetic series: a linear trend is found with its sign, white noise is mostly not significant after FDR, Hamed–Rao runs, annual sums and means, the 80 % rule, and the Sen slope with missing years |
 | Lint | `npm run lint` | oxlint with React and TypeScript plugins |
 
 A failing test, layer check or contract validation stops the Vercel build, so production keeps the last good

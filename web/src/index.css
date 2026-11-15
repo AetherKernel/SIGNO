@@ -4,7 +4,7 @@
  * light-first palette with a teal accent that is not in the data scale, ColorBrewer PuOr for trends,
  * Source Serif 4 / Source Sans 3 / JetBrains Mono, balanced type scale (presentation mode = wide scale),
  * 8 px spacing unit, 10 px radius, one motion moment (scan sweep on variable change).
- * Layout: one working screen: top bar, "Case file" panel, map, "Area file" panel. Stacks below 768 px.
+ * Layout (2026-11-15): top bar with four views; the Map view is a filter panel and the map; the cell viewer is a dialog over the map.
  */
 :root {
   /* Colour roles (WCAG AA checked for text on --bg, --surface and --raised) */
@@ -214,30 +214,86 @@ button {
   background: var(--raised);
 }
 
-/* App frame: one working screen on desktop. The page itself never scrolls there (focus could shift it);
-   the panels scroll inside. */
-@media (min-width: 768px) {
-  html,
-  body {
-    overflow: hidden;
-  }
+/* App frame: the page itself never scrolls; <main> scrolls inside (text views) or holds the map (map view). */
+html,
+body {
+  height: 100%;
+  overflow: hidden;
 }
 
 .app {
   height: 100vh;
-  height: 100svh;
+  height: 100dvh;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
 }
 
-.workspace {
-  display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
+.view {
+  min-width: 0;
   min-height: 0;
+  overflow-y: auto;
 }
 
-.workspace.with-area {
-  grid-template-columns: 300px minmax(0, 1fr) 360px;
+.view:focus {
+  outline: none;
+}
+
+/* Map view: filter panel and map (the map fills the rest). */
+.view-map {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.page-status {
+  padding: calc(var(--u) * 3);
+}
+
+/* Reading views: one centred column */
+.page {
+  margin: 0 auto;
+  padding: calc(var(--u) * 4) calc(var(--u) * 3) calc(var(--u) * 8);
+  display: grid;
+  gap: calc(var(--u) * 3);
+  align-content: start;
+}
+
+.page > h1 {
+  font-size: var(--t-h1);
+}
+
+.page-checks {
+  max-width: 1040px;
+}
+
+.page-method {
+  max-width: 760px;
+}
+
+.page-trends {
+  max-width: 1200px;
+}
+
+.page-section {
+  display: grid;
+  gap: calc(var(--u) * 2);
+  scroll-margin-top: calc(var(--u) * 2);
+}
+
+.page-section h2 {
+  font-size: var(--t-h2);
+}
+
+.page-toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--u) calc(var(--u) * 2.5);
+  font-size: var(--t-small);
+}
+
+.sources-list {
+  display: grid;
+  gap: 12px;
 }
 
 .panel {
@@ -250,10 +306,6 @@ button {
   gap: calc(var(--u) * 3);
 }
 
-.case-file {
-  border-right: 1px solid var(--line);
-}
-
 .area-file {
   border-left: 1px solid var(--line);
 }
@@ -263,12 +315,13 @@ button {
   gap: calc(var(--u) * 1.25);
 }
 
-/* Top bar */
+/* Top bar: name, the four views, actions */
 .topbar {
   display: flex;
   align-items: center;
-  gap: calc(var(--u) * 2);
-  padding: var(--u) calc(var(--u) * 2.5);
+  gap: calc(var(--u) * 2.5);
+  min-height: 56px;
+  padding: 0 calc(var(--u) * 2.5);
   background: var(--surface);
   border-bottom: 1px solid var(--line);
   min-width: 0;
@@ -309,77 +362,39 @@ button {
   white-space: nowrap;
 }
 
-.topnav {
-  margin-left: auto;
+.viewnav {
   display: flex;
+  align-self: stretch;
   gap: 4px;
+  margin-left: auto;
+}
+
+.viewlink {
+  display: inline-flex;
   align-items: center;
+  padding: 0 calc(var(--u) * 1.5);
+  border-bottom: 3px solid transparent;
+  color: var(--muted);
+  font-size: var(--t-small);
+  text-decoration: none;
+  white-space: nowrap;
 }
 
-.only-mobile {
-  display: none;
-}
-
-/* Variable picker */
-.picker {
-  border: 0;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  gap: var(--u);
-  min-width: 0;
-}
-
-.picker legend {
-  padding: 0;
-  margin-bottom: var(--u);
-}
-
-.option {
-  position: relative;
-  display: grid;
-  gap: 2px;
-  border: 1px solid var(--line);
-  border-radius: var(--r);
-  padding: calc(var(--u) * 1.25) calc(var(--u) * 1.5);
-  cursor: pointer;
-  background: var(--surface);
-}
-
-.option:hover {
+.viewlink:hover {
+  color: var(--text);
   background: var(--raised);
 }
 
-.option.selected {
-  border-color: var(--accent);
-  box-shadow: inset 0 0 0 1px var(--accent);
-}
-
-.option input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.option:has(input:focus-visible) {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.option-name {
+.viewlink[aria-current='page'] {
+  color: var(--text);
   font-weight: 600;
-  font-size: var(--t-body);
+  border-bottom-color: var(--accent);
 }
 
-.option-description {
-  font-size: var(--t-small);
-  color: var(--muted);
-}
-
-.option-source {
-  font-family: var(--f-data);
-  font-size: var(--t-caption);
-  color: var(--muted);
+.topactions {
+  display: flex;
+  align-items: center;
+  gap: var(--u);
 }
 
 /* Summary filters (counts that filter the map) */
@@ -522,6 +537,44 @@ button {
   flex: none;
 }
 
+.legend-title {
+  font-family: var(--f-body);
+  font-size: var(--t-small);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.legend-bar.five {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.legend-classes {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+  font-family: var(--f-data);
+  font-size: var(--t-caption);
+  color: var(--muted);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.legend.compact {
+  gap: 2px;
+  min-width: 0;
+}
+
+.legend.compact .legend-title {
+  font-size: var(--t-caption);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.legend.compact .legend-bar {
+  height: 10px;
+}
+
 /* Map */
 .map-wrap {
   position: relative;
@@ -585,62 +638,55 @@ button {
   white-space: nowrap;
 }
 
-.brief {
-  left: 16px;
-  top: 16px;
-  width: min(380px, calc(100% - 32px));
-  padding: calc(var(--u) * 2.5);
-  display: grid;
-  gap: calc(var(--u) * 1.5);
-  border-radius: var(--r);
-  box-shadow: var(--shadow);
-  font-size: var(--t-body);
-}
-
-.brief h2 {
-  font-size: var(--t-h2);
-}
-
-.brief-stats {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--u);
-}
-
-.stat {
-  border: 1px solid var(--line);
-  border-radius: var(--r-s);
-  padding: 6px 10px;
-}
-
-.stat dt {
-  font-size: var(--t-caption);
-  color: var(--muted);
-}
-
-.stat dd {
-  margin: 0;
-  font-family: var(--f-data);
-  font-size: var(--t-h3);
-  font-weight: 500;
-}
-
-/* Trend cells (SVG overlay positioned by Leaflet) */
+/* Map cells (SVG overlay positioned by Leaflet). Fill opacity comes from --cell-op, set on the cells group (Square opacity). */
 .cell {
-  stroke: rgb(0 0 0 / 0.28);
+  stroke: rgb(255 255 255 / 0.28);
   stroke-width: 0.5;
   vector-effect: non-scaling-stroke;
   cursor: pointer;
-  fill-opacity: 0.85;
+  pointer-events: all;
+  fill-opacity: var(--cell-op, 0.55);
   transition: fill-opacity 160ms ease-out;
 }
 
-.cell.not-significant {
-  fill-opacity: 0.6;
+/* Trend that is not significant: fixed light neutral fill (set in trendMap) at the normal opacity, dots drawn on top */
+.cell.dotted {
+  fill-opacity: var(--cell-op, 0.55);
+}
+
+/* Zero loss or zero burned area: not drawn, but still clickable (its fill is "transparent") */
+.cell.none {
+  fill-opacity: 1;
+}
+
+/* No value: transparent here, the grey hatch is drawn on top */
+.cell.empty {
+  fill-opacity: 1;
+}
+
+.cell-hatch {
+  opacity: max(0.45, var(--cell-op, 0.55));
 }
 
 .cell.dimmed {
-  fill-opacity: 0.12;
+  fill-opacity: 0.2;
+}
+
+.cell.none.dimmed,
+.cell.empty.dimmed {
+  fill-opacity: 1;
+}
+
+.cell:hover {
+  stroke: #fff;
+  stroke-width: 1.5;
+  stroke-opacity: 1;
+}
+
+/* Region mask and Leaflet panes created by the map: the borders and the selection never take clicks */
+.leaflet-borders-pane,
+.leaflet-selection-pane {
+  pointer-events: none;
 }
 
 /* Crop to the study region: the outside takes the map background colour; the edge is a thin line */
@@ -655,19 +701,6 @@ button {
   stroke-opacity: 0.55;
   stroke-width: 1.5;
   stroke-dasharray: 6 4;
-}
-
-/* Zoomed in close: let the imagery show through the trend cells */
-.near .cell {
-  fill-opacity: 0.4;
-}
-
-.near .cell.not-significant {
-  fill-opacity: 0.28;
-}
-
-.near .cell.dimmed {
-  fill-opacity: 0.06;
 }
 
 .cell:focus {
@@ -871,61 +904,7 @@ button {
   color: var(--muted);
 }
 
-/* Method and sources drawer (native <dialog>) */
-.drawer {
-  margin: 0 0 0 auto;
-  height: 100%;
-  max-height: none;
-  width: min(460px, 100%);
-  border: 0;
-  border-left: 1px solid var(--line);
-  padding: 0;
-  background: var(--surface);
-  color: var(--text);
-  box-shadow: var(--shadow);
-}
-
-.drawer::backdrop {
-  background: rgb(10 15 15 / 0.35);
-}
-
-.drawer-inner {
-  padding: calc(var(--u) * 3);
-  display: grid;
-  gap: calc(var(--u) * 2.5);
-}
-
-.drawer-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: start;
-  gap: var(--u);
-}
-
-.tabs {
-  display: flex;
-  gap: 4px;
-  border-bottom: 1px solid var(--line);
-}
-
-.tab {
-  border: 0;
-  background: none;
-  padding: var(--u) calc(var(--u) * 1.5);
-  font-size: var(--t-small);
-  font-weight: 600;
-  color: var(--muted);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  min-height: 40px;
-}
-
-.tab[aria-selected='true'] {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
-}
-
+/* Facts and sources (Method view) */
 .facts {
   display: grid;
   gap: calc(var(--u) * 1.5);
@@ -954,11 +933,219 @@ button {
   font-size: var(--t-small);
 }
 
-.footer-note {
-  font-size: var(--t-caption);
-  color: var(--muted);
+/* Filter panel (Map view, left) */
+.map-filters {
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.filters-body {
   display: grid;
-  gap: 4px;
+  align-content: start;
+}
+
+.fsec {
+  display: grid;
+  gap: var(--u);
+  padding: calc(var(--u) * 2);
+  margin: 0;
+  min-width: 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+.filters-body > .fsec:first-child {
+  border-top: 0;
+}
+
+.fsec > legend,
+.fsec-label {
+  font-size: var(--t-small);
+  font-weight: 600;
+  padding: 0;
+}
+
+.fsec > legend {
+  margin-bottom: 2px;
+  padding-top: calc(var(--u) * 2);
+}
+
+.fset-inline {
+  border: 0;
+  padding: 0;
+  margin: var(--u) 0 0;
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.fset-inline legend {
+  padding: 0;
+}
+
+.radio-row {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  column-gap: 8px;
+  align-items: start;
+  padding: 6px 0;
+  cursor: pointer;
+}
+
+.radio-row input {
+  grid-row: 1 / span 2;
+  margin: 3px 0 0;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
+.radio-label {
+  font-size: var(--t-body);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.radio-help {
+  font-size: var(--t-small);
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.radio-row.disabled {
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  font-size: var(--t-small);
+  cursor: pointer;
+}
+
+.check-row input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
+.fsec input[type='range'],
+.year-controls input[type='range'] {
+  width: 100%;
+  min-height: 28px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+/* Segmented radio group (Show: All, Significant, Falling, Rising) */
+.seg-radio {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+  overflow: hidden;
+}
+
+.seg-radio label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 8px;
+  background: var(--surface);
+  font-size: var(--t-small);
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 0 0 0.5px var(--line);
+}
+
+.seg-radio label:hover {
+  background: var(--raised);
+}
+
+.seg-radio label.on {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.seg-radio input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.seg-radio label:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.year-controls {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 32px auto;
+  align-items: center;
+  gap: 6px;
+}
+
+.icon-btn {
+  min-height: 32px;
+  width: 32px;
+  padding: 0;
+  font-size: 0.7rem;
+}
+
+.icon-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.play-btn {
+  min-height: 32px;
+  padding: 0 12px;
+}
+
+.link-btn {
+  justify-self: start;
+  border: 0;
+  background: none;
+  padding: 4px 0;
+  color: var(--accent);
+  font-size: var(--t-small);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* The legend stays in view while the rest of the panel scrolls, when the screen is tall enough */
+@media (min-width: 768px) and (min-height: 880px) {
+  .legend-sec {
+    position: sticky;
+    bottom: 0;
+    background: var(--surface);
+    z-index: 1;
+  }
+}
+
+.hint {
+  background: var(--raised);
+}
+
+.hint .btn {
+  white-space: normal;
+  text-align: left;
+  min-height: 40px;
+  padding-block: 6px;
+}
+
+/* Phone: the filters open from a bar under the map */
+.map-bar,
+.sheet {
+  display: none;
 }
 
 /* Motion: one orchestrated moment, nothing when the user prefers less motion */
@@ -976,80 +1163,571 @@ button {
   }
 }
 
-/* Phone and narrow windows: the page scrolls; map first, then the panels */
-@media (max-width: 767px) {
-  .app {
-    height: auto;
-    display: block;
-  }
-  .topbar {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    flex-wrap: wrap;
-    padding: var(--u) calc(var(--u) * 2);
-    gap: var(--u);
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .view-map {
+    grid-template-columns: 264px minmax(0, 1fr);
   }
   .case-title {
     display: none;
   }
-  .topnav {
-    width: 100%;
-    margin-left: 0;
-    flex-wrap: wrap;
+}
+
+/* Touch devices: 44 px targets */
+@media (pointer: coarse) {
+  .icon-btn,
+  .play-btn {
+    min-height: 44px;
   }
-  .topnav .btn {
-    padding: 0 10px;
+  .icon-btn {
+    width: 44px;
   }
-  .only-mobile {
-    display: inline-flex;
+  .year-controls {
+    grid-template-columns: 44px minmax(0, 1fr) 44px auto;
   }
-  .workspace,
-  .workspace.with-area {
+  .seg-radio label,
+  .radio-row,
+  .check-row {
+    min-height: 44px;
+  }
+  .select {
+    min-height: 44px;
+  }
+}
+
+/* Phone and narrow windows: two top rows (name and actions, then the views), the map fills the screen, filters in a sheet */
+@media (max-width: 767px) {
+  .topbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'brand actions'
+      'nav nav';
+    padding: 0 calc(var(--u) * 2);
+    gap: 0 var(--u);
+    min-height: 0;
+  }
+  .brand {
+    grid-area: brand;
+    min-height: 52px;
+    align-items: center;
+  }
+  .topactions {
+    grid-area: actions;
+  }
+  .case-title {
+    display: none;
+  }
+  .viewnav {
+    grid-area: nav;
+    margin: 0 calc(var(--u) * -2);
+    padding: 0 calc(var(--u) * 2);
+    overflow-x: auto;
+    scrollbar-width: none;
+    min-height: 44px;
+  }
+  .viewlink {
+    min-height: 44px;
+    padding: 0 12px;
+  }
+  .view-map {
     display: flex;
     flex-direction: column;
   }
   .map-wrap {
     order: 1;
-    /* about square: the region is wider than tall, so a taller map would only add empty space */
-    height: clamp(384px, calc(100vw + 64px), 70svh);
-    display: flex;
-    flex-direction: column;
-  }
-  .map {
-    position: relative;
-    inset: auto;
     flex: 1;
     min-height: 0;
   }
-  /* the readout becomes a strip under the map instead of covering the cells */
-  .readout {
-    position: static;
-    max-width: none;
-    border-radius: 0;
-    border-width: 1px 0 0;
-    padding: 6px calc(var(--u) * 2);
+  .map-filters {
+    display: none;
   }
-  .area-file {
+  .map-bar {
     order: 2;
-    border-left: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--u);
+    height: 48px;
+    padding: 0 var(--u);
+    background: var(--surface);
     border-top: 1px solid var(--line);
-    overflow: visible;
   }
-  .case-file {
-    order: 3;
-    border-right: 0;
-    border-top: 1px solid var(--line);
-    overflow: visible;
+  .map-bar .btn {
+    min-height: 40px;
+    flex: none;
   }
-  .brief {
-    left: 8px;
-    top: 8px;
-    width: calc(100% - 16px);
-    padding: calc(var(--u) * 2);
+  .map-bar-legend {
+    flex: 1;
+    min-width: 0;
+  }
+  .sheet {
+    display: block;
+  }
+  .sheet:not([open]) {
+    display: none;
+  }
+  .page {
+    padding: calc(var(--u) * 3) calc(var(--u) * 2) calc(var(--u) * 6);
   }
   .zoom-note {
     right: 52px;
     max-width: calc(100% - 72px);
+  }
+}
+
+/* ---- Tree cover, cross-checks and six-month comparison (added 2026-11-15) ---- */
+
+/* Sequential green scale for tree cover, light = little tree cover. Same in light and dark mode: it is a data scale. */
+:root {
+  --green-0: #f0e9a6;
+  --green-1: #d4e79e;
+  --green-2: #a6d48a;
+  --green-3: #6dba6f;
+  --green-4: #2f9552;
+  --green-5: #0a5c36;
+}
+
+/* Sequential scales of the loss (ColorBrewer Oranges) and burned area (Reds) maps, class 1..5. Placeholders until José
+   picks the final hex values (UX spec 2.5); they pass contrast on Blue Marble. Same in light and dark: they are data scales. */
+:root {
+  --loss-1: #fdd0a2;
+  --loss-2: #fdae6b;
+  --loss-3: #fd8d3c;
+  --loss-4: #d94801;
+  --loss-5: #7f2704;
+  --burn-1: #fcbba1;
+  --burn-2: #fc9272;
+  --burn-3: #fb6a4a;
+  --burn-4: #cb181d;
+  --burn-5: #67000d;
+}
+
+.flag-note {
+  background: var(--warn-bg);
+  color: var(--warn);
+  border-left: 3px solid var(--warn);
+  border-radius: var(--r-s);
+  padding: 6px 10px;
+  font-size: var(--t-small);
+}
+
+/* The zoom note moves to the bottom so it never covers the map controls */
+.zoom-note {
+  top: auto;
+  right: 12px;
+  bottom: 28px;
+}
+
+/* Yearly charts */
+.chart-readout {
+  margin: 0;
+  min-height: 1.5em;
+  color: var(--muted);
+}
+
+.chart .line-hansen {
+  stroke: var(--text);
+  stroke-width: 1.8;
+}
+
+.chart .line-modis {
+  stroke: var(--muted);
+  stroke-width: 1.6;
+  stroke-dasharray: 5 3;
+}
+
+.chart .dot-hollow {
+  fill: var(--surface);
+  stroke: var(--text);
+  stroke-width: 1.8;
+}
+
+.key-line {
+  display: inline-block;
+  width: 18px;
+  height: 0;
+  border-top: 2px solid var(--text);
+  vertical-align: middle;
+}
+
+.key-line.dashed {
+  border-top-style: dashed;
+  border-top-color: var(--muted);
+}
+
+.chart .bar {
+  stroke: none;
+}
+
+.chart .bar-loss {
+  fill: var(--puor-0);
+}
+
+.chart .bar-burned {
+  fill: var(--puor-1);
+}
+
+.chart .bar.selected {
+  stroke: var(--text);
+  stroke-width: 1.6;
+}
+
+.chart .base-rate {
+  stroke: var(--text);
+  stroke-width: 2;
+}
+
+.subhead {
+  margin: 0;
+  font-family: var(--f-body);
+  font-size: var(--t-small);
+  font-weight: 600;
+}
+
+.flag-note.small strong {
+  font-weight: 700;
+}
+
+.values-table summary {
+  cursor: pointer;
+  font-size: var(--t-small);
+  color: var(--accent);
+  min-height: 32px;
+}
+
+.values-table table,
+.vtable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--t-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.values-table th,
+.values-table td,
+.vtable th,
+.vtable td {
+  padding: 3px 6px;
+  text-align: right;
+  border-bottom: 1px solid var(--line);
+  font-weight: 400;
+}
+
+.values-table th:first-child,
+.vtable th:first-child {
+  text-align: left;
+}
+
+.values-table thead th,
+.vtable thead th {
+  font-size: var(--t-caption);
+  color: var(--muted);
+  font-weight: 600;
+  vertical-align: bottom;
+}
+
+.values-table tr.current {
+  background: var(--raised);
+  font-weight: 600;
+}
+
+/* Six-month comparison */
+.semester {
+  display: grid;
+  gap: calc(var(--u) * 1.25);
+}
+
+.semester-pickers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--u);
+  align-items: center;
+}
+
+.semester-pickers .select {
+  width: auto;
+  flex: 1 1 140px;
+}
+
+.semester-card {
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: var(--u) calc(var(--u) * 1.5);
+}
+
+.semester-card.incomplete {
+  background: var(--raised);
+  border-style: dashed;
+  color: var(--muted);
+}
+
+.semester-value {
+  margin: 0;
+  font-size: var(--t-h3);
+  font-weight: 500;
+}
+
+.chart .semester-band {
+  fill: var(--accent);
+  opacity: 0.16;
+}
+
+.chart .semester-band.partial {
+  fill: var(--muted);
+  opacity: 0.22;
+  stroke: var(--muted);
+  stroke-dasharray: 3 3;
+}
+
+/* Cross-checks view */
+.validation {
+  display: grid;
+  gap: calc(var(--u) * 2);
+}
+
+.zone-pick {
+  display: grid;
+  gap: 4px;
+}
+
+.vcard {
+  display: grid;
+  gap: var(--u);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: calc(var(--u) * 1.5) calc(var(--u) * 2);
+}
+
+.vcard h3 {
+  font-size: var(--t-h3);
+}
+
+.hbar,
+.dbar {
+  display: block;
+  position: relative;
+  height: 6px;
+  margin-top: 3px;
+  background: var(--raised);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.hbar i,
+.dbar i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.hbar i {
+  left: 0;
+}
+
+.hbar i.hansen {
+  background: var(--green-4);
+}
+
+.hbar i.modis {
+  background: repeating-linear-gradient(45deg, var(--green-4) 0 3px, var(--green-1) 3px 6px);
+}
+
+.dbar {
+  height: 8px;
+}
+
+.dbar::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--text);
+  opacity: 0.5;
+}
+
+.dbar i.down {
+  right: 50%;
+  background: var(--puor-0);
+}
+
+.dbar i.up {
+  left: 50%;
+  background: var(--puor-4);
+}
+
+.hotspots,
+.plain {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--u);
+}
+
+.hotspot {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  min-height: 44px;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+  background: var(--surface);
+  padding: var(--u) calc(var(--u) * 1.5);
+  cursor: pointer;
+}
+
+.hotspot:hover {
+  background: var(--raised);
+}
+
+.hotspot .action {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.case-card {
+  display: grid;
+  gap: var(--u);
+  border-top: 2px solid var(--accent);
+  padding-top: calc(var(--u) * 1.5);
+  margin-top: var(--u);
+}
+
+/* Cell viewer: a dialog over the map (the body is filled by the viewer component). Desktop: centred over the map area. */
+.viewer {
+  border: 0;
+  padding: 0;
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  width: min(760px, calc(100vw - 300px - 48px));
+  max-height: calc(100dvh - 96px);
+  margin: 0;
+  position: fixed;
+  top: 72px;
+  left: calc(300px + (100vw - 300px - min(760px, calc(100vw - 300px - 48px))) / 2);
+  overflow: hidden;
+}
+
+.viewer[open] {
+  display: grid;
+  animation: viewer-in 180ms ease-out;
+}
+
+.viewer::backdrop {
+  background: rgb(14 20 22 / 0.35);
+}
+
+.viewer-inner {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  max-height: calc(100dvh - 96px);
+  min-height: 0;
+}
+
+.viewer-head {
+  position: sticky;
+  top: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: calc(var(--u) * 2);
+  padding: calc(var(--u) * 2) calc(var(--u) * 2.5);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.viewer-head h2 {
+  font-size: var(--t-h2);
+}
+
+.viewer-head h2:focus {
+  outline: none;
+}
+
+.viewer-body {
+  overflow-y: auto;
+  padding: calc(var(--u) * 2.5);
+  display: grid;
+  gap: calc(var(--u) * 3);
+  align-content: start;
+}
+
+@keyframes viewer-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .viewer {
+    width: min(720px, 92vw);
+    left: calc((100vw - min(720px, 92vw)) / 2);
+  }
+}
+
+@media (max-width: 767px) {
+  .viewer {
+    top: 0;
+    left: 0;
+    width: 100dvw;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    border-radius: 0;
+  }
+  .viewer-inner {
+    max-height: none;
+    height: 100dvh;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viewer[open] {
+    animation: none;
+  }
+}
+
+/* Filters sheet (phone): a bottom sheet over the map */
+@media (max-width: 767px) {
+  .sheet {
+    position: fixed;
+    inset: auto 0 0 0;
+    margin: 0;
+    width: 100%;
+    max-width: none;
+    max-height: 80dvh;
+    padding: 0;
+    border: 0;
+    border-radius: var(--r) var(--r) 0 0;
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow);
+    overflow-y: auto;
+  }
+  .sheet::backdrop {
+    background: rgb(14 20 22 / 0.35);
+  }
+  .sheet-head {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--u) calc(var(--u) * 2);
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+  .sheet-head h2 {
+    font-size: var(--t-h3);
   }
 }

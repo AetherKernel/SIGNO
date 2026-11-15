@@ -1,0 +1,156 @@
+// AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15. Reviewed and owned by team AETHER.
+//
+// The trend map: which measures can be mapped as a trend, and how their cells are painted. A trend comes from the
+// backend only (slope per decade, p-value, "significant" after the false discovery rate correction): the browser
+// picks values and formats them, it never tests or fits anything.
+//   - the monthly variables (NDVI, EVI, daytime temperature, rainfall, burned area): trends/{id}.json
+//   - tree cover loss (Hansen) and MODIS tree cover: CoverCell.trends in cover.json
+
+import type { CoverCellTrend, SenLine, CoverLayer, TrendLayer, ValidationReport, Variable } from '../../shared/contracts.ts'
+import type { CellPaint, MapCell } from './cover.ts'
+import { formatCoordinates, formatTrendSlope, maxAbsSlope, slopeColor, unitLabel } from './format.ts'
+import { matchesFilter, type CellFilter } from './viewState.ts'
+
+export interface TrendOption {
+  /** Value of ?var=. The monthly variables use their manifest id; the cover trends "lossKm2" and "modisTreeCover". */
+  id: string
+  name: string
+  /** Units of the slope, already "per decade". */
+  slopeUnits: string
+  /** First and last year of the test. */
+  years: [number, number]
+  kind: 'series' | 'cover'
+}
+
+export interface TrendResult {
+  slopePerDecade: number | null
+  pValue: number | null
+  significant: boolean
+  line?: SenLine
+}
+
+type CoverTrendKey = 'lossKm2' | 'modisTreeCover'
+
+const yearOf = (month: string) => Number(month.slice(0, 4))
+
+/** The measures that can be shown as a trend, in the order of the Variable select. */
+export function trendOptions(variables: Variable[], cover: CoverLayer | null): TrendOption[] {
+  const options: TrendOption[] = variables.map((v) => ({
+    id: v.id,
+    name: v.name,
+    slopeUnits: v.slopeUnits ?? `${unitLabel(v)} per decade`,
+    years: v.trendYears ? [v.trendYears.start, v.trendYears.end] : [yearOf(v.period.start), yearOf(v.period.end)],
+    kind: 'series',
+  }))
+  if (cover && cover.cells.some((c) => c.trends)) {
+    const lastLoss = cover.lossYears[cover.lossYears.length - 1]
+    const flagged = cover.flags.filter((f) => f.source.toLowerCase() === 'modis').map((f) => f.year)
+    const modisYears = cover.years.filter((y) => !flagged.includes(y))
+    options.push(
+      {
+        id: 'lossKm2',
+        name: 'Tree cover loss (Hansen)',
+        slopeUnits: 'km² per year, per decade',
+        years: [cover.lossYears[0], lastLoss],
+        kind: 'cover',
+      },
+      {
+        id: 'modisTreeCover',
+        name: 'Tree cover (MODIS)',
+        slopeUnits: '% of cell per decade',
+        years: [modisYears[0] ?? cover.years[0], modisYears[modisYears.length - 1] ?? cover.years[cover.years.length - 1]],
+        kind: 'cover',
+      },
+    )
+  }
+  return options
+}
+
+export function optionLabel(option: TrendOption): string {
+  // Short on purpose (no years): the select must not truncate; the years tested are in the summary under it.
+  return option.name.replace(' (Hansen)', '').replace('Tree cover (MODIS)', 'Tree cover, MODIS')
+}
+
+/** Trend results by cell id for a monthly variable. */
+export function layerResults(layer: TrendLayer): Map<string, TrendResult> {
+  return new Map(layer.cells.map((c) => [c.cellId, c]))
+}
+
+/** Trend results by cell id for a cover measure; cells that were not tested are left out. */
+export function coverResults(cover: CoverLayer, key: CoverTrendKey): Map<string, TrendResult> {
+  const results = new Map<string, TrendResult>()
+  for (const cell of cover.cells) {
+    const trend: CoverCellTrend | null | undefined = cell.trends?.[key]
+    if (trend) results.set(cell.cellId, trend)
+  }
+  return results
+}
+
+/** True when no cell was tested (the "trend test not published yet" state). */
+export function noneTested(results: Map<string, TrendResult>): boolean {
+  for (const r of results.values()) if (r.slopePerDecade !== null) return false
+  return true
+}
+
+/** "212 of 566 squares changed significantly: 140 down, 72 up." from the backend's counts; null when there are none. */
+export function summaryLine(option: TrendOption, layer: TrendLayer | null, validation: ValidationReport | null): string | null {
+  let counts: { tested: number; down: number; up: number } | null = null
+  if (option.kind === 'series' && layer && layer.variableId === option.id) {
+    const s = layer.summary
+    counts = { tested: s.cellsTested, down: s.significantDecreasing, up: s.significantIncreasing }
+  } else if (option.kind === 'cover') {
+    const v = validation?.trendChecks?.variables.find((x) => x.variableId === option.id)
+    if (v) counts = { tested: v.cellsTested, down: v.significantDecreasing, up: v.significantIncreasing }
+  }
+  if (!counts || counts.tested === 0) return null
+  const n = counts.down + counts.up
+  return `${n.toLocaleString('en-US')} of ${counts.tested.toLocaleString('en-US')} squares changed significantly: ${counts.down.toLocaleString('en-US')} down, ${counts.up.toLocaleString('en-US')} up. Years tested: ${option.years[0]}–${option.years[1]}.`
+}
+
+/** Legend range: symmetric, at the 90th percentile of |significant slopes| so typical values show (larger ones take the end colour). */
+function legendRange(results: TrendResult[]): number {
+  const sig = results.filter((r) => r.significant && r.slopePerDecade !== null && r.slopePerDecade !== 0).map((r) => Math.abs(r.slopePerDecade as number))
+  if (sig.length === 0) return maxAbsSlope(results)
+  sig.sort((a, b) => a - b)
+  return sig[Math.min(sig.length - 1, Math.floor(0.9 * (sig.length - 1)))]
+}
+
+export interface TrendPaintInfo {
+  paint: CellPaint
+  /** Legend range (90th percentile of |significant slopes|): the legend is symmetric around zero; larger slopes take the end colour. */
+  maxAbs: number
+  /** No cell was tested. */
+  pending: boolean
+}
+
+/** Paint of a trend map. Colour = direction and size; dotted = not significant (as decided by the backend). */
+export function makeTrendPaint(option: TrendOption, results: Map<string, TrendResult>, filter: CellFilter): TrendPaintInfo {
+  const maxAbs = legendRange([...results.values()])
+  const span = `${option.years[0]}–${option.years[1]}`
+  const readout = (cell: MapCell) => {
+    const r = results.get(cell.cellId)
+    if (!r || r.slopePerDecade === null) return 'Not tested: too few years with data'
+    if (!r.significant) return `No clear trend (${span})`
+    if (r.slopePerDecade === 0) return `No measurable slope: clear order but no measurable slope (${span})`
+    const word = r.slopePerDecade < 0 ? 'Falling' : 'Rising'
+    return `${word}: ${formatTrendSlope(r.slopePerDecade, option.slopeUnits)}, significant (${span})`
+  }
+  const paint: CellPaint = {
+    key: `trend:${option.id}`,
+    regionLabel: `Trend map of ${option.name}, ${span}. Tab to reach the squares, use the arrow keys to move between them and Enter to open one.`,
+    style: (cell) => {
+      const r = results.get(cell.cellId)
+      if (!r || r.slopePerDecade === null) return { color: 'var(--cell-empty)', kind: 'empty' }
+      const solid = r.significant && r.slopePerDecade !== 0
+      return {
+        // Not significant: a fixed light neutral fill, so it never looks stronger than a significant square.
+        color: solid ? slopeColor(r.slopePerDecade, maxAbs) : 'var(--surface)',
+        kind: solid ? 'solid' : 'dotted',
+        dim: !matchesFilter(r, filter),
+      }
+    },
+    describe: (cell) => `${formatCoordinates(cell.lat, cell.lon)}: ${readout(cell)}`,
+    readout,
+  }
+  return { paint, maxAbs, pending: noneTested(results) }
+}

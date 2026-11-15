@@ -7,6 +7,10 @@ export const API_BASE_PATH = '/api/v1'
 
 export const apiPaths = {
   manifest: (): string => 'manifest.json',
+  cover: (): string => 'cover.json',
+  validation: (): string => 'validation.json',
+  rasters: (): string => 'rasters.json',
+  zones: (): string => 'zones.json',
   trends: (variableId: string): string => `trends/${variableId}.json`,
   series: (variableId: string, cellId: string): string => `series/${variableId}/${cellId}.json`,
 }

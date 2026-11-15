@@ -5,9 +5,12 @@
   "type": "module",
   "scripts": {
     "api:build": "node server/buildApi.ts",
+    "api:build:real": "node server/buildApi.ts --source=files",
     "dev": "npm run api:build && vite",
+    "dev:real": "npm run api:build:real && vite",
     "build": "npm run api:build && npm run check:layers && npm test && tsc -b && vite build",
-    "test": "node --test server/validate.test.ts server/summary.test.ts",
+    "build:real": "npm run api:build:real && npm run check:layers && npm test && tsc -b && vite build",
+    "test": "node --test server/validate.test.ts server/summary.test.ts server/periods.test.ts server/cover.test.ts server/annual.test.ts server/trends.test.ts",
     "check:layers": "node scripts/checkLayers.ts",
     "lint": "oxlint",
     "preview": "vite preview"

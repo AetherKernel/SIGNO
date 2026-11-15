@@ -1,0 +1,2730 @@
+{
+ "zones": [
+  {
+   "zoneId": "amazon",
+   "label": "Amazon (whole region)",
+   "agreement2000": {
+    "r": 0.882,
+    "cells": 226932,
+    "biasPp": -22.54,
+    "rmsePp": 25.32,
+    "byHansenClass": [
+     {
+      "hansenRange": [
+       0,
+       10
+      ],
+      "cells": 4596,
+      "hansenMean": 4.5,
+      "modisMean": 12.2
+     },
+     {
+      "hansenRange": [
+       10,
+       30
+      ],
+      "cells": 9255,
+      "hansenMean": 20.4,
+      "modisMean": 19.5
+     },
+     {
+      "hansenRange": [
+       30,
+       50
+      ],
+      "cells": 10672,
+      "hansenMean": 40.2,
+      "modisMean": 31.3
+     },
+     {
+      "hansenRange": [
+       50,
+       70
+      ],
+      "cells": 13293,
+      "hansenMean": 60.6,
+      "modisMean": 44.6
+     },
+     {
+      "hansenRange": [
+       70,
+       90
+      ],
+      "cells": 24800,
+      "hansenMean": 81.6,
+      "modisMean": 58.4
+     },
+     {
+      "hansenRange": [
+       90,
+       100
+      ],
+      "cells": 164316,
+      "hansenMean": 98.4,
+      "modisMean": 72.5
+     }
+    ]
+   },
+   "changeVsLoss": {
+    "r": -0.719,
+    "cells": 226909,
+    "definition": "MOD44B mean(2024,2025) - mean(2001,2002), percentage points",
+    "byLossDecile": [
+     {
+      "decile": 1,
+      "hansenLossShareMean": 0.0,
+      "modisChangePpMean": 1.19,
+      "cells": 21554
+     },
+     {
+      "decile": 2,
+      "hansenLossShareMean": 0.0001,
+      "modisChangePpMean": 0.74,
+      "cells": 23778
+     },
+     {
+      "decile": 3,
+      "hansenLossShareMean": 0.0004,
+      "modisChangePpMean": 0.16,
+      "cells": 22740
+     },
+     {
+      "decile": 4,
+      "hansenLossShareMean": 0.001,
+      "modisChangePpMean": -0.03,
+      "cells": 22688
+     },
+     {
+      "decile": 5,
+      "hansenLossShareMean": 0.003,
+      "modisChangePpMean": 0.56,
+      "cells": 22694
+     },
+     {
+      "decile": 6,
+      "hansenLossShareMean": 0.0101,
+      "modisChangePpMean": 0.48,
+      "cells": 22691
+     },
+     {
+      "decile": 7,
+      "hansenLossShareMean": 0.0348,
+      "modisChangePpMean": -0.01,
+      "cells": 22691
+     },
+     {
+      "decile": 8,
+      "hansenLossShareMean": 0.105,
+      "modisChangePpMean": -1.41,
+      "cells": 22691
+     },
+     {
+      "decile": 9,
+      "hansenLossShareMean": 0.2499,
+      "modisChangePpMean": -6.41,
+      "cells": 22691
+     },
+     {
+      "decile": 10,
+      "hansenLossShareMean": 0.5405,
+      "modisChangePpMean": -22.64,
+      "cells": 22691
+     }
+    ]
+   },
+   "lossWithFire": {
+    "definition": "Hansen loss area in cells with MCD64A1 burned area (share > 0) in the same or the previous calendar year; for 2001 only 2001 itself (2000 is a partial year)",
+    "years": [
+     {
+      "year": 2001,
+      "lossKm2": 20454.4,
+      "lossInBurnedCellsKm2": 8245.9,
+      "share": 0.403,
+      "zoneShareOfCellsBurned": 0.061
+     },
+     {
+      "year": 2002,
+      "lossKm2": 27287.8,
+      "lossInBurnedCellsKm2": 18950.9,
+      "share": 0.694,
+      "zoneShareOfCellsBurned": 0.131
+     },
+     {
+      "year": 2003,
+      "lossKm2": 23865.8,
+      "lossInBurnedCellsKm2": 18314.0,
+      "share": 0.767,
+      "zoneShareOfCellsBurned": 0.155
+     },
+     {
+      "year": 2004,
+      "lossKm2": 29984.0,
+      "lossInBurnedCellsKm2": 22171.6,
+      "share": 0.739,
+      "zoneShareOfCellsBurned": 0.164
+     },
+     {
+      "year": 2005,
+      "lossKm2": 29686.7,
+      "lossInBurnedCellsKm2": 22235.5,
+      "share": 0.749,
+      "zoneShareOfCellsBurned": 0.172
+     },
+     {
+      "year": 2006,
+      "lossKm2": 22081.7,
+      "lossInBurnedCellsKm2": 14893.6,
+      "share": 0.674,
+      "zoneShareOfCellsBurned": 0.157
+     },
+     {
+      "year": 2007,
+      "lossKm2": 19521.2,
+      "lossInBurnedCellsKm2": 12828.8,
+      "share": 0.657,
+      "zoneShareOfCellsBurned": 0.15
+     },
+     {
+      "year": 2008,
+      "lossKm2": 18863.4,
+      "lossInBurnedCellsKm2": 10864.0,
+      "share": 0.576,
+      "zoneShareOfCellsBurned": 0.144
+     },
+     {
+      "year": 2009,
+      "lossKm2": 14267.5,
+      "lossInBurnedCellsKm2": 5821.1,
+      "share": 0.408,
+      "zoneShareOfCellsBurned": 0.114
+     },
+     {
+      "year": 2010,
+      "lossKm2": 20874.8,
+      "lossInBurnedCellsKm2": 12464.3,
+      "share": 0.597,
+      "zoneShareOfCellsBurned": 0.138
+     },
+     {
+      "year": 2011,
+      "lossKm2": 15228.8,
+      "lossInBurnedCellsKm2": 7275.7,
+      "share": 0.478,
+      "zoneShareOfCellsBurned": 0.129
+     },
+     {
+      "year": 2012,
+      "lossKm2": 20769.6,
+      "lossInBurnedCellsKm2": 8832.8,
+      "share": 0.425,
+      "zoneShareOfCellsBurned": 0.1
+     },
+     {
+      "year": 2013,
+      "lossKm2": 14892.7,
+      "lossInBurnedCellsKm2": 4759.6,
+      "share": 0.32,
+      "zoneShareOfCellsBurned": 0.095
+     },
+     {
+      "year": 2014,
+      "lossKm2": 20909.8,
+      "lossInBurnedCellsKm2": 7303.2,
+      "share": 0.349,
+      "zoneShareOfCellsBurned": 0.092
+     },
+     {
+      "year": 2015,
+      "lossKm2": 17523.6,
+      "lossInBurnedCellsKm2": 8199.5,
+      "share": 0.468,
+      "zoneShareOfCellsBurned": 0.121
+     },
+     {
+      "year": 2016,
+      "lossKm2": 46699.4,
+      "lossInBurnedCellsKm2": 26129.9,
+      "share": 0.56,
+      "zoneShareOfCellsBurned": 0.133
+     },
+     {
+      "year": 2017,
+      "lossKm2": 40014.4,
+      "lossInBurnedCellsKm2": 20833.0,
+      "share": 0.521,
+      "zoneShareOfCellsBurned": 0.128
+     },
+     {
+      "year": 2018,
+      "lossKm2": 26458.7,
+      "lossInBurnedCellsKm2": 12110.8,
+      "share": 0.458,
+      "zoneShareOfCellsBurned": 0.119
+     },
+     {
+      "year": 2019,
+      "lossKm2": 26128.2,
+      "lossInBurnedCellsKm2": 11660.7,
+      "share": 0.446,
+      "zoneShareOfCellsBurned": 0.112
+     },
+     {
+      "year": 2020,
+      "lossKm2": 30324.0,
+      "lossInBurnedCellsKm2": 15186.2,
+      "share": 0.501,
+      "zoneShareOfCellsBurned": 0.13
+     },
+     {
+      "year": 2021,
+      "lossKm2": 27148.4,
+      "lossInBurnedCellsKm2": 13347.7,
+      "share": 0.492,
+      "zoneShareOfCellsBurned": 0.119
+     },
+     {
+      "year": 2022,
+      "lossKm2": 31356.8,
+      "lossInBurnedCellsKm2": 16349.5,
+      "share": 0.521,
+      "zoneShareOfCellsBurned": 0.112
+     },
+     {
+      "year": 2023,
+      "lossKm2": 27155.2,
+      "lossInBurnedCellsKm2": 13778.3,
+      "share": 0.507,
+      "zoneShareOfCellsBurned": 0.135
+     },
+     {
+      "year": 2024,
+      "lossKm2": 54064.9,
+      "lossInBurnedCellsKm2": 38785.7,
+      "share": 0.717,
+      "zoneShareOfCellsBurned": 0.162
+     },
+     {
+      "year": 2025,
+      "lossKm2": 31056.0,
+      "lossInBurnedCellsKm2": 18149.1,
+      "share": 0.584,
+      "zoneShareOfCellsBurned": 0.138
+     }
+    ]
+   },
+   "hotspots": [
+    {
+     "lat": -11.175,
+     "lon": -54.875,
+     "apiCellId": "r09c25",
+     "hansenLossShare": 0.996,
+     "peakLossYear": 2020,
+     "peakLossShare": 0.271,
+     "hansenTreeCover2000": 99.6,
+     "modisChangePp": -48.9,
+     "burnedYears": [
+      2018,
+      2020,
+      2022,
+      2023,
+      2024,
+      2025
+     ]
+    },
+    {
+     "lat": -10.875,
+     "lon": -54.075,
+     "apiCellId": "r10c25",
+     "hansenLossShare": 0.992,
+     "peakLossYear": 2017,
+     "peakLossShare": 0.766,
+     "hansenTreeCover2000": 99.0,
+     "modisChangePp": -60.3,
+     "burnedYears": [
+      2004,
+      2017,
+      2019,
+      2020,
+      2021,
+      2022,
+      2024
+     ]
+    },
+    {
+     "lat": -5.925,
+     "lon": -53.525,
+     "apiCellId": "r15c26",
+     "hansenLossShare": 0.992,
+     "peakLossYear": 2018,
+     "peakLossShare": 0.487,
+     "hansenTreeCover2000": 99.5,
+     "modisChangePp": -48.9,
+     "burnedYears": [
+      2017,
+      2018,
+      2019,
+      2020,
+      2022,
+      2023,
+      2024
+     ]
+    },
+    {
+     "lat": -8.675,
+     "lon": -51.375,
+     "apiCellId": "r12c28",
+     "hansenLossShare": 0.99,
+     "peakLossYear": 2006,
+     "peakLossShare": 0.454,
+     "hansenTreeCover2000": 99.2,
+     "modisChangePp": -65.3,
+     "burnedYears": [
+      2005,
+      2006,
+      2007,
+      2008,
+      2010,
+      2014,
+      2015,
+      2017,
+      2023,
+      2024
+     ]
+    },
+    {
+     "lat": -9.125,
+     "lon": -61.075,
+     "apiCellId": "r11c18",
+     "hansenLossShare": 0.99,
+     "peakLossYear": 2022,
+     "peakLossShare": 0.568,
+     "hansenTreeCover2000": 99.7,
+     "modisChangePp": -55.3,
+     "burnedYears": [
+      2022,
+      2024
+     ]
+    },
+    {
+     "lat": -10.525,
+     "lon": -64.225,
+     "apiCellId": "r10c15",
+     "hansenLossShare": 0.988,
+     "peakLossYear": 2014,
+     "peakLossShare": 0.324,
+     "hansenTreeCover2000": 99.6,
+     "modisChangePp": -57.0,
+     "burnedYears": [
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2024
+     ]
+    },
+    {
+     "lat": -12.725,
+     "lon": -54.075,
+     "apiCellId": "r08c25",
+     "hansenLossShare": 0.987,
+     "peakLossYear": 2024,
+     "peakLossShare": 0.701,
+     "hansenTreeCover2000": 99.6,
+     "modisChangePp": -29.3,
+     "burnedYears": [
+      2008,
+      2024
+     ]
+    },
+    {
+     "lat": -7.925,
+     "lon": -55.025,
+     "apiCellId": "r13c24",
+     "hansenLossShare": 0.986,
+     "peakLossYear": 2020,
+     "peakLossShare": 0.457,
+     "hansenTreeCover2000": 99.7,
+     "modisChangePp": -58.2,
+     "burnedYears": [
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024
+     ]
+    },
+    {
+     "lat": -7.875,
+     "lon": -55.025,
+     "apiCellId": "r13c24",
+     "hansenLossShare": 0.986,
+     "peakLossYear": 2020,
+     "peakLossShare": 0.752,
+     "hansenTreeCover2000": 99.7,
+     "modisChangePp": -56.3,
+     "burnedYears": [
+      2020,
+      2021,
+      2022,
+      2023,
+      2024
+     ]
+    },
+    {
+     "lat": -8.475,
+     "lon": -54.725,
+     "apiCellId": "r12c25",
+     "hansenLossShare": 0.986,
+     "peakLossYear": 2020,
+     "peakLossShare": 0.485,
+     "hansenTreeCover2000": 99.3,
+     "modisChangePp": -50.8,
+     "burnedYears": [
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+     ]
+    }
+   ]
+  },
+  {
+   "zoneId": "amazon_brazil",
+   "label": "Brazilian Amazon",
+   "agreement2000": {
+    "r": 0.901,
+    "cells": 136812,
+    "biasPp": -21.9,
+    "rmsePp": 24.35,
+    "byHansenClass": [
+     {
+      "hansenRange": [
+       0,
+       10
+      ],
+      "cells": 2166,
+      "hansenMean": 4.3,
+      "modisMean": 12.1
+     },
+     {
+      "hansenRange": [
+       10,
+       30
+      ],
+      "cells": 5488,
+      "hansenMean": 21.0,
+      "modisMean": 18.9
+     },
+     {
+      "hansenRange": [
+       30,
+       50
+      ],
+      "cells": 7326,
+      "hansenMean": 40.3,
+      "modisMean": 31.1
+     },
+     {
+      "hansenRange": [
+       50,
+       70
+      ],
+      "cells": 9433,
+      "hansenMean": 60.5,
+      "modisMean": 45.1
+     },
+     {
+      "hansenRange": [
+       70,
+       90
+      ],
+      "cells": 15618,
+      "hansenMean": 81.2,
+      "modisMean": 59.5
+     },
+     {
+      "hansenRange": [
+       90,
+       100
+      ],
+      "cells": 96781,
+      "hansenMean": 98.5,
+      "modisMean": 73.2
+     }
+    ]
+   },
+   "changeVsLoss": {
+    "r": -0.781,
+    "cells": 136799,
+    "definition": "MOD44B mean(2024,2025) - mean(2001,2002), percentage points",
+    "byLossDecile": [
+     {
+      "decile": 1,
+      "hansenLossShareMean": 0.0,
+      "modisChangePpMean": 1.63,
+      "cells": 11363
+     },
+     {
+      "decile": 2,
+      "hansenLossShareMean": 0.0001,
+      "modisChangePpMean": 1.28,
+      "cells": 15987
+     },
+     {
+      "decile": 3,
+      "hansenLossShareMean": 0.0004,
+      "modisChangePpMean": 0.65,
+      "cells": 13649
+     },
+     {
+      "decile": 4,
+      "hansenLossShareMean": 0.001,
+      "modisChangePpMean": 0.26,
+      "cells": 13720
+     },
+     {
+      "decile": 5,
+      "hansenLossShareMean": 0.0035,
+      "modisChangePpMean": 0.66,
+      "cells": 13679
+     },
+     {
+      "decile": 6,
+      "hansenLossShareMean": 0.0173,
+      "modisChangePpMean": 0.47,
+      "cells": 13681
+     },
+     {
+      "decile": 7,
+      "hansenLossShareMean": 0.0706,
+      "modisChangePpMean": -0.15,
+      "cells": 13680
+     },
+     {
+      "decile": 8,
+      "hansenLossShareMean": 0.1781,
+      "modisChangePpMean": -3.27,
+      "cells": 13680
+     },
+     {
+      "decile": 9,
+      "hansenLossShareMean": 0.3329,
+      "modisChangePpMean": -10.27,
+      "cells": 13680
+     },
+     {
+      "decile": 10,
+      "hansenLossShareMean": 0.604,
+      "modisChangePpMean": -26.95,
+      "cells": 13680
+     }
+    ]
+   },
+   "lossWithFire": {
+    "definition": "Hansen loss area in cells with MCD64A1 burned area (share > 0) in the same or the previous calendar year; for 2001 only 2001 itself (2000 is a partial year)",
+    "years": [
+     {
+      "year": 2001,
+      "lossKm2": 17427.7,
+      "lossInBurnedCellsKm2": 7820.3,
+      "share": 0.449,
+      "zoneShareOfCellsBurned": 0.07
+     },
+     {
+      "year": 2002,
+      "lossKm2": 24116.0,
+      "lossInBurnedCellsKm2": 17927.2,
+      "share": 0.743,
+      "zoneShareOfCellsBurned": 0.158
+     },
+     {
+      "year": 2003,
+      "lossKm2": 21229.3,
+      "lossInBurnedCellsKm2": 17193.9,
+      "share": 0.81,
+      "zoneShareOfCellsBurned": 0.183
+     },
+     {
+      "year": 2004,
+      "lossKm2": 26445.3,
+      "lossInBurnedCellsKm2": 20578.8,
+      "share": 0.778,
+      "zoneShareOfCellsBurned": 0.187
+     },
+     {
+      "year": 2005,
+      "lossKm2": 25370.2,
+      "lossInBurnedCellsKm2": 20063.0,
+      "share": 0.791,
+      "zoneShareOfCellsBurned": 0.199
+     },
+     {
+      "year": 2006,
+      "lossKm2": 19048.1,
+      "lossInBurnedCellsKm2": 13723.7,
+      "share": 0.72,
+      "zoneShareOfCellsBurned": 0.179
+     },
+     {
+      "year": 2007,
+      "lossKm2": 15427.8,
+      "lossInBurnedCellsKm2": 10852.8,
+      "share": 0.703,
+      "zoneShareOfCellsBurned": 0.169
+     },
+     {
+      "year": 2008,
+      "lossKm2": 14553.2,
+      "lossInBurnedCellsKm2": 8939.3,
+      "share": 0.614,
+      "zoneShareOfCellsBurned": 0.162
+     },
+     {
+      "year": 2009,
+      "lossKm2": 10100.2,
+      "lossInBurnedCellsKm2": 4667.1,
+      "share": 0.462,
+      "zoneShareOfCellsBurned": 0.125
+     },
+     {
+      "year": 2010,
+      "lossKm2": 15750.0,
+      "lossInBurnedCellsKm2": 9883.9,
+      "share": 0.628,
+      "zoneShareOfCellsBurned": 0.144
+     },
+     {
+      "year": 2011,
+      "lossKm2": 11047.9,
+      "lossInBurnedCellsKm2": 5517.1,
+      "share": 0.499,
+      "zoneShareOfCellsBurned": 0.129
+     },
+     {
+      "year": 2012,
+      "lossKm2": 14962.6,
+      "lossInBurnedCellsKm2": 7091.8,
+      "share": 0.474,
+      "zoneShareOfCellsBurned": 0.104
+     },
+     {
+      "year": 2013,
+      "lossKm2": 10565.9,
+      "lossInBurnedCellsKm2": 3764.7,
+      "share": 0.356,
+      "zoneShareOfCellsBurned": 0.1
+     },
+     {
+      "year": 2014,
+      "lossKm2": 15546.9,
+      "lossInBurnedCellsKm2": 5913.4,
+      "share": 0.38,
+      "zoneShareOfCellsBurned": 0.096
+     },
+     {
+      "year": 2015,
+      "lossKm2": 13865.5,
+      "lossInBurnedCellsKm2": 7413.7,
+      "share": 0.535,
+      "zoneShareOfCellsBurned": 0.141
+     },
+     {
+      "year": 2016,
+      "lossKm2": 39458.8,
+      "lossInBurnedCellsKm2": 23699.0,
+      "share": 0.601,
+      "zoneShareOfCellsBurned": 0.148
+     },
+     {
+      "year": 2017,
+      "lossKm2": 32094.8,
+      "lossInBurnedCellsKm2": 18731.0,
+      "share": 0.584,
+      "zoneShareOfCellsBurned": 0.142
+     },
+     {
+      "year": 2018,
+      "lossKm2": 20259.9,
+      "lossInBurnedCellsKm2": 10028.1,
+      "share": 0.495,
+      "zoneShareOfCellsBurned": 0.132
+     },
+     {
+      "year": 2019,
+      "lossKm2": 19470.2,
+      "lossInBurnedCellsKm2": 9662.1,
+      "share": 0.496,
+      "zoneShareOfCellsBurned": 0.112
+     },
+     {
+      "year": 2020,
+      "lossKm2": 22192.2,
+      "lossInBurnedCellsKm2": 12371.4,
+      "share": 0.557,
+      "zoneShareOfCellsBurned": 0.137
+     },
+     {
+      "year": 2021,
+      "lossKm2": 20474.4,
+      "lossInBurnedCellsKm2": 10708.0,
+      "share": 0.523,
+      "zoneShareOfCellsBurned": 0.124
+     },
+     {
+      "year": 2022,
+      "lossKm2": 23934.0,
+      "lossInBurnedCellsKm2": 13401.2,
+      "share": 0.56,
+      "zoneShareOfCellsBurned": 0.119
+     },
+     {
+      "year": 2023,
+      "lossKm2": 17958.5,
+      "lossInBurnedCellsKm2": 8805.8,
+      "share": 0.49,
+      "zoneShareOfCellsBurned": 0.142
+     },
+     {
+      "year": 2024,
+      "lossKm2": 34875.2,
+      "lossInBurnedCellsKm2": 25109.1,
+      "share": 0.72,
+      "zoneShareOfCellsBurned": 0.169
+     },
+     {
+      "year": 2025,
+      "lossKm2": 20647.9,
+      "lossInBurnedCellsKm2": 12524.7,
+      "share": 0.607,
+      "zoneShareOfCellsBurned": 0.145
+     }
+    ]
+   },
+   "hotspots": [
+    {
+     "lat": -11.175,
+     "lon": -54.875,
+     "apiCellId": "r09c25",
+     "hansenLossShare": 0.996,
+     "peakLossYear": 2020,
+     "peakLossShare": 0.271,
+     "hansenTreeCover2000": 99.6,
+     "modisChangePp": -48.9,
+     "burnedYears": [
+      2018,
+      2020,
+      2022,
+      2023,
+      2024,
+      2025
+     ]
+    },
+    {
+     "lat": -10.875,
+     "lon": -54.075,
+     "apiCellId": "r10c25",
+     "hansenLossShare": 0.992,
+     "peakLossYear": 2017,
+     "peakLossShare": 0.766,
+     "hansenTreeCover2000": 99.0,
+     "modisChangePp": -60.3,
+     "burnedYears": [
+      2004,
+      2017,
+      2019,
+      2020,
+      2021,
+      2022,
+      2024
+     ]
+    },
+    {
+     "lat": -5.925,
+     "lon": -53.525,
+     "apiCellId": "r15c26",
+     "hansenLossShare": 0.992,
+     "peakLossYear": 2018,
+     "peakLossShare": 0.487,
+     "hansenTreeCover2000": 99.5,
+     "modisChangePp": -48.9,
+     "burnedYears": [
+      2017,
+      2018,
+      2019,
+      2020,
+      2022,
+      2023,
+      2024
+     ]
+    },
+    {
+     "lat": -8.675,
+     "lon": -51.375,
+     "apiCellId": "r12c28",
+     "hansenLossShare": 0.99,
+     "peakLossYear": 2006,
+     "peakLossShare": 0.454,
+     "hansenTreeCover2000": 99.2,
+     "modisChangePp": -65.3,
+     "burnedYears": [
+      2005,
+      2006,
+      2007,
+      2008,
+      2010,
+      2014,
+      2015,
+      2017,
+      2023,
+      2024
+     ]
+    },
+    {
+     "lat": -9.125,
+     "lon": -61.075,
+     "apiCellId": "r11c18",
+     "hansenLossShare": 0.99,
+     "peakLossYear": 2022,
+     "peakLossShare": 0.568,
+     "hansenTreeCover2000": 99.7,
+     "modisChangePp": -55.3,
+     "burnedYears": [
+      2022,
+      2024
+     ]
+    },
+    {
+     "lat": -10.525,
+     "lon": -64.225,
+     "apiCellId": "r10c15",
+     "hansenLossShare": 0.988,
+     "peakLossYear": 2014,
+     "peakLossShare": 0.324,
+     "hansenTreeCover2000": 99.6,
+     "modisChangePp": -57.0,
+     "burnedYears": [
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2024
+     ]
+    },
+    {
+     "lat": -12.725,
+     "lon": -54.075,
+     "apiCellId": "r08c25",
+     "hansenLossShare": 0.987,
+     "peakLossYear": 2024,
+     "peakLossShare": 0.701,
+     "hansenTreeCover2000": 99.6,
+     "modisChangePp": -29.3,
+     "burnedYears": [
+      2008,
+      2024
+     ]
+    },
+    {
+     "lat": -7.925,
+     "lon": -55.025,
+     "apiCellId": "r13c24",
+     "hansenLossShare": 0.986,
+     "peakLossYear": 2020,
+     "peakLossShare": 0.457,
+     "hansenTreeCover2000": 99.7,
+     "modisChangePp": -58.2,
+     "burnedYears": [
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024
+     ]
+    },
+    {
+     "lat": -7.875,
+     "lon": -55.025,
+     "apiCellId": "r13c24",
+     "hansenLossShare": 0.986,
+     "peakLossYear": 2020,
+     "peakLossShare": 0.752,
+     "hansenTreeCover2000": 99.7,
+     "modisChangePp": -56.3,
+     "burnedYears": [
+      2020,
+      2021,
+      2022,
+      2023,
+      2024
+     ]
+    },
+    {
+     "lat": -8.475,
+     "lon": -54.725,
+     "apiCellId": "r12c25",
+     "hansenLossShare": 0.986,
+     "peakLossYear": 2020,
+     "peakLossShare": 0.485,
+     "hansenTreeCover2000": 99.3,
+     "modisChangePp": -50.8,
+     "burnedYears": [
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+     ]
+    }
+   ]
+  },
+  {
+   "zoneId": "amazon_peru",
+   "label": "Peruvian Amazon",
+   "agreement2000": {
+    "r": 0.666,
+    "cells": 25648,
+    "biasPp": -27.1,
+    "rmsePp": 29.42,
+    "byHansenClass": [
+     {
+      "hansenRange": [
+       0,
+       10
+      ],
+      "cells": 24,
+      "hansenMean": 6.6,
+      "modisMean": 11.5
+     },
+     {
+      "hansenRange": [
+       10,
+       30
+      ],
+      "cells": 143,
+      "hansenMean": 22.1,
+      "modisMean": 20.1
+     },
+     {
+      "hansenRange": [
+       30,
+       50
+      ],
+      "cells": 321,
+      "hansenMean": 41.1,
+      "modisMean": 29.6
+     },
+     {
+      "hansenRange": [
+       50,
+       70
+      ],
+      "cells": 767,
+      "hansenMean": 61.7,
+      "modisMean": 40.2
+     },
+     {
+      "hansenRange": [
+       70,
+       90
+      ],
+      "cells": 2937,
+      "hansenMean": 82.6,
+      "modisMean": 52.1
+     },
+     {
+      "hansenRange": [
+       90,
+       100
+      ],
+      "cells": 21456,
+      "hansenMean": 98.2,
+      "modisMean": 70.9
+     }
+    ]
+   },
+   "changeVsLoss": {
+    "r": -0.603,
+    "cells": 25648,
+    "definition": "MOD44B mean(2024,2025) - mean(2001,2002), percentage points",
+    "byLossDecile": [
+     {
+      "decile": 1,
+      "hansenLossShareMean": 0.0,
+      "modisChangePpMean": 2.01,
+      "cells": 2288
+     },
+     {
+      "decile": 2,
+      "hansenLossShareMean": 0.0002,
+      "modisChangePpMean": 2.06,
+      "cells": 2837
+     },
+     {
+      "decile": 3,
+      "hansenLossShareMean": 0.0005,
+      "modisChangePpMean": 2.43,
+      "cells": 2570
+     },
+     {
+      "decile": 4,
+      "hansenLossShareMean": 0.0012,
+      "modisChangePpMean": 2.54,
+      "cells": 2564
+     },
+     {
+      "decile": 5,
+      "hansenLossShareMean": 0.0029,
+      "modisChangePpMean": 2.99,
+      "cells": 2565
+     },
+     {
+      "decile": 6,
+      "hansenLossShareMean": 0.007,
+      "modisChangePpMean": 3.01,
+      "cells": 2565
+     },
+     {
+      "decile": 7,
+      "hansenLossShareMean": 0.0181,
+      "modisChangePpMean": 2.21,
+      "cells": 2564
+     },
+     {
+      "decile": 8,
+      "hansenLossShareMean": 0.0486,
+      "modisChangePpMean": 1.05,
+      "cells": 2565
+     },
+     {
+      "decile": 9,
+      "hansenLossShareMean": 0.1323,
+      "modisChangePpMean": -2.26,
+      "cells": 2565
+     },
+     {
+      "decile": 10,
+      "hansenLossShareMean": 0.3785,
+      "modisChangePpMean": -11.82,
+      "cells": 2565
+     }
+    ]
+   },
+   "lossWithFire": {
+    "definition": "Hansen loss area in cells with MCD64A1 burned area (share > 0) in the same or the previous calendar year; for 2001 only 2001 itself (2000 is a partial year)",
+    "years": [
+     {
+      "year": 2001,
+      "lossKm2": 839.7,
+      "lossInBurnedCellsKm2": 8.6,
+      "share": 0.01,
+      "zoneShareOfCellsBurned": 0.002
+     },
+     {
+      "year": 2002,
+      "lossKm2": 780.6,
+      "lossInBurnedCellsKm2": 79.7,
+      "share": 0.102,
+      "zoneShareOfCellsBurned": 0.009
+     },
+     {
+      "year": 2003,
+      "lossKm2": 720.9,
+      "lossInBurnedCellsKm2": 159.1,
+      "share": 0.221,
+      "zoneShareOfCellsBurned": 0.021
+     },
+     {
+      "year": 2004,
+      "lossKm2": 992.2,
+      "lossInBurnedCellsKm2": 173.7,
+      "share": 0.175,
+      "zoneShareOfCellsBurned": 0.024
+     },
+     {
+      "year": 2005,
+      "lossKm2": 1609.1,
+      "lossInBurnedCellsKm2": 481.1,
+      "share": 0.299,
+      "zoneShareOfCellsBurned": 0.042
+     },
+     {
+      "year": 2006,
+      "lossKm2": 857.3,
+      "lossInBurnedCellsKm2": 192.1,
+      "share": 0.224,
+      "zoneShareOfCellsBurned": 0.043
+     },
+     {
+      "year": 2007,
+      "lossKm2": 1137.6,
+      "lossInBurnedCellsKm2": 219.0,
+      "share": 0.192,
+      "zoneShareOfCellsBurned": 0.029
+     },
+     {
+      "year": 2008,
+      "lossKm2": 1241.5,
+      "lossInBurnedCellsKm2": 268.2,
+      "share": 0.216,
+      "zoneShareOfCellsBurned": 0.029
+     },
+     {
+      "year": 2009,
+      "lossKm2": 1762.0,
+      "lossInBurnedCellsKm2": 357.6,
+      "share": 0.203,
+      "zoneShareOfCellsBurned": 0.021
+     },
+     {
+      "year": 2010,
+      "lossKm2": 1408.3,
+      "lossInBurnedCellsKm2": 327.4,
+      "share": 0.232,
+      "zoneShareOfCellsBurned": 0.033
+     },
+     {
+      "year": 2011,
+      "lossKm2": 1244.9,
+      "lossInBurnedCellsKm2": 274.0,
+      "share": 0.22,
+      "zoneShareOfCellsBurned": 0.032
+     },
+     {
+      "year": 2012,
+      "lossKm2": 2730.3,
+      "lossInBurnedCellsKm2": 598.7,
+      "share": 0.219,
+      "zoneShareOfCellsBurned": 0.027
+     },
+     {
+      "year": 2013,
+      "lossKm2": 2091.9,
+      "lossInBurnedCellsKm2": 460.6,
+      "share": 0.22,
+      "zoneShareOfCellsBurned": 0.029
+     },
+     {
+      "year": 2014,
+      "lossKm2": 2068.0,
+      "lossInBurnedCellsKm2": 338.8,
+      "share": 0.164,
+      "zoneShareOfCellsBurned": 0.021
+     },
+     {
+      "year": 2015,
+      "lossKm2": 1689.6,
+      "lossInBurnedCellsKm2": 259.0,
+      "share": 0.153,
+      "zoneShareOfCellsBurned": 0.02
+     },
+     {
+      "year": 2016,
+      "lossKm2": 2347.5,
+      "lossInBurnedCellsKm2": 369.5,
+      "share": 0.157,
+      "zoneShareOfCellsBurned": 0.029
+     },
+     {
+      "year": 2017,
+      "lossKm2": 2984.4,
+      "lossInBurnedCellsKm2": 332.7,
+      "share": 0.111,
+      "zoneShareOfCellsBurned": 0.025
+     },
+     {
+      "year": 2018,
+      "lossKm2": 2154.6,
+      "lossInBurnedCellsKm2": 242.8,
+      "share": 0.113,
+      "zoneShareOfCellsBurned": 0.02
+     },
+     {
+      "year": 2019,
+      "lossKm2": 2359.9,
+      "lossInBurnedCellsKm2": 402.8,
+      "share": 0.171,
+      "zoneShareOfCellsBurned": 0.027
+     },
+     {
+      "year": 2020,
+      "lossKm2": 2852.1,
+      "lossInBurnedCellsKm2": 462.9,
+      "share": 0.162,
+      "zoneShareOfCellsBurned": 0.033
+     },
+     {
+      "year": 2021,
+      "lossKm2": 2301.7,
+      "lossInBurnedCellsKm2": 437.9,
+      "share": 0.19,
+      "zoneShareOfCellsBurned": 0.031
+     },
+     {
+      "year": 2022,
+      "lossKm2": 2438.8,
+      "lossInBurnedCellsKm2": 477.7,
+      "share": 0.196,
+      "zoneShareOfCellsBurned": 0.028
+     },
+     {
+      "year": 2023,
+      "lossKm2": 2354.1,
+      "lossInBurnedCellsKm2": 433.1,
+      "share": 0.184,
+      "zoneShareOfCellsBurned": 0.029
+     },
+     {
+      "year": 2024,
+      "lossKm2": 2760.4,
+      "lossInBurnedCellsKm2": 800.3,
+      "share": 0.29,
+      "zoneShareOfCellsBurned": 0.038
+     },
+     {
+      "year": 2025,
+      "lossKm2": 2569.5,
+      "lossInBurnedCellsKm2": 429.7,
+      "share": 0.167,
+      "zoneShareOfCellsBurned": 0.033
+     }
+    ]
+   },
+   "hotspots": [
+    {
+     "lat": -8.525,
+     "lon": -74.525,
+     "apiCellId": "r12c05",
+     "hansenLossShare": 0.936,
+     "peakLossYear": 2024,
+     "peakLossShare": 0.536,
+     "hansenTreeCover2000": 97.7,
+     "modisChangePp": -51.9,
+     "burnedYears": [
+      2005,
+      2007,
+      2008,
+      2010,
+      2012,
+      2014,
+      2016,
+      2019,
+      2021,
+      2022,
+      2024
+     ]
+    },
+    {
+     "lat": -6.125,
+     "lon": -76.175,
+     "apiCellId": "r14c03",
+     "hansenLossShare": 0.936,
+     "peakLossYear": 2007,
+     "peakLossShare": 0.514,
+     "hansenTreeCover2000": 99.5,
+     "modisChangePp": -11.0,
+     "burnedYears": [
+      2006,
+      2007,
+      2008
+     ]
+    },
+    {
+     "lat": -8.175,
+     "lon": -74.925,
+     "apiCellId": "r12c05",
+     "hansenLossShare": 0.9,
+     "peakLossYear": 2013,
+     "peakLossShare": 0.331,
+     "hansenTreeCover2000": 98.2,
+     "modisChangePp": -22.7,
+     "burnedYears": [
+      2013,
+      2014,
+      2019,
+      2022,
+      2024
+     ]
+    },
+    {
+     "lat": -8.575,
+     "lon": -74.475,
+     "apiCellId": "r12c05",
+     "hansenLossShare": 0.892,
+     "peakLossYear": 2022,
+     "peakLossShare": 0.197,
+     "hansenTreeCover2000": 98.8,
+     "modisChangePp": -45.6,
+     "burnedYears": [
+      2005,
+      2007,
+      2008,
+      2010,
+      2014,
+      2015,
+      2016,
+      2017,
+      2019,
+      2021,
+      2022,
+      2024
+     ]
+    },
+    {
+     "lat": -6.125,
+     "lon": -76.125,
+     "apiCellId": "r14c03",
+     "hansenLossShare": 0.886,
+     "peakLossYear": 2007,
+     "peakLossShare": 0.361,
+     "hansenTreeCover2000": 99.9,
+     "modisChangePp": -15.1,
+     "burnedYears": [
+      2006,
+      2007,
+      2008
+     ]
+    },
+    {
+     "lat": -11.325,
+     "lon": -69.575,
+     "apiCellId": "r09c10",
+     "hansenLossShare": 0.883,
+     "peakLossYear": 2019,
+     "peakLossShare": 0.146,
+     "hansenTreeCover2000": 97.9,
+     "modisChangePp": -39.6,
+     "burnedYears": [
+      2004,
+      2008,
+      2010,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024
+     ]
+    },
+    {
+     "lat": -8.425,
+     "lon": -75.025,
+     "apiCellId": "r12c04",
+     "hansenLossShare": 0.874,
+     "peakLossYear": 2008,
+     "peakLossShare": 0.142,
+     "hansenTreeCover2000": 96.3,
+     "modisChangePp": -26.7,
+     "burnedYears": [
+      2007,
+      2008,
+      2010,
+      2011,
+      2012,
+      2013,
+      2024,
+      2025
+     ]
+    },
+    {
+     "lat": -8.025,
+     "lon": -74.925,
+     "apiCellId": "r12c05",
+     "hansenLossShare": 0.861,
+     "peakLossYear": 2022,
+     "peakLossShare": 0.408,
+     "hansenTreeCover2000": 99.3,
+     "modisChangePp": -47.5,
+     "burnedYears": [
+      2005,
+      2010,
+      2019,
+      2022,
+      2023,
+      2024
+     ]
+    },
+    {
+     "lat": -8.125,
+     "lon": -74.925,
+     "apiCellId": "r12c05",
+     "hansenLossShare": 0.857,
+     "peakLossYear": 2012,
+     "peakLossShare": 0.422,
+     "hansenTreeCover2000": 99.5,
+     "modisChangePp": -18.8,
+     "burnedYears": [
+      2012,
+      2013,
+      2024
+     ]
+    },
+    {
+     "lat": -5.825,
+     "lon": -77.175,
+     "apiCellId": "r15c02",
+     "hansenLossShare": 0.853,
+     "peakLossYear": 2010,
+     "peakLossShare": 0.196,
+     "hansenTreeCover2000": 99.3,
+     "modisChangePp": -41.2,
+     "burnedYears": [
+      2011
+     ]
+    }
+   ]
+  }
+ ],
+ "cases": [
+  {
+   "id": "la_pampa",
+   "label": "La Pampa, Madre de Dios (gold mining)",
+   "lat": -12.975,
+   "lon": -70.025,
+   "reference": "MAAP #233 (Sep 2025), https://www.maapprogram.org/?p=26475",
+   "apiCellId": "r08c09",
+   "years": [
+    2000,
+    2001,
+    2002,
+    2003,
+    2004,
+    2005,
+    2006,
+    2007,
+    2008,
+    2009,
+    2010,
+    2011,
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+   ],
+   "hansenTreeCover": [
+    99.6,
+    99.6,
+    99.6,
+    99.6,
+    99.6,
+    99.6,
+    99.6,
+    99.6,
+    99.6,
+    99.6,
+    99.5,
+    99.3,
+    95.5,
+    91.6,
+    67.3,
+    57.4,
+    54.5,
+    49.2,
+    41.6,
+    36.2,
+    35.9,
+    35.7,
+    34.8,
+    29.6,
+    26.1,
+    23.0
+   ],
+   "modisTreeCover": [
+    79.6,
+    78.1,
+    76.5,
+    74.7,
+    81.8,
+    79.8,
+    77.4,
+    80.1,
+    80.7,
+    77.0,
+    78.3,
+    78.2,
+    69.5,
+    64.1,
+    41.3,
+    29.7,
+    32.6,
+    22.7,
+    20.1,
+    15.5,
+    15.5,
+    21.1,
+    17.9,
+    13.9,
+    10.5,
+    5.4
+   ],
+   "lossYears": [
+    2001,
+    2002,
+    2003,
+    2004,
+    2005,
+    2006,
+    2007,
+    2008,
+    2009,
+    2010,
+    2011,
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+   ],
+   "hansenLossShare": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.002,
+    0.038,
+    0.039,
+    0.244,
+    0.1,
+    0.029,
+    0.053,
+    0.077,
+    0.054,
+    0.003,
+    0.003,
+    0.008,
+    0.053,
+    0.034,
+    0.032
+   ],
+   "burnedMonths": 0,
+   "burnedMonthsList": [],
+   "burnedPeriod": "2001-01..2026-09"
+  }
+ ],
+ "meta": {
+  "generatedUtc": "2026-11-15T06:53:49+00:00",
+  "sources": {
+   "MOD44B": "10.5067/MODIS/MOD44B.061",
+   "HANSEN": "10.1126/science.1244693",
+   "MCD64A1": "10.5067/MODIS/MCD64A1.061"
+  },
+  "note": "Descriptive cross-checks between independent datasets; no significance test (r values have no p-value). Burned means MCD64A1 burned share > 0 in the cell; only complete calendar years 2001-2025 are used.",
+  "aiDisclosure": "Generated by the SIGNO pipeline (pipeline/), code written with Claude (Anthropic) via Claude Code following the team's choices; values come only from the cited NASA and Hansen/UMD datasets."
+ },
+ "trendChecks": {
+  "generatedUtc": "2026-11-15T10:43:02+00:00",
+  "design": {
+   "alpha": 0.05,
+   "minCompleteShare": 0.8,
+   "autocorrelationRuleThreshold": 0.2,
+   "permutations": 20,
+   "seed": 20261115,
+   "text": "Mann-Kendall test on yearly values with Sen's slope, Benjamini-Hochberg FDR across the tested cells of each variable. Pre-registered rules (autocorrelation, satellite drift) applied as written. V1 shuffles the years of every cell and reruns the whole procedure; V2 adds to the shuffled series a linear trend equal to the median |Sen slope| of the real significant cells."
+  },
+  "variables": [
+   {
+    "variableId": "ndvi",
+    "testUsed": "Mann-Kendall (original)",
+    "autocorrelationShare": 0.1696,
+    "period": [
+     2001,
+     2020
+    ],
+    "units": "unitless per decade",
+    "cellsTotal": 566,
+    "cellsTested": 566,
+    "significantIncreasing": 158,
+    "significantDecreasing": 48,
+    "medianSlopePerDecade": 0.0034037,
+    "medianSlopePerDecadeSignificant": 0.005489,
+    "cellsWithMissingYear": 0
+   },
+   {
+    "variableId": "evi",
+    "testUsed": "Mann-Kendall (original)",
+    "autocorrelationShare": 0.03,
+    "period": [
+     2001,
+     2020
+    ],
+    "units": "unitless per decade",
+    "cellsTotal": 566,
+    "cellsTested": 566,
+    "significantIncreasing": 68,
+    "significantDecreasing": 3,
+    "medianSlopePerDecade": 0.0063512,
+    "medianSlopePerDecadeSignificant": 0.012171,
+    "cellsWithMissingYear": 0
+   },
+   {
+    "variableId": "lst_day",
+    "testUsed": "Mann-Kendall (original)",
+    "autocorrelationShare": 0.0459,
+    "period": [
+     2001,
+     2020
+    ],
+    "units": "°C per decade",
+    "cellsTotal": 566,
+    "cellsTested": 566,
+    "significantIncreasing": 429,
+    "significantDecreasing": 0,
+    "medianSlopePerDecade": 0.33486,
+    "medianSlopePerDecadeSignificant": 0.36988,
+    "cellsWithMissingYear": 0
+   },
+   {
+    "variableId": "precip",
+    "testUsed": "Mann-Kendall (original)",
+    "autocorrelationShare": 0.0901,
+    "period": [
+     2001,
+     2024
+    ],
+    "units": "mm per year per decade",
+    "cellsTotal": 566,
+    "cellsTested": 566,
+    "significantIncreasing": 0,
+    "significantDecreasing": 69,
+    "medianSlopePerDecade": -64.237,
+    "medianSlopePerDecadeSignificant": -315.6,
+    "cellsWithMissingYear": 0
+   },
+   {
+    "variableId": "burned_area",
+    "testUsed": "Mann-Kendall (original)",
+    "autocorrelationShare": 0.0689,
+    "period": [
+     2001,
+     2025
+    ],
+    "units": "% of cell per year per decade",
+    "cellsTotal": 566,
+    "cellsTested": 566,
+    "significantIncreasing": 27,
+    "significantDecreasing": 20,
+    "medianSlopePerDecade": 0.0,
+    "medianSlopePerDecadeSignificant": 0.0094505,
+    "cellsWithMissingYear": 7
+   },
+   {
+    "variableId": "lossKm2",
+    "testUsed": "Mann-Kendall (original)",
+    "autocorrelationShare": 0.1625,
+    "period": [
+     2001,
+     2025
+    ],
+    "units": "km² per year per decade",
+    "cellsTotal": 566,
+    "cellsTested": 566,
+    "significantIncreasing": 318,
+    "significantDecreasing": 20,
+    "medianSlopePerDecade": 2.4,
+    "medianSlopePerDecadeSignificant": 5.1801,
+    "cellsWithMissingYear": 0
+   },
+   {
+    "variableId": "modisTreeCover",
+    "testUsed": "Mann-Kendall (original)",
+    "autocorrelationShare": 0.1007,
+    "period": [
+     2000,
+     2024
+    ],
+    "units": "% of cell per decade",
+    "cellsTotal": 566,
+    "cellsTested": 566,
+    "significantIncreasing": 27,
+    "significantDecreasing": 135,
+    "medianSlopePerDecade": -0.27507,
+    "medianSlopePerDecadeSignificant": -2.9967,
+    "cellsWithMissingYear": 0
+   }
+  ],
+  "d1Drift": {
+   "years": [
+    2015,
+    2025
+   ],
+   "overpassHoursFirstYear": 10.543,
+   "overpassHoursLastYear": 9.413,
+   "variables": {
+    "ndvi": {
+     "r": 0.85,
+     "pValue": 0.0009,
+     "n": 11,
+     "endsIn2020": true
+    },
+    "evi": {
+     "r": 0.85,
+     "pValue": 0.0009,
+     "n": 11,
+     "endsIn2020": true
+    }
+   },
+   "rule": "If |r| >= 0.5 for a variable, its test ends in 2020 (like land surface temperature); otherwise it keeps 2001-2025 and 2021-2025 are flagged as satellite drift years."
+  },
+  "v1FalsePositives": {
+   "ndvi": {
+    "permutations": 20,
+    "meanShareSignificant": 0.0,
+    "maxShareSignificant": 0.0
+   },
+   "evi": {
+    "permutations": 20,
+    "meanShareSignificant": 0.0,
+    "maxShareSignificant": 0.0
+   },
+   "lst_day": {
+    "permutations": 20,
+    "meanShareSignificant": 0.0,
+    "maxShareSignificant": 0.0
+   },
+   "precip": {
+    "permutations": 20,
+    "meanShareSignificant": 0.0,
+    "maxShareSignificant": 0.0
+   },
+   "burned_area": {
+    "permutations": 20,
+    "meanShareSignificant": 9e-05,
+    "maxShareSignificant": 0.00177
+   },
+   "lossKm2": {
+    "permutations": 20,
+    "meanShareSignificant": 0.0,
+    "maxShareSignificant": 0.0
+   },
+   "modisTreeCover": {
+    "permutations": 20,
+    "meanShareSignificant": 0.0,
+    "maxShareSignificant": 0.0
+   }
+  },
+  "v2Detection": {
+   "ndvi": {
+    "injectedSlopePerDecade": 0.0064091,
+    "meanShareDetected": 0.566,
+    "minShareDetected": 0.5406,
+    "meanShareDetectedIncreasing": 0.566
+   },
+   "evi": {
+    "injectedSlopePerDecade": 0.012274,
+    "meanShareDetected": 0.7337,
+    "minShareDetected": 0.6731,
+    "meanShareDetectedIncreasing": 0.7337
+   },
+   "lst_day": {
+    "injectedSlopePerDecade": 0.36988,
+    "meanShareDetected": 0.5252,
+    "minShareDetected": 0.4629,
+    "meanShareDetectedIncreasing": 0.5252
+   },
+   "precip": {
+    "injectedSlopePerDecade": 315.6,
+    "meanShareDetected": 0.9154,
+    "minShareDetected": 0.8905,
+    "meanShareDetectedIncreasing": 0.9154
+   },
+   "burned_area": {
+    "injectedSlopePerDecade": 0.47219,
+    "meanShareDetected": 0.7739,
+    "minShareDetected": 0.7456,
+    "meanShareDetectedIncreasing": 0.7734
+   },
+   "lossKm2": {
+    "injectedSlopePerDecade": 6.3883,
+    "meanShareDetected": 0.5483,
+    "minShareDetected": 0.5212,
+    "meanShareDetectedIncreasing": 0.5471
+   },
+   "modisTreeCover": {
+    "injectedSlopePerDecade": 3.0732,
+    "meanShareDetected": 0.8533,
+    "minShareDetected": 0.8145,
+    "meanShareDetectedIncreasing": 0.8532
+   }
+  },
+  "v3KnownPlaces": [
+   {
+    "cellId": "r09c25",
+    "kind": "hotspot",
+    "zones": [
+     "amazon",
+     "amazon_brazil"
+    ],
+    "lossKm2": {
+     "slopePerDecade": 6.7968,
+     "pValue": 0.76142,
+     "qValue": 0.79808,
+     "significant": false,
+     "direction": "increasing",
+     "expectedDirection": "increasing",
+     "directionAsExpected": true
+    },
+    "modisTreeCover": {
+     "slopePerDecade": -6.5623,
+     "pValue": 7.9896e-09,
+     "qValue": 5.0246e-07,
+     "significant": true,
+     "direction": "decreasing",
+     "expectedDirection": "decreasing",
+     "directionAsExpected": true
+    }
+   },
+   {
+    "cellId": "r10c25",
+    "kind": "hotspot",
+    "zones": [
+     "amazon",
+     "amazon_brazil"
+    ],
+    "lossKm2": {
+     "slopePerDecade": -42.19,
+     "pValue": 0.088211,
+     "qValue": 0.12089,
+     "significant": false,
+     "direction": "decreasing",
+     "expectedDirection": "increasing",
+     "directionAsExpected": false
+    },
+    "modisTreeCover": {
+     "slopePerDecade": -4.1597,
+     "pValue": 5.2581e-06,
+     "qValue": 7.2587e-05,
+     "significant": true,
+     "direction": "decreasing",
+     "expectedDirection": "decreasing",
+     "directionAsExpected": true
+    }
+   },
+   {
+    "cellId": "r15c26",
+    "kind": "hotspot",
+    "zones": [
+     "amazon",
+     "amazon_brazil"
+    ],
+    "lossKm2": {
+     "slopePerDecade": 11.232,
+     "pValue": 0.45472,
+     "qValue": 0.51995,
+     "significant": false,
+     "direction": "increasing",
+     "expectedDirection": "increasing",
+     "directionAsExpected": true
+    },
+    "modisTreeCover": {
+     "slopePerDecade": -1.6477,
+     "pValue": 0.058386,
+     "qValue": 0.15335,
+     "significant": false,
+     "direction": "decreasing",
+     "expectedDirection": "decreasing",
+     "directionAsExpected": true
+    }
+   },
+   {
+    "cellId": "r12c28",
+    "kind": "hotspot",
+    "zones": [
+     "amazon",
+     "amazon_brazil"
+    ],
+    "lossKm2": {
+     "slopePerDecade": -26.562,
+     "pValue": 0.38751,
+     "qValue": 0.44671,
+     "significant": false,
+     "direction": "decreasing",
+     "expectedDirection": "increasing",
+     "directionAsExpected": false
+    },
+    "modisTreeCover": {
+     "slopePerDecade": -5.1595,
+     "pValue": 9.6082e-05,
+     "qValue": 0.00093762,
+     "significant": true,
+     "direction": "decreasing",
+     "expectedDirection": "decreasing",
+     "directionAsExpected": true
+    }
+   },
+   {
+    "cellId": "r11c18",
+    "kind": "hotspot",
+    "zones": [
+     "amazon",
+     "amazon_brazil"
+    ],
+    "lossKm2": {
+     "slopePerDecade": -20.702,
+     "pValue": 0.23361,
+     "qValue": 0.28435,
+     "significant": false,
+     "direction": "decreasing",
+     "expectedDirection": "increasing",
+     "directionAsExpected": false
+    },
+    "modisTreeCover": {
+     "slopePerDecade": -3.6503,
+     "pValue": 2.6978e-08,
+     "qValue": 1.018e-06,
+     "significant": true,
+     "direction": "decreasing",
+     "expectedDirection": "decreasing",
+     "directionAsExpected": true
+    }
+   },
+   {
+    "cellId": "r10c15",
+    "kind": "hotspot",
+    "zones": [
+     "amazon",
+     "amazon_brazil"
+    ],
+    "lossKm2": {
+     "slopePerDecade": 5.8333,
+     "pValue": 0.83352,
+     "qValue": 0.85466,
+     "significant": false,
+     "direction": "increasing",
+     "expectedDirection": "increasing",
+     "directionAsExpected": true
+    },
+    "modisTreeCover": {
+     "slopePerDecade": -8.1429,
+     "pValue": 3.332e-10,
+     "qValue": 4.7148e-08,
+     "significant": true,
+     "direction": "decreasing",
+     "expectedDirection": "decreasing",
+     "directionAsExpected": true
+    }
+   },
+   {
+    "cellId": "r08c25",
+    "kind": "hotspot",
+    "zones": [
+     "amazon",
+     "amazon_brazil"
+    ],
+    "lossKm2": {
+     "slopePerDecade": -23.548,
+     "pValue": 0.38751,
+     "qValue": 0.44671,
+     "significant": false,
+     "direction": "decreasing",
+     "expectedDirection": "increasing",
+     "directionAsExpected": false
+    },
+    "modisTreeCover": {
+     "slopePerDecade": -7.9721,
+     "pValue": 4.0555e-08,
+     "qValue": 1.3502e-06,
+     "significant": true,
+     "direction": "decreasing",
+     "expectedDirection": "decreasing",
+     "directionAsExpected": true
+    }
+   },
+   {
+    "cellId": "r13c24",
+    "kind": "hotspot",
+    "zones": [
+     "amazon",
+     "amazon_brazil"
+    ],
+    "lossKm2": {
+     "slopePerDecade": 10.345,
+     "pValue": 0.69134,
+     "qValue": 0.73277,
+     "significant": false,
+     "direction": "increasing",
+     "expectedDirection": "increasing",
+     "directionAsExpected": true
+    },
+    "modisTreeCover": {
+     "slopePerDecade": -7.575,
+     "pValue": 1.053e-08,
+     "qValue": 5.9598e-07,
+     "significant": true,
+     "direction": "decreasing",
+     "expectedDirection": "decreasing",
+     "directionAsExpected": true
+    }
+   },
+   {
+    "cellId": "r12c25",
+    "kind": "hotspot",
+    "zones": [
+     "amazon",
+     "amazon_brazil"
+    ],
+    "lossKm2": {
+     "slopePerDecade": 50.947,
+     "pValue": 0.006285,
+     "qValue": 0.013078,
+     "significant": true,
+     "direction": "increasing",
+     "expectedDirection": "increasing",
+     "directionAsExpected": true
+    },
+    "modisTreeCover": {
+     "slopePerDecade": -3.7479,
+     "pValue": 6.5593e-06,
+     "qValue": 8.2502e-05,
+     "significant": true,
+     "direction": "decreasing",
+     "expectedDirection": "decreasing",
+     "directionAsExpected": true
+    }
+   },
+   {
+    "cellId": "r12c05",
+    "kind": "hotspot",
+    "zones": [
+     "amazon_peru"
+    ],
+    "lossKm2": {
+     "slopePerDecade": 72.896,
+     "pValue": 3.5677e-05,
+     "qValue": 0.00021949,
+     "significant": true,
+     "direction": "increasing",
+     "expectedDirection": "increasing",
+     "directionAsExpected": true
+    },
+    "modisTreeCover": {
+     "slopePerDecade": -1.9767,
+     "pValue": 0.058524,
+     "qValue": 0.15335,
+     "significant": false,
+     "direction": "decreasing",
+     "expectedDirection": "decreasing",
+     "directionAsExpected": true
+    }
+   },
+   {
+    "cellId": "r14c03",
+    "kind": "hotspot",
+    "zones": [
+     "amazon_peru"
+    ],
+    "lossKm2": {
+     "slopePerDecade": 25.611,
+     "pValue": 0.026506,
+     "qValue": 0.045052,
+     "significant": true,
+     "direction": "increasing",
+     "expectedDirection": "increasing",
+     "directionAsExpected": true
+    },
+    "modisTreeCover": {
+     "slopePerDecade": -0.57455,
+     "pValue": 0.41369,
+     "qValue": 0.60817,
+     "significant": false,
+     "direction": "decreasing",
+     "expectedDirection": "decreasing",
+     "directionAsExpected": true
+    }
+   },
+   {
+    "cellId": "r09c10",
+    "kind": "hotspot",
+    "zones": [
+     "amazon_peru"
+    ],
+    "lossKm2": {
+     "slopePerDecade": 30.1,
+     "pValue": 3.3576e-06,
+     "qValue": 5.1362e-05,
+     "significant": true,
+     "direction": "increasing",
+     "expectedDirection": "increasing",
+     "directionAsExpected": true
+    },
+    "modisTreeCover": {
+     "slopePerDecade": -2.3078,
+     "pValue": 0.00099107,
+     "qValue": 0.0062327,
+     "significant": true,
+     "direction": "decreasing",
+     "expectedDirection": "decreasing",
+     "directionAsExpected": true
+    }
+   },
+   {
+    "cellId": "r12c04",
+    "kind": "hotspot",
+    "zones": [
+     "amazon_peru"
+    ],
+    "lossKm2": {
+     "slopePerDecade": 60.445,
+     "pValue": 2.3657e-05,
+     "qValue": 0.00018859,
+     "significant": true,
+     "direction": "increasing",
+     "expectedDirection": "increasing",
+     "directionAsExpected": true
+    },
+    "modisTreeCover": {
+     "slopePerDecade": -0.75643,
+     "pValue": 0.18311,
+     "qValue": 0.35616,
+     "significant": false,
+     "direction": "decreasing",
+     "expectedDirection": "decreasing",
+     "directionAsExpected": true
+    }
+   },
+   {
+    "cellId": "r15c02",
+    "kind": "hotspot",
+    "zones": [
+     "amazon_peru"
+    ],
+    "lossKm2": {
+     "slopePerDecade": 6.6389,
+     "pValue": 0.18311,
+     "qValue": 0.23083,
+     "significant": false,
+     "direction": "increasing",
+     "expectedDirection": "increasing",
+     "directionAsExpected": true
+    },
+    "modisTreeCover": {
+     "slopePerDecade": 0.069231,
+     "pValue": 0.96273,
+     "qValue": 0.98537,
+     "significant": false,
+     "direction": "increasing",
+     "expectedDirection": "decreasing",
+     "directionAsExpected": false
+    }
+   },
+   {
+    "cellId": "r08c09",
+    "kind": "case",
+    "zones": [],
+    "caseId": "la_pampa",
+    "label": "La Pampa, Madre de Dios (gold mining)",
+    "lossKm2": {
+     "slopePerDecade": 37.244,
+     "pValue": 1.3848e-08,
+     "qValue": 7.838e-06,
+     "significant": true,
+     "direction": "increasing",
+     "expectedDirection": "increasing",
+     "directionAsExpected": true
+    },
+    "modisTreeCover": {
+     "slopePerDecade": -2.0406,
+     "pValue": 0.00038388,
+     "qValue": 0.0027856,
+     "significant": true,
+     "direction": "decreasing",
+     "expectedDirection": "decreasing",
+     "directionAsExpected": true
+    }
+   }
+  ],
+  "v4ZoneTrends": {
+   "amazon": {
+    "ndvi": {
+     "slopePerDecade": 0.00097927,
+     "pValue": 0.49566,
+     "significant": false,
+     "years": [
+      2001,
+      2020
+     ],
+     "n": 20,
+     "line": {
+      "start": {
+       "year": 2001,
+       "value": 0.7965
+      },
+      "end": {
+       "year": 2020,
+       "value": 0.79836
+      }
+     },
+     "test": "original"
+    },
+    "evi": {
+     "slopePerDecade": 0.0054411,
+     "pValue": 0.00024618,
+     "significant": true,
+     "years": [
+      2001,
+      2020
+     ],
+     "n": 20,
+     "line": {
+      "start": {
+       "year": 2001,
+       "value": 0.49986
+      },
+      "end": {
+       "year": 2020,
+       "value": 0.51019
+      }
+     },
+     "test": "original"
+    },
+    "lst_day": {
+     "slopePerDecade": 0.32909,
+     "pValue": 6.5893e-05,
+     "significant": true,
+     "years": [
+      2001,
+      2020
+     ],
+     "n": 20,
+     "line": {
+      "start": {
+       "year": 2001,
+       "value": 27.023
+      },
+      "end": {
+       "year": 2020,
+       "value": 27.648
+      }
+     },
+     "test": "original"
+    },
+    "precip": {
+     "slopePerDecade": -36.966,
+     "pValue": 0.33336,
+     "significant": false,
+     "years": [
+      2001,
+      2024
+     ],
+     "n": 24,
+     "line": {
+      "start": {
+       "year": 2001,
+       "value": 2382.0
+      },
+      "end": {
+       "year": 2024,
+       "value": 2297.0
+      }
+     },
+     "test": "original"
+    },
+    "burned_area": {
+     "slopePerDecade": -3518.8,
+     "pValue": 0.79725,
+     "significant": false,
+     "years": [
+      2001,
+      2025
+     ],
+     "n": 25,
+     "line": {
+      "start": {
+       "year": 2001,
+       "value": 80967.0
+      },
+      "end": {
+       "year": 2025,
+       "value": 72522.0
+      }
+     },
+     "test": "original"
+    },
+    "modisTreeCover": {
+     "slopePerDecade": -0.86108,
+     "pValue": 0.0027875,
+     "significant": true,
+     "years": [
+      2000,
+      2024
+     ],
+     "n": 25,
+     "line": {
+      "start": {
+       "year": 2000,
+       "value": 64.144
+      },
+      "end": {
+       "year": 2024,
+       "value": 62.078
+      }
+     },
+     "test": "original"
+    },
+    "lossKm2": {
+     "slopePerDecade": 4768.4,
+     "pValue": 0.047125,
+     "significant": true,
+     "years": [
+      2001,
+      2025
+     ],
+     "n": 25,
+     "line": {
+      "start": {
+       "year": 2001,
+       "value": 20406.0
+      },
+      "end": {
+       "year": 2025,
+       "value": 31850.0
+      }
+     },
+     "test": "original"
+    }
+   },
+   "amazon_brazil": {
+    "ndvi": {
+     "slopePerDecade": -0.00028869,
+     "pValue": 0.92246,
+     "significant": false,
+     "years": [
+      2001,
+      2020
+     ],
+     "n": 20,
+     "line": {
+      "start": {
+       "year": 2001,
+       "value": 0.79537
+      },
+      "end": {
+       "year": 2020,
+       "value": 0.79482
+      }
+     },
+     "test": "original"
+    },
+    "evi": {
+     "slopePerDecade": 0.0049994,
+     "pValue": 0.00024618,
+     "significant": true,
+     "years": [
+      2001,
+      2020
+     ],
+     "n": 20,
+     "line": {
+      "start": {
+       "year": 2001,
+       "value": 0.50078
+      },
+      "end": {
+       "year": 2020,
+       "value": 0.51027
+      }
+     },
+     "test": "original"
+    },
+    "lst_day": {
+     "slopePerDecade": 0.38253,
+     "pValue": 0.00019065,
+     "significant": true,
+     "years": [
+      2001,
+      2020
+     ],
+     "n": 20,
+     "line": {
+      "start": {
+       "year": 2001,
+       "value": 27.555
+      },
+      "end": {
+       "year": 2020,
+       "value": 28.282
+      }
+     },
+     "test": "original"
+    },
+    "precip": {
+     "slopePerDecade": -78.248,
+     "pValue": 0.13026,
+     "significant": false,
+     "years": [
+      2001,
+      2024
+     ],
+     "n": 24,
+     "line": {
+      "start": {
+       "year": 2001,
+       "value": 2330.4
+      },
+      "end": {
+       "year": 2024,
+       "value": 2150.5
+      }
+     },
+     "test": "original"
+    },
+    "burned_area": {
+     "slopePerDecade": -7551.5,
+     "pValue": 0.31525,
+     "significant": false,
+     "years": [
+      2001,
+      2025
+     ],
+     "n": 25,
+     "line": {
+      "start": {
+       "year": 2001,
+       "value": 47898.0
+      },
+      "end": {
+       "year": 2025,
+       "value": 29774.0
+      }
+     },
+     "test": "original"
+    },
+    "modisTreeCover": {
+     "slopePerDecade": -1.2505,
+     "pValue": 7.914e-05,
+     "significant": true,
+     "years": [
+      2000,
+      2024
+     ],
+     "n": 25,
+     "line": {
+      "start": {
+       "year": 2000,
+       "value": 63.974
+      },
+      "end": {
+       "year": 2024,
+       "value": 60.972
+      }
+     },
+     "test": "original"
+    },
+    "lossKm2": {
+     "slopePerDecade": 1618.9,
+     "pValue": 0.41369,
+     "significant": false,
+     "years": [
+      2001,
+      2025
+     ],
+     "n": 25,
+     "line": {
+      "start": {
+       "year": 2001,
+       "value": 17527.0
+      },
+      "end": {
+       "year": 2025,
+       "value": 21413.0
+      }
+     },
+     "test": "original"
+    }
+   },
+   "amazon_peru": {
+    "ndvi": {
+     "slopePerDecade": 0.0038683,
+     "pValue": 0.0052435,
+     "significant": true,
+     "years": [
+      2001,
+      2020
+     ],
+     "n": 20,
+     "line": {
+      "start": {
+       "year": 2001,
+       "value": 0.81739
+      },
+      "end": {
+       "year": 2020,
+       "value": 0.82474
+      }
+     },
+     "test": "original"
+    },
+    "evi": {
+     "slopePerDecade": 0.0075258,
+     "pValue": 0.0058198,
+     "significant": true,
+     "years": [
+      2001,
+      2020
+     ],
+     "n": 20,
+     "line": {
+      "start": {
+       "year": 2001,
+       "value": 0.51718
+      },
+      "end": {
+       "year": 2020,
+       "value": 0.53148
+      }
+     },
+     "test": "original"
+    },
+    "lst_day": {
+     "slopePerDecade": 0.3147,
+     "pValue": 0.00040558,
+     "significant": true,
+     "years": [
+      2001,
+      2020
+     ],
+     "n": 20,
+     "line": {
+      "start": {
+       "year": 2001,
+       "value": 25.382
+      },
+      "end": {
+       "year": 2020,
+       "value": 25.98
+      }
+     },
+     "test": "original"
+    },
+    "precip": {
+     "slopePerDecade": -113.54,
+     "pValue": 0.096534,
+     "significant": false,
+     "years": [
+      2001,
+      2024
+     ],
+     "n": 24,
+     "line": {
+      "start": {
+       "year": 2001,
+       "value": 2588.6
+      },
+      "end": {
+       "year": 2024,
+       "value": 2327.4
+      }
+     },
+     "test": "original"
+    },
+    "burned_area": {
+     "slopePerDecade": 85.343,
+     "pValue": 0.31525,
+     "significant": false,
+     "years": [
+      2001,
+      2025
+     ],
+     "n": 25,
+     "line": {
+      "start": {
+       "year": 2001,
+       "value": 357.39
+      },
+      "end": {
+       "year": 2025,
+       "value": 562.21
+      }
+     },
+     "test": "original"
+    },
+    "modisTreeCover": {
+     "slopePerDecade": 0.5825,
+     "pValue": 0.058524,
+     "significant": false,
+     "years": [
+      2000,
+      2024
+     ],
+     "n": 25,
+     "line": {
+      "start": {
+       "year": 2000,
+       "value": 68.997
+      },
+      "end": {
+       "year": 2024,
+       "value": 70.395
+      }
+     },
+     "test": "original"
+    },
+    "lossKm2": {
+     "slopePerDecade": 831.06,
+     "pValue": 1.0545e-06,
+     "significant": true,
+     "years": [
+      2001,
+      2025
+     ],
+     "n": 25,
+     "line": {
+      "start": {
+       "year": 2001,
+       "value": 1070.7
+      },
+      "end": {
+       "year": 2025,
+       "value": 3065.3
+      }
+     },
+     "test": "original"
+    }
+   }
+  }
+ }
+}

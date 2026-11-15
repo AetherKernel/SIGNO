@@ -28,6 +28,7 @@ const VARIABLES: Variable[] = [
     temporalResolution: 'monthly',
     period: PERIOD,
     product: { shortName: 'MOD13C2', version: '061', provider: 'LP DAAC', doi: '10.5067/MODIS/MOD13C2.061', kind: 'satellite' },
+    semesterAggregation: 'mean',
   },
   {
     id: 'lst_day',
@@ -39,6 +40,7 @@ const VARIABLES: Variable[] = [
     temporalResolution: 'monthly',
     period: PERIOD,
     product: { shortName: 'MOD11C3', version: '061', provider: 'LP DAAC', doi: '10.5067/MODIS/MOD11C3.061', kind: 'satellite' },
+    semesterAggregation: 'mean',
   },
 ]
 

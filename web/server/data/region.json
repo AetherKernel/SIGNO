@@ -1,0 +1,11 @@
+{
+ "id": "amazon",
+ "name": "Amazon (RAISG biome, provisional)",
+ "boundarySource": "RAISG (2025), Biomas 2025, record 'Amazonía' (provisional, P-008)",
+ "bbox": [
+  -80.0,
+  -21.0,
+  -43.0,
+  10.5
+ ]
+}

@@ -1,5 +1,9 @@
-# Downloaded and processed NASA data (cite sources in README instead)
-/data/
+# Data at the repository root only (web/server/data/ holds the versioned pipeline export for the web).
+# Downloaded data: anyone can download it again from the sources in data/README.md
+/data/raw/
+# Clipped and cleaned months: re-created from data/raw/ by the pipeline
+/data/interim/
+*.zip
 
 # Secrets (Earthdata Login, tokens)
 .env
@@ -20,3 +24,6 @@ Thumbs.db
 .DS_Store
 .vscode/
 .idea/
+
+# Claude Code skills copied from other projects (third-party content, own licenses; local only)
+/.claude/skills/

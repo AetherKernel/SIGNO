@@ -1,0 +1,613 @@
+/* AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15. Reviewed and owned by team AETHER.
+ *
+ * Styles of the cell viewer content (CellViewer, YearTravel, CellChanges, CellTrends, CellValues, YearChart). The dialog
+ * shell (.viewer, .viewer-head, .viewer-body) is in index.css; this file only adds the travel bar row and the content.
+ * Only the design tokens of index.css are used, so light and dark follow the page.
+ */
+
+/* Shell: header, travel bar, then the body that scrolls */
+.viewer .viewer-inner {
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
+
+.viewer-head > div:first-child {
+  min-width: 0;
+  flex: 1;
+}
+
+.cv-pill {
+  display: inline-block;
+  margin-left: var(--u);
+  padding: 0 var(--u);
+  border-radius: 999px;
+  background: var(--warn-bg);
+  color: var(--warn);
+  font-size: var(--t-caption);
+  font-weight: 600;
+}
+
+.cv-locator {
+  flex: none;
+  align-self: center;
+}
+
+.cv-locator-cells {
+  fill: var(--line);
+}
+
+.cv-locator-here {
+  fill: var(--accent);
+}
+
+/* Year travel */
+.viewer-travel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--u) calc(var(--u) * 2);
+  padding: var(--u) calc(var(--u) * 2.5);
+  border-bottom: 1px solid var(--line);
+  background: var(--raised);
+}
+
+.travel-years,
+.travel-steps {
+  display: flex;
+  align-items: center;
+  gap: var(--u);
+}
+
+.viewer-travel label {
+  font-size: var(--t-small);
+  font-weight: 600;
+}
+
+.viewer-travel .select {
+  width: auto;
+  min-width: 84px;
+  font-family: var(--f-data);
+}
+
+.viewer .btn.icon {
+  min-width: 40px;
+  padding: 0 var(--u);
+}
+
+.viewer .btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* Body */
+.cv-summary {
+  max-width: 70ch;
+}
+
+.cv-section {
+  display: grid;
+  gap: calc(var(--u) * 1.5);
+  align-content: start;
+}
+
+.cv-section > h3 {
+  font-size: var(--t-h3);
+}
+
+.cv-case {
+  max-width: 70ch;
+}
+
+.cv-link {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--accent);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+  min-height: 24px;
+  justify-self: start;
+}
+
+/* Tables */
+.cv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--t-small);
+}
+
+.cv-table th,
+.cv-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+  text-align: right;
+  vertical-align: top;
+  font-weight: 400;
+}
+
+.cv-table thead th {
+  font-size: var(--t-caption);
+  color: var(--muted);
+  font-weight: 600;
+  vertical-align: bottom;
+}
+
+.cv-table th:first-child,
+.cv-table tbody th {
+  text-align: left;
+}
+
+.cv-table tbody th {
+  font-weight: 600;
+}
+
+.cv-changes .cv-value {
+  display: block;
+  font-variant-numeric: tabular-nums;
+}
+
+.cv-value.faded {
+  color: var(--muted);
+}
+
+.cv-note {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: var(--t-caption);
+  text-align: right;
+  line-height: 1.3;
+}
+
+.cv-tag {
+  display: inline-block;
+  margin-top: 2px;
+  padding: 0 6px;
+  border: 1px solid var(--warn);
+  border-radius: 999px;
+  color: var(--warn);
+  font-size: var(--t-caption);
+  font-weight: 600;
+}
+
+.cv-spark-col {
+  width: 120px;
+  text-align: right;
+}
+
+.cv-spark {
+  display: inline-block;
+}
+
+.cv-spark-line {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 1.4;
+}
+
+.cv-spark-tick {
+  stroke: var(--muted);
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+}
+
+.cv-spark-tick.b {
+  stroke: var(--text);
+}
+
+.cv-spark-dot {
+  fill: var(--accent);
+}
+
+.cv-skeleton {
+  display: block;
+  height: 20px;
+  border-radius: var(--r-s);
+  background: linear-gradient(90deg, var(--raised), var(--line), var(--raised));
+  background-size: 200% 100%;
+  animation: cv-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes cv-pulse {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+/* Charts */
+.cv-pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: calc(var(--u) * 2);
+}
+
+.cv-chart {
+  margin: 0;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.cv-chart-box {
+  width: 100%;
+  min-width: 0;
+}
+
+.cv-chart-box svg {
+  display: block;
+  max-width: 100%;
+  border-radius: var(--r-s);
+}
+
+.cv-chart-box svg:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.cv-readout {
+  margin: 0;
+  min-height: 1.5em;
+  font-size: var(--t-small);
+  color: var(--muted);
+}
+
+.cv-caption {
+  font-size: var(--t-caption);
+  color: var(--muted);
+}
+
+.cv-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+  opacity: 0.6;
+}
+
+.cv-tick {
+  fill: var(--muted);
+  font-family: var(--f-data);
+  font-size: 10px;
+}
+
+.cv-tested {
+  fill: var(--accent);
+  opacity: 0.09;
+}
+
+.cv-mark {
+  stroke-width: 1.3;
+  stroke-dasharray: 3 3;
+}
+
+.cv-mark.a {
+  stroke: var(--muted);
+}
+
+.cv-mark.b {
+  stroke: var(--text);
+}
+
+.cv-mark-label {
+  font-family: var(--f-data);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.cv-mark-label.a {
+  fill: var(--muted);
+}
+
+.cv-mark-label.b {
+  fill: var(--text);
+}
+
+.cv-cursor {
+  stroke: var(--accent);
+  stroke-width: 1;
+  opacity: 0.7;
+}
+
+.cv-line {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 1.6;
+}
+
+.cv-line.dashed {
+  stroke: var(--muted);
+  stroke-dasharray: 5 3;
+}
+
+.cv-dot {
+  fill: var(--text);
+}
+
+.cv-dot.dashed {
+  fill: var(--muted);
+}
+
+.cv-dot.outside {
+  fill: var(--muted);
+}
+
+.cv-dot.hollow {
+  fill: var(--surface);
+  stroke: var(--text);
+  stroke-width: 1.6;
+}
+
+.cv-bar {
+  fill: var(--accent);
+}
+
+.cv-bar.loss {
+  fill: var(--puor-0);
+}
+
+.cv-bar.burned {
+  fill: var(--puor-1);
+}
+
+.cv-bar.outside {
+  fill: var(--muted);
+}
+
+.cv-bar.hollow {
+  opacity: 0.4;
+  stroke: var(--text);
+  stroke-dasharray: 2 2;
+}
+
+/* Trends list */
+.cv-trends {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.cv-trend {
+  border-bottom: 1px solid var(--line);
+  padding: 6px 0;
+}
+
+.cv-trend > summary {
+  display: flex;
+  gap: var(--u);
+  align-items: baseline;
+  cursor: pointer;
+  min-height: 32px;
+}
+
+p.cv-trend {
+  display: flex;
+  gap: var(--u);
+  align-items: baseline;
+  margin: 0;
+}
+
+.cv-trend-icon {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1.5px solid var(--muted);
+  color: var(--muted);
+  font-weight: 700;
+  font-size: var(--t-small);
+  line-height: 1;
+}
+
+.cv-trend.falling .cv-trend-icon {
+  border-color: var(--puor-0);
+  color: var(--puor-0);
+}
+
+.cv-trend.rising .cv-trend-icon {
+  border-color: var(--puor-5);
+  color: var(--puor-5);
+}
+
+.cv-trend-body {
+  display: grid;
+  gap: var(--u);
+  padding: var(--u) 0 var(--u) 30px;
+}
+
+.cv-trend > p {
+  padding-left: 30px;
+  margin-top: var(--u);
+}
+
+/* Exact values and links */
+.cv-exact-details > summary,
+.cv-menu > summary {
+  cursor: pointer;
+}
+
+.cv-exact-details > summary {
+  font-size: var(--t-h3);
+  font-family: var(--f-display);
+  font-weight: 600;
+  min-height: 32px;
+}
+
+.cv-values {
+  display: grid;
+  gap: calc(var(--u) * 1.5);
+  padding-top: var(--u);
+}
+
+.cv-scroll {
+  max-height: 320px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+}
+
+.cv-exact th,
+.cv-exact td {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.cv-exact thead th {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 1;
+  white-space: normal;
+  min-width: 70px;
+}
+
+.cv-exact tr.current {
+  background: var(--raised);
+}
+
+.cv-exact tr.current th,
+.cv-exact tr.current td {
+  font-weight: 600;
+}
+
+.cv-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--u);
+}
+
+.cv-links a.btn {
+  text-decoration: none;
+}
+
+.cv-menu {
+  position: relative;
+}
+
+.cv-menu > summary {
+  list-style: none;
+}
+
+.cv-menu ul {
+  margin: var(--u) 0 0;
+  padding: var(--u) calc(var(--u) * 2);
+  list-style: disc;
+  display: grid;
+  gap: 6px;
+  font-size: var(--t-small);
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+  background: var(--surface);
+}
+
+/* Touch: 44 px targets */
+@media (max-width: 767px), (pointer: coarse) {
+  .viewer .btn,
+  .viewer .select,
+  .viewer .btn.icon {
+    min-height: 44px;
+  }
+  .viewer .btn.icon {
+    min-width: 44px;
+  }
+  .cv-trend > summary {
+    min-height: 44px;
+  }
+  .cv-link {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+/* Phone: each row of the change table is a small card; the sparkline sits under the numbers */
+@media (max-width: 767px) {
+  .cv-locator {
+    display: none;
+  }
+  .viewer-travel {
+    padding: 6px calc(var(--u) * 2);
+    gap: 6px calc(var(--u) * 2);
+  }
+  .viewer .viewer-head {
+    padding: calc(var(--u) * 1.5) calc(var(--u) * 2);
+    gap: var(--u);
+  }
+  .viewer .viewer-head h2 {
+    font-size: var(--t-h3);
+  }
+  .viewer .viewer-body {
+    padding: calc(var(--u) * 2);
+  }
+  .cv-changes thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+  }
+  .cv-changes,
+  .cv-changes tbody {
+    display: block;
+  }
+  .cv-changes tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px var(--u);
+    padding: var(--u) 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .cv-changes th,
+  .cv-changes td {
+    border: 0;
+    padding: 2px 0;
+    text-align: left;
+  }
+  .cv-changes tbody th {
+    grid-column: 1 / -1;
+  }
+  .cv-changes td[colspan] {
+    grid-column: 1 / -1;
+  }
+  .cv-changes td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    font-size: var(--t-caption);
+    color: var(--muted);
+  }
+  .cv-changes td[data-label='Change'] {
+    grid-column: 1 / -1;
+  }
+  .cv-changes .cv-note {
+    text-align: left;
+  }
+  .cv-changes .cv-spark-col {
+    grid-column: 1 / -1;
+    width: auto;
+  }
+  .cv-trend-body {
+    padding-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cv-skeleton {
+    animation: none;
+  }
+}
+
+/* The dialog never scrolls itself (focus or scrollIntoView would push the sticky header away): only the body scrolls. */
+dialog.viewer[open] {
+  overflow: clip;
+}
+
+.cv-sen {
+  stroke: var(--accent);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}

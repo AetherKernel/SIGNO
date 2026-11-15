@@ -1,0 +1,841 @@
+/* AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15. Reviewed and owned by team AETHER.
+ *
+ * Styles of the Trends view (TrendsView, ZoneChart, TrendMethod). Prefix "tr-"; colours only from the tokens of index.css.
+ * Layout: 1200 px container (see .page-trends), table of measures, 2/3 + 1/3 detail, stacked below 1024 px; the table becomes
+ * stacked blocks below 768 px. Light and dark come from the tokens. */
+
+.tr {
+  --tr-fall: var(--puor-0);
+  --tr-rise: var(--puor-5);
+  gap: calc(var(--u) * 5);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* The purple end of PuOr is too dark on the dark surface: use the lighter purple there. */
+@media (prefers-color-scheme: dark) {
+  .tr {
+    --tr-rise: var(--puor-4);
+  }
+}
+
+.tr h3 {
+  font-size: var(--t-h3);
+}
+
+.tr-small {
+  font-size: var(--t-small);
+}
+
+.tr-block {
+  display: block;
+}
+
+.tr-section {
+  display: grid;
+  gap: calc(var(--u) * 2);
+  scroll-margin-top: calc(var(--u) * 2);
+}
+
+.tr-section > h2,
+.tr-panel > h2 {
+  font-size: var(--t-h2);
+}
+
+/* Header and zone selector */
+.tr-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: calc(var(--u) * 2) calc(var(--u) * 3);
+}
+
+.tr-head > div:first-child {
+  display: grid;
+  gap: var(--u);
+  max-width: 62ch;
+}
+
+.tr-lead {
+  max-width: 62ch;
+}
+
+.tr-seg {
+  display: inline-flex;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.tr-seg legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.tr-seg label {
+  position: relative;
+  display: flex;
+}
+
+.tr-seg input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.tr-seg span {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 calc(var(--u) * 2);
+  font-size: var(--t-small);
+  font-weight: 600;
+  border-left: 1px solid var(--line);
+}
+
+.tr-seg label:first-of-type span {
+  border-left: 0;
+}
+
+.tr-seg input:checked + span {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.tr-seg input:not(:checked):hover + span {
+  background: var(--raised);
+}
+
+.tr-seg input:focus-visible + span {
+  outline: 2px solid var(--accent);
+  outline-offset: -4px;
+}
+
+.tr-seg input:checked:focus-visible + span {
+  outline-color: var(--on-accent);
+}
+
+.tr-zone-select {
+  display: grid;
+  gap: 4px;
+  min-width: min(100%, 260px);
+  flex: 1 1 220px;
+}
+
+.tr-zone-select label {
+  font-size: var(--t-small);
+  font-weight: 600;
+}
+
+.tr-zone-select select {
+  min-height: 44px;
+  padding: 0 var(--u);
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+}
+
+/* Headline cards: a flat strip with dividers, one finding each */
+.tr-kpis {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.tr-kpis > li {
+  border-left: 1px solid var(--line);
+  min-width: 0;
+}
+
+.tr-kpis > li:first-child {
+  border-left: 0;
+}
+
+.tr-kpi {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  height: 100%;
+  padding: calc(var(--u) * 2);
+  border-top: 3px solid transparent;
+  margin-top: -1px;
+}
+
+.tr-kpi.is-selected {
+  border-top-color: var(--accent);
+}
+
+.tr-kpi p {
+  margin: 0;
+}
+
+.tr-kpi-label {
+  font-weight: 600;
+}
+
+.tr-kpi-dir {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.tr-kpi-value {
+  font-size: var(--t-h2);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.tr-kpi-value small {
+  font-size: var(--t-small);
+  color: var(--muted);
+}
+
+.tr-link {
+  justify-self: start;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: var(--t-small);
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.tr-link[aria-pressed='true'] {
+  color: var(--text);
+  text-decoration: none;
+}
+
+/* Direction icons: shape carries the meaning, not colour */
+.tr-dir {
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tr-dirtext {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+/* Tags: clear = filled, not clear = outline */
+.tr-tag {
+  display: inline-block;
+  padding: 1px 8px;
+  border: 1px solid var(--muted);
+  border-radius: 999px;
+  font-size: var(--t-small);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tr-tag.is-clear {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+
+/* Table of measures */
+.tr-measures-wrap {
+  overflow-x: auto;
+}
+
+.tr-measures {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--t-small);
+}
+
+.tr-measures th,
+.tr-measures td {
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--line);
+}
+
+.tr-measures thead th {
+  font-weight: 600;
+  color: var(--muted);
+  vertical-align: bottom;
+}
+
+.tr-colnote {
+  display: block;
+  font-weight: 400;
+}
+
+.tr-measures tbody th {
+  font-weight: 400;
+}
+
+.tr-measures tr.is-selected > * {
+  background: var(--raised);
+}
+
+.tr-measures tr.is-selected > :first-child {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.tr-rowbtn {
+  display: block;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font-size: var(--t-body);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tr-rowbtn:hover {
+  text-decoration: underline;
+}
+
+.tr-units {
+  display: block;
+}
+
+.tr-num {
+  white-space: nowrap;
+}
+
+/* Squares falling | rising: bar widths are CSS ratios of the backend's counts */
+.tr-squares {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tr-sq-n {
+  min-width: 2.5ch;
+  font-family: var(--f-data);
+  font-variant-numeric: tabular-nums;
+}
+
+.tr-sq-n:first-child {
+  text-align: right;
+}
+
+.tr-sqbar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 112px;
+  height: 12px;
+  background: var(--raised);
+  border-radius: 2px;
+}
+
+.tr-sq-down,
+.tr-sq-up {
+  height: 100%;
+}
+
+.tr-sq-down {
+  justify-self: end;
+  width: calc(var(--n-down) / var(--n-total) * 100%);
+  background: var(--tr-fall);
+  border-radius: 2px 0 0 2px;
+}
+
+.tr-sq-up {
+  width: calc(var(--n-up) / var(--n-total) * 100%);
+  background: var(--tr-rise);
+  border-radius: 0 2px 2px 0;
+  border-left: 1px solid var(--text);
+}
+
+.tr-spark {
+  display: block;
+}
+
+.tr-spark-line {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 1.5;
+}
+
+.tr-spark-drift {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.2;
+  stroke-dasharray: 2 2;
+}
+
+.tr-spark-sen {
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 2;
+}
+
+/* Detail: chart and plain-language reading */
+.tr-detail {
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+  align-items: start;
+  gap: calc(var(--u) * 3);
+}
+
+.tr-detail-chart {
+  display: grid;
+  gap: var(--u);
+  min-width: 0;
+}
+
+.tr-detail-text {
+  display: grid;
+  gap: calc(var(--u) * 1.5);
+  padding: calc(var(--u) * 2);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+}
+
+.tr-meaning {
+  display: grid;
+  gap: var(--u);
+}
+
+.tr-chart {
+  margin: 0;
+  display: grid;
+  gap: var(--u);
+}
+
+.tr-chart-wrap {
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface);
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.tr-chart-wrap svg {
+  display: block;
+}
+
+.tr-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+  opacity: 0.6;
+}
+
+.tr-tick {
+  fill: var(--muted);
+  font-family: var(--f-data);
+  font-size: 11px;
+}
+
+.tr-note {
+  fill: var(--muted);
+  font-size: 11px;
+}
+
+.tr-window {
+  fill: var(--accent);
+  opacity: 0.07;
+}
+
+.tr-hatch {
+  stroke: var(--muted);
+  stroke-width: 1;
+  opacity: 0.4;
+}
+
+.tr-band {
+  fill: var(--raised);
+  stroke: var(--muted);
+  stroke-width: 1;
+}
+
+.tr-selected-rule {
+  stroke: var(--accent);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.tr-line {
+  fill: none;
+  stroke: var(--series);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.tr-line-drift {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+}
+
+.tr-dot.tr-used,
+.tr-bar.tr-used {
+  fill: var(--series);
+}
+
+.tr-dot.tr-drift,
+.tr-dot.tr-unused,
+.tr-bar.tr-drift,
+.tr-bar.tr-unused {
+  fill: var(--muted);
+  opacity: 0.6;
+}
+
+.tr-dot.tr-incomplete,
+.tr-bar.tr-incomplete {
+  fill: var(--surface);
+  stroke: var(--series);
+  stroke-width: 2;
+}
+
+.tr-bar.tr-incomplete {
+  stroke-dasharray: 3 2;
+}
+
+.tr-dot.is-selected,
+.tr-bar.is-selected {
+  stroke: var(--text);
+  stroke-width: 2;
+}
+
+.tr-sen {
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+
+.tr-sen.is-clear {
+  stroke: var(--text);
+  stroke-width: 2.5;
+  stroke-dasharray: none;
+}
+
+.tr-sen-label {
+  fill: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.tr-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px calc(var(--u) * 2.5);
+  font-size: var(--t-small);
+  color: var(--muted);
+}
+
+.tr-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tr-key {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  box-sizing: border-box;
+}
+
+.tr-key-used {
+  border-radius: 50%;
+  background: var(--series);
+}
+
+.tr-key-unused {
+  border-radius: 50%;
+  background: var(--muted);
+  opacity: 0.6;
+}
+
+.tr-key-incomplete {
+  border-radius: 50%;
+  border: 2px solid var(--series);
+  background: var(--surface);
+}
+
+.tr-key-band {
+  width: 8px;
+  height: 14px;
+  background: var(--raised);
+  border: 1px solid var(--muted);
+  border-radius: 2px;
+}
+
+.tr-key-sen {
+  height: 0;
+  border-top: 2px dashed var(--muted);
+}
+
+.tr-key-sen.is-clear {
+  border-top: 3px solid var(--text);
+}
+
+.tr-readout {
+  min-height: 3em;
+  padding: var(--u) calc(var(--u) * 1.5);
+  background: var(--raised);
+  border-radius: var(--r-s);
+}
+
+/* Collapsible numbers */
+.tr-details {
+  font-size: var(--t-small);
+}
+
+.tr-details > summary {
+  cursor: pointer;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.tr-table-scroll {
+  max-height: 340px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+}
+
+.tr-measures-wrap.tr-table-scroll {
+  max-height: none;
+  border: 0;
+  border-radius: 0;
+}
+
+.tr-values {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.tr-values th,
+.tr-values td {
+  padding: 6px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.tr-values thead th {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.tr-values tbody th {
+  font-weight: 600;
+}
+
+.tr-values tr.is-selected > * {
+  background: var(--raised);
+}
+
+/* How the test works and how we checked it */
+.tr-panel {
+  display: grid;
+  gap: calc(var(--u) * 3);
+  padding: calc(var(--u) * 3);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  scroll-margin-top: calc(var(--u) * 2);
+}
+
+.tr-method-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: calc(var(--u) * 4);
+}
+
+.tr-method-grid > div {
+  display: grid;
+  align-content: start;
+  gap: calc(var(--u) * 1.5);
+  min-width: 0;
+}
+
+.tr-steps,
+.tr-findings {
+  display: grid;
+  gap: calc(var(--u) * 1.5);
+  margin: 0;
+  padding-left: 1.25em;
+}
+
+.tr-findings {
+  list-style: none;
+  padding-left: 0;
+}
+
+.tr-findings h4 {
+  margin: 0 0 4px;
+  font-size: var(--t-body);
+}
+
+.tr-findings p {
+  margin: 0;
+  max-width: 68ch;
+}
+
+.tr-foot {
+  display: grid;
+  gap: var(--u);
+  max-width: 80ch;
+}
+
+/* Loading */
+.tr-skeleton {
+  background: var(--raised);
+  border-radius: var(--r);
+  animation: tr-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes tr-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tr-skeleton {
+    animation: none;
+  }
+}
+
+/* Tablet */
+@media (max-width: 1023px) {
+  .tr-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tr-kpis > li:nth-child(odd) {
+    border-left: 0;
+  }
+
+  .tr-kpis > li:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+  }
+
+  .tr-detail,
+  .tr-method-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Phone: one column, the table as stacked blocks */
+@media (max-width: 767px) {
+  .tr {
+    gap: calc(var(--u) * 4);
+  }
+
+  .tr-kpis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tr-kpis > li {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .tr-kpis > li:first-child {
+    border-top: 0;
+  }
+
+  .tr-panel {
+    padding: calc(var(--u) * 2);
+  }
+
+  .tr-measures thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+  }
+
+  .tr-measures,
+  .tr-measures tbody,
+  .tr-measures tr,
+  .tr-measures th,
+  .tr-measures td {
+    display: block;
+  }
+
+  .tr-measures tr {
+    padding: var(--u) 0 calc(var(--u) * 1.5);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .tr-measures th,
+  .tr-measures td {
+    border-bottom: 0;
+    padding: 3px 12px;
+  }
+
+  .tr-measures td[data-label]::before {
+    content: attr(data-label) ': ';
+    color: var(--muted);
+  }
+
+  .tr-measures td[data-label='Yearly values']::before,
+  .tr-measures td[data-label='Squares falling | rising']::before {
+    display: block;
+  }
+
+  .tr-measures tr.is-selected > :first-child {
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+
+  .tr-num {
+    white-space: normal;
+  }
+
+  .tr-num .tr-block {
+    display: inline;
+    margin-left: 0.5ch;
+  }
+
+  .tr-rowbtn {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  .tr-link {
+    min-height: 44px;
+  }
+}

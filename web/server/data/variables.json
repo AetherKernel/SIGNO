@@ -1,0 +1,122 @@
+[
+ {
+  "id": "ndvi",
+  "name": "Vegetation greenness (NDVI)",
+  "description": "How green and dense the vegetation looks from space, from -1 to 1. Dense Amazon forest stays near 0.8; the index saturates over closed canopy, so a drop signals strong change.",
+  "units": "unitless",
+  "temporalResolution": "monthly",
+  "period": {
+   "start": "2001-01",
+   "end": "2026-10"
+  },
+  "product": {
+   "shortName": "MOD13C2",
+   "version": "061",
+   "provider": "LP DAAC",
+   "doi": "10.5067/MODIS/MOD13C2.061",
+   "kind": "satellite"
+  },
+  "semesterAggregation": "mean",
+  "slopeUnits": "unitless per decade",
+  "trendYears": {
+   "start": 2001,
+   "end": 2020
+  }
+ },
+ {
+  "id": "evi",
+  "name": "Vegetation greenness (EVI)",
+  "description": "Like NDVI but less saturated over dense forest, so it shows more detail where the canopy is closed.",
+  "units": "unitless",
+  "temporalResolution": "monthly",
+  "period": {
+   "start": "2001-01",
+   "end": "2026-10"
+  },
+  "product": {
+   "shortName": "MOD13C2",
+   "version": "061",
+   "provider": "LP DAAC",
+   "doi": "10.5067/MODIS/MOD13C2.061",
+   "kind": "satellite"
+  },
+  "semesterAggregation": "mean",
+  "slopeUnits": "unitless per decade",
+  "trendYears": {
+   "start": 2001,
+   "end": 2020
+  }
+ },
+ {
+  "id": "lst_day",
+  "name": "Daytime land surface temperature",
+  "description": "How hot the ground surface is in the morning overpass, measured from space. Forest keeps the surface cooler than cleared land. Shown until 2020: later, the satellite's orbit drift biases it.",
+  "units": "°C",
+  "temporalResolution": "monthly",
+  "period": {
+   "start": "2001-01",
+   "end": "2020-12"
+  },
+  "product": {
+   "shortName": "MOD11C3",
+   "version": "061",
+   "provider": "LP DAAC",
+   "doi": "10.5067/MODIS/MOD11C3.061",
+   "kind": "satellite"
+  },
+  "semesterAggregation": "mean",
+  "slopeUnits": "°C per decade",
+  "trendYears": {
+   "start": 2001,
+   "end": 2020
+  }
+ },
+ {
+  "id": "precip",
+  "name": "Rainfall",
+  "description": "Monthly rain from NASA's satellite constellation, calibrated with rain gauges. Helps tell a drought from forest loss.",
+  "units": "mm/month",
+  "temporalResolution": "monthly",
+  "period": {
+   "start": "2001-01",
+   "end": "2025-09"
+  },
+  "product": {
+   "shortName": "GPM_3IMERGM",
+   "version": "07",
+   "provider": "GES DISC",
+   "doi": "10.5067/GPM/IMERG/3B-MONTH/07",
+   "kind": "satellite"
+  },
+  "semesterAggregation": "sum",
+  "slopeUnits": "mm per year, per decade",
+  "trendYears": {
+   "start": 2001,
+   "end": 2024
+  }
+ },
+ {
+  "id": "burned_area",
+  "name": "Burned area",
+  "description": "Share of the cell that burned that month, mapped from MODIS at 500 m. Fire and tree cover loss often occur in the same places; that alone does not show which caused which.",
+  "units": "% of cell",
+  "temporalResolution": "monthly",
+  "period": {
+   "start": "2001-01",
+   "end": "2026-09"
+  },
+  "product": {
+   "shortName": "MCD64A1",
+   "version": "061",
+   "provider": "LP DAAC",
+   "doi": "10.5067/MODIS/MCD64A1.061",
+   "kind": "satellite"
+  },
+  "semesterAggregation": "sum",
+  "slopeUnits": "% of cell per year, per decade",
+  "trendYears": {
+   "start": 2001,
+   "end": 2025
+  }
+ }
+]

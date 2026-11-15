@@ -17,6 +17,7 @@ const variable: Variable = {
   temporalResolution: 'monthly',
   period: { start: '2001-01', end: '2024-12' },
   product: { shortName: 'MOD13C2', version: '061', provider: 'LP DAAC', doi: null, kind: 'satellite' },
+  semesterAggregation: 'mean',
 }
 
 function layer(overrides: Partial<SourceTrendLayer> = {}): SourceTrendLayer {
@@ -47,6 +48,8 @@ describe('validateVariables', () => {
   it('rejects duplicate ids', () => assert.throws(() => validateVariables([variable, variable]), /duplicate/))
   it('rejects a bad month format', () =>
     assert.throws(() => validateVariables([{ ...variable, period: { start: '2001-1', end: '2024-12' } }]), /YYYY-MM/))
+  it('rejects a missing or unknown semesterAggregation', () =>
+    assert.throws(() => validateVariables([{ ...variable, semesterAggregation: 'median' as 'mean' }]), /semesterAggregation/))
   it('rejects a period that ends before it starts', () =>
     assert.throws(() => validateVariables([{ ...variable, period: { start: '2024-01', end: '2001-01' } }]), /after/))
 })
@@ -68,6 +71,14 @@ describe('validateTrendLayer', () => {
     const bad = layer()
     bad.cells[0] = { ...bad.cells[0], slopePerDecade: Number.NaN }
     assert.throws(() => validateTrendLayer(bad, variable, region), /slopePerDecade/)
+  })
+  it('accepts a Sen line and rejects a malformed one', () => {
+    const ok = layer()
+    ok.cells[0] = { ...ok.cells[0], line: { start: { year: 2001, value: 1 }, end: { year: 2025, value: 2 } } }
+    assert.doesNotThrow(() => validateTrendLayer(ok, variable, region))
+    const bad = layer()
+    bad.cells[0] = { ...bad.cells[0], line: { start: { year: 2001, value: Number.NaN }, end: { year: 2025, value: 2 } } }
+    assert.throws(() => validateTrendLayer(bad, variable, region), /line must be/)
   })
   it('rejects duplicate cell ids', () => {
     const bad = layer()
