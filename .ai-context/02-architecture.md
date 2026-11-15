@@ -130,6 +130,8 @@ off with `prefers-reduced-motion`.
 **Map credits on phones.** Below 768 px the Leaflet credits (Leaflet, NASA GIBS, Natural Earth) take one compact line
 cut with "…", so they do not crowd the Filters bar; a tap, or keyboard focus on one of their links, shows them in full
 (`TrendMap.tsx` and `index.css`). They stay on the map, as the licences ask. Desktop is unchanged.
+The bar under the map (Filters button and compact legend) is at least 48 px and grows with its legend: the trend
+legend has three rows (title, Falling/Rising, numbers) and a fixed height let its title slip under the map.
 
 **Opening a square.** Mouse: a click opens its file. Keyboard: Tab to the map, arrows, Enter. Touch (`TrendMap.tsx`):
 the first tap shows the square's readout under the map with an **"Open this area's file"** button (44 px); a second tap

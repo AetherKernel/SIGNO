@@ -31,6 +31,11 @@
 
 ## Done
 
+- 2026-11-15: phones, trend legend title hidden under the map (José, screenshot at about 516 px). The bar under the
+  map had a fixed 48 px; the trend legend (three rows) only just fit, and with a slightly larger font it overflowed
+  upwards and the map covered its title. The loss legend at 320 px overflowed too (61 px). The bar now has
+  `min-height: 48px` and grows with its legend. Checked at 320, 516 and 767 px, with the normal font and at 125 %,
+  on the trend and loss maps: the legend stays inside the bar, no sideways scroll; desktop has no such bar.
 - 2026-11-15: phones, map credits crowding the Filters bar (José). The credits took two or more full-width lines right
   above the Filters bar. Now they take one compact line (cut with "…") that opens in full on a tap. Checked at 360 × 640
   and 320 × 568 (one 18 px line, clear of the readout and the bar, no sideways scroll) and on desktop (unchanged), on

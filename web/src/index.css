@@ -1327,8 +1327,11 @@ body {
     display: flex;
     align-items: center;
     gap: var(--u);
-    height: 48px;
-    padding: 0 var(--u);
+    /* At least 48 px, and taller when the legend needs it: the trend legend has three rows and, with a larger font
+       (phone text size settings), a fixed 48 px pushed its title up under the map. */
+    flex: none;
+    min-height: 48px;
+    padding: 4px var(--u);
     background: var(--surface);
     border-top: 1px solid var(--line);
   }
