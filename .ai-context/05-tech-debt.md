@@ -15,7 +15,7 @@
 | P-013 | Medium | Land cover context in the area file (MapBiomas Amazonía) | José wants Global Forest Watch-style data for the selected area; MapBiomas is 30 m, annual 1985–2023, CC BY-SA, not NASA data | Partly covered (15 Nov): the area file shows Hansen tree cover and loss, MOD44B tree cover and MCD64A1 burned area. MapBiomas is not added: still a data decision with Alexis. If it is added, cite it as complementary and respect share-alike |
 | P-014 | High | Crop the map to the real Amazon boundary | Today the crop follows the approximate bounding box (ADR-005) | After P-008, add the boundary geometry to the contract and use it for the crop and the edge |
 | P-016 | Low | Place names over the map (borders drawn since 15 Nov) | GIBS `Reference_Labels_15m` answered HTTP 500 and painted the map black, so it was removed | Retry another reference layer or a vector boundary once P-008 is decided |
-| P-030 | Low | Close the Drive design-system core | Cards 01, 02, 04 and 05 are accepted (2026-11-15). Card 03: there will be a symbol, designed by Kiara. Card 07 (imagery) is owned by Kiara. Card 06 (icons) is accepted: Tabler Icons (ADR-007). No dark theme file yet (`tokens/oscuro.json`): the validator reads `[data-theme="dark"]` blocks, the web uses `prefers-color-scheme` | Kiara delivers the symbol and closes 07; then the dark theme and the hub layer |
+| P-030 | Low | Close the Drive design-system core | Cards 01, 02, 04 and 05 are accepted (2026-11-15). Card 03: logo chosen (proposal 02 "Hoja Cartografica", generated with Gemini, approved by the team) and on the site since 2026-11-15 (see *Done*). Card 07 (imagery) is owned by Kiara. Card 06 (icons) is accepted: Tabler Icons (ADR-007). No dark theme file yet (`tokens/oscuro.json`): the validator reads `[data-theme="dark"]` blocks, the web uses `prefers-color-scheme` | Kiara delivers the symbol and closes 07; then the dark theme and the hub layer |
 | P-037 | Low | Choose the language by region, with confirmation | Kept as future work by José (ADR-007): detect the region, show a pop-up that names the detected region and offers to switch, and a language selector in the footer; or follow the browser language | Needs a privacy-safe detection (no third-party IP lookup) and English kept for judges; discuss as part of the project's roadmap |
 | P-038 | Medium | Spanish texts published by the API | In the Spanish interface, variable names, method descriptions and data notes stay in English because they come from the pipeline (ADR-007) | Agree with Alexis a contract change (for example `nameEs`, `descriptionEs`) or a frontend table keyed by variable id |
 | P-024 | High | Show cover, validation and six-month periods in the interface | Mostly done (15 Nov): the tree cover map and the area viewer (`CellViewer.tsx`), and the Cross-checks view (`ValidationPanel.tsx`) use the API. The six-month comparison is no longer in the area viewer (see P-012). The UI shows backend values and computes nothing itself | Still open: raster overlays (fire blocks and 0.05° detail from the PNGs; `rasters.json` is served, but no view reads it yet). Owner: Alexis (raster data side); José (UI). Browser check: P-025 |
@@ -31,6 +31,13 @@
 
 ## Done
 
+- 2026-11-15: the team logo in the top bar and as the favicon (Kiara, approved by José).
+  - **What:** the pixel-art leaf logo (proposal 02 "Hoja Cartografica", generated with Gemini; source and every
+    version in Drive, `docs/design-system/marca/logo/`) replaces the text "SIGNO". `SignoLogo.tsx` draws it as inline
+    SVG at 122×32 px (2× its 61×16 grid); its colours are in `index.css` (`.signo-logo`, with a dark set). The Vite
+    favicon is replaced by the 8×8 leaf, which switches colours with `prefers-color-scheme`.
+  - **AI rule:** declared in the README (*Use of AI*) and in each file's header. The team decided the logo, as SVG code,
+    carries no watermark.
 - 2026-11-15: texts stuck on "loading…" and a blank map under a page translator.
   - **Problem:** José saw "Rainfall: loading…" next to a loaded verdict in the area viewer. Rendering, not data: every
     API file loaded (200). With a page translator active, React updated text nodes the translator had replaced, so the

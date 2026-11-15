@@ -5,6 +5,7 @@
 // language switch (English by default, Spanish on request; ?lang=es). For the pitch, use the browser zoom (Ctrl +).
 // A click on a view pushes one history entry (so Back and Forward work); the app then moves focus to <main>.
 // On phones the views take a second row that scrolls sideways.
+// The name is the team's logo (SignoLogo, generated with Gemini; see that file), 2026-11-15.
 
 import { IconLanguage } from '@tabler/icons-react'
 import type { MouseEvent } from 'react'
@@ -12,6 +13,7 @@ import type { Manifest } from '../../shared/contracts.ts'
 import { LANGS, useLang, type Lang } from '../lib/i18n.ts'
 import { APP_VIEWS, type AppView } from '../lib/viewState.ts'
 import { DataStatusBanner } from './DataStatusBanner.tsx'
+import { SignoLogo } from './SignoLogo.tsx'
 
 interface Props {
   manifest: Manifest | null
@@ -33,7 +35,9 @@ export function TopBar({ manifest, view, hrefFor, onNavigate, onLang }: Props) {
   return (
     <header className="topbar">
       <div className="brand">
-        <p className="logo">SIGNO</p>
+        <p className="logo">
+          <SignoLogo />
+        </p>
         <span className="case-title">
           {t('Amazon vegetation, fire and climate, 2001–2025', 'Vegetación, fuego y clima de la Amazonía, 2001–2025')}
         </span>

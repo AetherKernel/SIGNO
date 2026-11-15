@@ -245,9 +245,14 @@ solve the challenge, and design decisions are made by the team.
     statistical method. The interface was reviewed for design and usability with the `frontend-design` and
     `ui-ux-pro-max` skills (local, not versioned).
 - **Gemini (Google):** literature and data-source exploration.
+- **Gemini (Google): the logo.** The pixel-art leaf logo (the Amazon river and its tributaries in a leaf, and "SIGNO"
+  in a pixel serif) was generated with Gemini and chosen by the team (Kiara, approved by José) on 2026-11-15. Claude
+  (Anthropic), via Claude Code, exported it without changing the design to inline SVG
+  (`web/src/components/SignoLogo.tsx`) and to `web/public/favicon.svg`; both carry a header comment saying so. The team
+  decided that the logo, drawn as SVG code and not as a picture, does not carry a watermark.
 
 Any code or data generated with AI carries a header comment saying so. Images and videos generated with AI carry a
-visible watermark.
+visible watermark (the logo is the exception noted above).
 
 ## License
 

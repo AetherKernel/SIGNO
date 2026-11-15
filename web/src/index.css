@@ -327,17 +327,38 @@ body {
 
 .brand {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: calc(var(--u) * 1.5);
   min-width: 0;
 }
 
 .logo {
-  font-family: var(--f-display);
-  font-weight: 700;
-  font-size: var(--t-h2);
-  letter-spacing: 0.04em;
   margin: 0;
+  flex-shrink: 0;
+}
+
+/* Team logo (SignoLogo.tsx; generated with Gemini, chosen by the team, 2026-11-15). Its own palette, not the UI tokens.
+   Drawn at 2x its 61x16 pixel grid so the pixels stay sharp. */
+.signo-logo {
+  display: block;
+  width: 122px;
+  height: 32px;
+}
+.signo-logo .k-D { fill: #0d3b22; }
+.signo-logo .k-M { fill: #15803d; }
+.signo-logo .k-L { fill: #22c55e; }
+.signo-logo .k-B { fill: #4ade80; }
+.signo-logo .k-R { fill: #0284c7; }
+.signo-logo .k-T { fill: #06b6d4; }
+.signo-logo .k-X { fill: #0d3b22; }
+@media (prefers-color-scheme: dark) {
+  .signo-logo .k-D { fill: #166534; }
+  .signo-logo .k-M { fill: #22c55e; }
+  .signo-logo .k-L { fill: #4ade80; }
+  .signo-logo .k-B { fill: #bbf7d0; }
+  .signo-logo .k-R { fill: #22d3ee; }
+  .signo-logo .k-T { fill: #67e8f9; }
+  .signo-logo .k-X { fill: #ecfdf5; }
 }
 
 .case-title {
