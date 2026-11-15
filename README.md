@@ -11,7 +11,7 @@ apart from noise.
 > Status (15 Nov 2026): NASA and Hansen data for 2000–2026 is processed, clipped to the Amazon, cross-checked and
 > exported to the web app's API source (`web/server/data/`) ([`pipeline/README.md`](pipeline/README.md)). The team's
 > trend test is applied (ADR-006): the app shows where each measure rose or fell, with the test's own checks. The live
-> prototype still shows labelled sample data until the export is published (P-009). Team confirmation of ADR-006 and the
+> prototype is built from this export (real data, no sample-data notice). Team confirmation of ADR-006 and the
 > browser check of the interface are pending (`.ai-context/05-tech-debt.md`, P-028 and P-025).
 
 ## Repository layout
@@ -40,10 +40,11 @@ SIGNO/
 The backend reads the data through a swappable source, validates it against the shared contract and publishes a
 read-only, versioned **static API** (`/api/v1/manifest.json`, `/api/v1/trends/{variable}.json`,
 `/api/v1/series/{variable}/{cell}.json`, and the optional `cover.json`, `validation.json`, `zones.json` and
-`rasters.json`). The frontend only talks to that API; the country borders are a static file. The live site still shows
-clearly labelled **synthetic sample data** until the team switches Vercel to the pipeline export (P-009). The pipeline's
-export format is in [`web/server/data/README.md`](web/server/data/README.md); switching to it is one environment variable,
-`SIGNO_DATA_SOURCE=files` (or `npm run build:real`). Details: [`.ai-context/02-architecture.md`](.ai-context/02-architecture.md) and
+`rasters.json`). The frontend only talks to that API; the country borders are a static file. The live site is built from
+the pipeline export (`npm run build:real`, `dataStatus: real`); `npm run build` keeps clearly labelled **synthetic
+sample data** for development. The pipeline's export format is in
+[`web/server/data/README.md`](web/server/data/README.md); the switch is the environment variable
+`SIGNO_DATA_SOURCE=files`, which `npm run build:real` sets. Details: [`.ai-context/02-architecture.md`](.ai-context/02-architecture.md) and
 [`.ai-context/06-api-mcp.md`](.ai-context/06-api-mcp.md).
 
 Run it locally (Node.js 22.18 or later):

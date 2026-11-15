@@ -12,7 +12,7 @@ API (`/api/v1/…`) and one static file (the country borders). It never runs the
 |---|---|
 | Interface | Four views: the map (filters, squares, area viewer), Trends, Cross-checks, and Method & sources. The trend test is applied (ADR-006): the Trend type of the map, the zone trends and the trust checks are published with the pipeline data |
 | Checks | 102 backend unit tests, lint, layer check, type check, mock and real builds, and a local serve of `/`, the manifest and the optional files |
-| Live site | Still sample data. Vercel builds the mock until it builds the pipeline data (P-009) |
+| Live site | Real data: Vercel builds with `npm run build:real` (pipeline export) since 2026-11-15 |
 | Not built | Raster overlays (P-024); the forest-context charts and the small multiples of the Trends view (P-026) |
 | Not done yet | Browser check at 375 px, in dark mode, with the keyboard and in the console (P-025) |
 
@@ -97,8 +97,8 @@ The steps are the same on Windows, macOS and Linux. Run each command on its own 
 - The production URL must open without login (submission rule).
 - Vercel runs no long processes (ADR-002). The data pipeline runs outside Vercel, see
   [`pipeline/README.md`](../pipeline/README.md).
-- The Vercel project exists (P-006, done 14 Nov). Making it build the pipeline data is P-009: set
-  `SIGNO_DATA_SOURCE=files` or use the build command `npm run build:real`, then redeploy.
+- The Vercel project exists (P-006, done 14 Nov). Since 15 Nov it builds the pipeline data: `vercel.json` runs
+  `npm run build:real` (P-009, done).
 
 ## Data contract
 
@@ -200,7 +200,6 @@ discovery rate 5 %). Satellite drift years (NDVI, EVI, daytime temperature after
 | P-025 | Browser check at 375 px, in dark mode, with the keyboard and the console, covering the map, the area viewer and the Trends view |
 | P-028 | Team confirmation of ADR-006 (José and Kiara) |
 | P-029 | Comparison with NASA Giovanni, and a confidence interval for the slope (not in the product yet) |
-| P-009 | Vercel builds the pipeline data (owner: José) |
 | P-013 | Land cover from MapBiomas: not added (a data decision with Alexis) |
 | P-014 | Crop to the real Amazon boundary (after P-008) |
 | P-015, P-016 | Self-host the fonts; place names over the map (the country borders are drawn since 15 Nov, the labels are not) |

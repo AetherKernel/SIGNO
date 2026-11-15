@@ -62,7 +62,7 @@ shared as a link:
 | Trend analysis | `pipeline/trends.py`, `pipeline/test_trends.py` | Mann-Kendall test on yearly values, Sen's slope, Benjamini-Hochberg FDR, validation V1–V4 (ADR-006). Reads `web/server/data/` and `web/public/data/` |
 
 **Data flow:** NASA Earthdata and Hansen/UMD (global files and tiles) → `data/raw/` (each file deleted after its step) → `data/interim/` (Amazon
-clip and 0.05° cell statistics, about 1.4–2.6 MB per MODIS month; failed months retried up to 3 times; logs per product in `data/interim/logs/`) → `web/server/data/` (API source: `export_api.py`, `export_cover.py`, `validate.py`, `trends.py`) and `web/public/data/` (JSON, PNG maps, `validation.json`, `borders.json`). Both are meant to be versioned (commit pending, P-023) → Vercel. Only these outputs are published;
+clip and 0.05° cell statistics, about 1.4–2.6 MB per MODIS month; failed months retried up to 3 times; logs per product in `data/interim/logs/`) → `web/server/data/` (API source: `export_api.py`, `export_cover.py`, `validate.py`, `trends.py`) and `web/public/data/` (JSON, PNG maps, `validation.json`, `borders.json`). Both are versioned (commit `4683512`) → Vercel builds them with `npm run build:real`. Only these outputs are published;
 raw data, clips, masks, logs and boundary files (`data/raw/boundaries/`) stay out of git.
 
 ### Interface (views of 15 Nov 2026)
@@ -152,7 +152,7 @@ Whatever the option, the statistical test is the product's core and must be tran
 |---|---|---|
 | Local | Windows 11, Node 22.21, Python 3.13 via `py` | `npm run dev` on port 5173 (Vite default) |
 | Preview | Vercel, one URL per pull request | Team review before merging |
-| Production | Vercel, deployed from `main`: <https://signo-chi-pink.vercel.app/> | Public link for the submission (ADR-002); verified without login on 2026-11-14. Build settings in `web/vercel.json`; Node `22.x` from `package.json` engines (needed to run the TypeScript backend directly). Until Vercel builds with `SIGNO_DATA_SOURCE=files` (or `build:real`), the site shows sample data (P-009) |
+| Production | Vercel, deployed from `main`: <https://signo-chi-pink.vercel.app/> | Public link for the submission (ADR-002); verified without login on 2026-11-14. Build settings in `web/vercel.json`; Node `22.x` from `package.json` engines (needed to run the TypeScript backend directly). Builds with `npm run build:real` (pipeline export, `dataStatus: real`) since 2026-11-15; `npm run build` keeps the mock for development |
 
 Vercel does not run long processes or Streamlit, so heavy data work stays outside it (ADR-002). Access to NASA data
 requires an Earthdata Login account per member; credentials never go in the repo.

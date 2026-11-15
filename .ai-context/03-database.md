@@ -130,13 +130,13 @@ Boundaries: RAISG *Biomas 2025* (record `id_bioma = 1`, latin-1 text, SIRGAS 200
 | `data/interim/HANSEN/gfc_v1.13.nc` | `treecover2000`, `loss_share` (years 2001–2025), `canopy_loss` and `tree_cover` per 0.05° cell | No |
 | `data/interim/GRACE/tws.nc` | `tws` (cm) and `tws_uncertainty` on the 0.5° grid, one entry per calendar month | No |
 | `data/interim/masks/<boundary>_<step>_<rows>x<cols>.nc` | cached zone masks per grid | No |
-| `web/server/data/` | API source: `region.json`, `variables.json`, `trends/<id>.json`, `series/<id>.json` (`export_api.py`: 566 cells of 1°, five variables; trend fields filled by `trends.py`); `cover.json` (`export_cover.py`, `trends.py`); `validation.json` (`validate.py`, camelCase; `trendChecks` from `trends.py`) | Planned (P-023) |
-| `web/server/data/zones.json`, `web/public/data/borders.json` | Yearly values, monthly ranges and zone trends per zone (`trends.py`, step 8); country borders (`export_borders.py`, step 9) | Planned (P-023) |
-| `web/public/data/amazon_monthly.json` | monthly zone values (2001-01 onward) | Planned (P-023) |
-| `web/public/data/amazon_semester.json` | the same values per six-month period (`YYYY-H1`, `YYYY-H2`) | Planned (P-023) |
-| `web/public/data/amazon_annual.json` | yearly tree cover (MOD44B), Hansen cover 2000 and loss, burned area | Planned (P-023) |
-| `web/public/data/validation.json` | cross-validation sections per zone, snake_case (results of the 15 Nov run in `pipeline/README.md`, *Cross-validation*) | Planned (P-023) |
-| `web/public/data/maps/index.json`, `maps/**/*.png` | 0.05° map layers as 8-bit PNG data images | Planned (P-023) |
+| `web/server/data/` | API source: `region.json`, `variables.json`, `trends/<id>.json`, `series/<id>.json` (`export_api.py`: 566 cells of 1°, five variables; trend fields filled by `trends.py`); `cover.json` (`export_cover.py`, `trends.py`); `validation.json` (`validate.py`, camelCase; `trendChecks` from `trends.py`) | Yes (commit `4683512`) |
+| `web/server/data/zones.json`, `web/public/data/borders.json` | Yearly values, monthly ranges and zone trends per zone (`trends.py`, step 8); country borders (`export_borders.py`, step 9) | Yes (commit `4683512`) |
+| `web/public/data/amazon_monthly.json` | monthly zone values (2001-01 onward) | Yes (commit `4683512`) |
+| `web/public/data/amazon_semester.json` | the same values per six-month period (`YYYY-H1`, `YYYY-H2`) | Yes (commit `4683512`) |
+| `web/public/data/amazon_annual.json` | yearly tree cover (MOD44B), Hansen cover 2000 and loss, burned area | Yes (commit `4683512`) |
+| `web/public/data/validation.json` | cross-validation sections per zone, snake_case (results of the 15 Nov run in `pipeline/README.md`, *Cross-validation*) | Yes (commit `4683512`) |
+| `web/public/data/maps/index.json`, `maps/**/*.png` | 0.05° map layers as 8-bit PNG data images | Yes (commit `4683512`) |
 
 Clipped grids: 630 × 740 (0.05°), 315 × 370 (0.1°), 126 × 148 (0.25°), 63 × 74 (0.5°, GRACE).
 
