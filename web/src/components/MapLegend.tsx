@@ -7,7 +7,7 @@
 
 import { useId, type ReactNode } from 'react'
 import { BURNED_BREAKS, COVER_BREAKS, COVER_CLASSES, LOSS_BREAKS } from '../lib/cover.ts'
-import { formatSigned, legendBreaks, localizeUnits, SLOPE_CLASSES } from '../lib/format.ts'
+import { formatSigned, legendBreaks, slopeUnitsLabel, SLOPE_CLASSES } from '../lib/format.ts'
 import { useLang } from '../lib/i18n.ts'
 import type { MapType } from '../lib/viewState.ts'
 import { ViewLink } from './ViewLink.tsx'
@@ -173,7 +173,7 @@ export function MapLegend({ mapType, year, trend, compact = false }: Props) {
   const maxAbs = trend?.maxAbs ?? 0
   const breaks = legendBreaks(maxAbs)
   const name = trend?.name ?? t('the measure', 'la medida')
-  const units = trend ? localizeUnits(trend.slopeUnits, t) : t('per decade', 'por década')
+  const units = trend ? slopeUnitsLabel(trend.slopeUnits, t) : t('per decade', 'por década')
   // The scale ends at ±maxAbs so typical slopes show; say so when real squares go beyond it ("≤ −428.03").
   const range = trend?.range ?? null
   const clippedLow = range !== null && range.min < -maxAbs

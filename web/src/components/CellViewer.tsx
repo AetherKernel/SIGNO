@@ -219,8 +219,18 @@ function CellContent({ cell, manifest, cover, validation, titleId, summaryId, he
 
       <div className="viewer-body">
         <p id={summaryId} className="cv-summary">
-          {summary.join(' ')}
+          {summary.sentences.join(' ')}
         </p>
+        {summary.others.length > 0 && (
+          <details className="cv-others">
+            <summary>{t(`Other clear trends (${summary.others.length})`, `Otras tendencias claras (${summary.others.length})`)}</summary>
+            <ul>
+              {summary.others.map((sentence) => (
+                <li key={sentence}>{sentence}</li>
+              ))}
+            </ul>
+          </details>
+        )}
         {place && <PlaceNote place={place} />}
 
         <section aria-labelledby={`${titleId}-changed`} className="cv-section">

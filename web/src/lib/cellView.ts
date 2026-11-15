@@ -376,7 +376,20 @@ export function describeTrend(entry: TrendEntry, t: Tr = EN): { headline: string
   }
 }
 
-/** Sentences of the summary, built from published values with fixed templates; parts without data are skipped. */
+/** Clear trends named in the summary sentence; the rest go to the "Other clear trends" list (P-033, José). */
+export const SUMMARY_NAMED_TRENDS = 3
+
+/** The area summary: its sentences, and the clear trends it does not name (shown in a list the reader opens). */
+export interface AreaSummary {
+  sentences: string[]
+  others: string[]
+}
+
+/**
+ * Sentences of the summary, built from published values with fixed templates; parts without data are skipped.
+ * Every clear trend is reported: the first ones (falling first, then rising) in the sentence, the rest counted there
+ * ("and 1 more clear trend") and listed in `others`. Before 15 Nov the extra ones were dropped (P-033).
+ */
 export function buildSummary(
   cover: CoverLayer | null,
   coverCell: CoverCell | null,
@@ -384,7 +397,7 @@ export function buildSummary(
   from: number,
   to: number,
   t: Tr = EN,
-): string[] {
+): AreaSummary {
   const sentences: string[] = []
   const hansen = coverCell?.hansenTreeCover ?? []
   const i0 = cover ? cover.years.indexOf(Math.min(from, to)) : -1
@@ -407,16 +420,25 @@ export function buildSummary(
           ),
     )
   }
-  if (entries.some((e) => e.status === 'loading')) return [...sentences, t('Loading the trend results…', 'Cargando los resultados de tendencia…')]
-  const significant = entries.filter((e) => e.status === 'falling' || e.status === 'rising').slice(0, 3)
-  for (const e of significant) {
+  if (entries.some((e) => e.status === 'loading'))
+    return { sentences: [...sentences, t('Loading the trend results…', 'Cargando los resultados de tendencia…')], others: [] }
+  const trendSentence = (e: TrendEntry) =>
+    t(
+      `${e.name} ${e.status === 'falling' ? 'fell' : 'rose'} significantly: ${slopeText(e, t)} (${span(e)}).`,
+      `${e.name} ${e.status === 'falling' ? 'bajó' : 'subió'} de forma significativa: ${slopeText(e, t)} (${span(e)}).`,
+    )
+  // Entries come sorted: falling, then rising, then the rest (buildTrendEntries).
+  const significant = entries.filter((e) => e.status === 'falling' || e.status === 'rising')
+  const named = significant.slice(0, SUMMARY_NAMED_TRENDS)
+  const others = significant.slice(SUMMARY_NAMED_TRENDS).map(trendSentence)
+  for (const e of named) sentences.push(trendSentence(e))
+  if (others.length > 0)
     sentences.push(
       t(
-        `${e.name} ${e.status === 'falling' ? 'fell' : 'rose'} significantly: ${slopeText(e, t)} (${span(e)}).`,
-        `${e.name} ${e.status === 'falling' ? 'bajó' : 'subió'} de forma significativa: ${slopeText(e, t)} (${span(e)}).`,
+        `And ${others.length} more clear trend${others.length === 1 ? '' : 's'} (see “Other clear trends”).`,
+        `Y ${others.length} ${others.length === 1 ? 'tendencia clara más' : 'tendencias claras más'} (ver “Otras tendencias claras”).`,
       ),
     )
-  }
   const flat = entries.filter((e) => e.status === 'none').length
   if (flat > 0)
     sentences.push(
@@ -427,7 +449,7 @@ export function buildSummary(
     )
   if (significant.length === 0 && flat === 0)
     sentences.push(t('Trend results are not available for this area.', 'No hay resultados de tendencia para esta área.'))
-  return sentences
+  return { sentences, others }
 }
 
 // Documented places

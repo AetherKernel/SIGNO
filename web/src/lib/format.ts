@@ -34,6 +34,19 @@ export function formatTrendSlope(slope: number, slopeUnits: string, t: Tr = EN):
   return `${formatSigned(slope)} ${units === '' ? t('per decade', 'por década') : localizeUnits(units, t)}`
 }
 
+/**
+ * The pipeline's method text says "in unitless per decade" for NDVI and EVI (P-035). Shown as plain words until the
+ * pipeline publishes it so; any other text is returned unchanged.
+ */
+export function plainMethodText(text: string): string {
+  return text.replace(/\bin unitless per decade\b/g, 'per decade (NDVI and EVI have no units)')
+}
+
+/** Slope units for a heading: "unitless per decade" (NDVI, EVI) becomes "no units"; others are localized. */
+export function slopeUnitsLabel(slopeUnits: string, t: Tr = EN): string {
+  return /^unitless\b/.test(slopeUnits.trim()) ? t('no units', 'sin unidades') : localizeUnits(slopeUnits, t)
+}
+
 /** Units published by the API in English ("km² per year, per decade", "% of cell"), in the current language. */
 export function localizeUnits(units: string, t: Tr = EN): string {
   return t(

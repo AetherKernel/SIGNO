@@ -9,7 +9,7 @@ import { useEffect } from 'react'
 import { API_BASE_PATH, apiPaths } from '../../shared/apiPaths.ts'
 import type { Manifest } from '../../shared/contracts.ts'
 import { useTrendLayer } from '../hooks/useSignoData.ts'
-import { formatPeriod, formatYears, isTrendTestPending } from '../lib/format.ts'
+import { formatPeriod, formatYears, isTrendTestPending, plainMethodText } from '../lib/format.ts'
 import { useLang } from '../lib/i18n.ts'
 
 export interface MethodViewProps {
@@ -59,7 +59,7 @@ export function MethodView({ manifest, coverTrendMethod }: MethodViewProps) {
               {t('Description', 'Descripción')}
               {firstVariable ? t(` (for ${firstVariable.name})`, ` (para ${firstVariable.name})`) : ''}
             </dt>
-            <dd>{layer?.method.description ?? '…'}</dd>
+            <dd>{layer ? plainMethodText(layer.method.description) : '…'}</dd>
           </div>
           <div>
             <dt>{t('Years tested, by variable', 'Años probados, por variable')}</dt>

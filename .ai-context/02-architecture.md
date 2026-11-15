@@ -127,7 +127,9 @@ map opens framed on the region; outside it the imagery stays visible under a tra
 space), and pan and zoom stay inside the region (José, 2026-11-15). The scan sweep runs when the layer changes and is
 off with `prefers-reduced-motion`.
 
-**Area viewer** (dialog over the map, `CellViewer.tsx`): the summary in one paragraph; the documented-case note (La Pampa:
+**Area viewer** (dialog over the map, `CellViewer.tsx`): the summary in one paragraph, which names the first three
+clear trends (falling first) and counts the rest, listed under "Other clear trends" (`buildSummary`,
+`SUMMARY_NAMED_TRENDS`); the documented-case note (La Pampa:
 0.05° numbers and the MAAP reference) or the hotspot note; **year travel** (`YearTravel.tsx`): From and To, a play button
 and the `[` and `]` keys; **What changed from A to B** (`CellChanges.tsx`): each measure in A, in B and the difference
 B minus A in its own units; the tree cover, loss and burned charts (`YearChart.tsx`); **Trends in this area**

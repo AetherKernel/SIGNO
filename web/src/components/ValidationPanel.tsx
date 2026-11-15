@@ -274,8 +274,8 @@ function CasesCard({
       <h3 id="v-places">{t('Hotspots of tree cover loss and documented places', 'Puntos críticos de pérdida y lugares documentados')}</h3>
       <p className="small">
         {t(
-          'Select a place to open it on the map, in the tree cover view at its year of largest loss.',
-          'Elige un lugar para abrirlo en el mapa, en la vista de cobertura y en su año de mayor pérdida.',
+          'Select a place to open it on the tree cover loss map, at its year of largest loss.',
+          'Elige un lugar para abrirlo en el mapa de pérdida de cobertura arbórea, en su año de mayor pérdida.',
         )}
       </p>
       <ol className="hotspots" aria-label={t(`Hotspots in ${zone.label}`, `Puntos críticos en ${zone.label}`)}>

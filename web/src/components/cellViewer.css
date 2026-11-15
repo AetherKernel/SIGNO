@@ -79,6 +79,21 @@
 }
 
 /* Body */
+
+/* Clear trends the summary sentence does not name (P-033): a list the reader opens. */
+.cv-others > summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: var(--t-small);
+}
+
+.cv-others > ul {
+  margin: var(--u) 0 0;
+  padding-left: calc(var(--u) * 2.5);
+  display: grid;
+  gap: 4px;
+}
 .cv-section {
   display: grid;
   gap: calc(var(--u) * 1.5);
