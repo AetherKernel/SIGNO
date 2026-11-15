@@ -6,7 +6,7 @@
 // Map is the default, also for old links without ?view=. Trends, Cross-checks and Method are loaded on demand.
 // Data comes only from hooks (src/hooks) → service (src/services) → API v1 (published by server/).
 
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef } from 'react'
 import type { Hotspot, ValidationCase } from '../shared/contracts.ts'
 import { MapScreen } from './components/MapScreen.tsx'
 import { TopBar } from './components/TopBar.tsx'
@@ -22,7 +22,6 @@ function App() {
   const manifest = useManifest()
   const [params, setParams] = useUrlParams()
   const view = parseAppView(params.get('view'))
-  const [present, setPresent] = useState(false)
   const mainRef = useRef<HTMLElement>(null)
   const shownView = useRef(view)
 
@@ -30,10 +29,6 @@ function App() {
   const extras = manifest.data?.extras
   const cover = useCover(extras?.cover === true)
   const validation = useValidation(extras?.validation === true)
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('present', present)
-  }, [present])
 
   // A new view: move focus to <main> so keyboard and screen reader users start at its content, and name the page.
   useEffect(() => {
@@ -78,8 +73,6 @@ function App() {
         view={view}
         hrefFor={hrefFor}
         onNavigate={navigate}
-        present={present}
-        onTogglePresent={() => setPresent((p) => !p)}
       />
 
       <main id="main" ref={mainRef} tabIndex={-1} className={`view view-${view}`}>

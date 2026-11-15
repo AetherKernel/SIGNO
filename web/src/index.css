@@ -2,7 +2,7 @@
  *
  * SIGNO design tokens, decided by José on 2026-11-14 (concept "Sala de análisis", vocabulary "expediente"):
  * light-first palette with a teal accent that is not in the data scale, ColorBrewer PuOr for trends,
- * Source Serif 4 / Source Sans 3 / JetBrains Mono, balanced type scale (presentation mode = wide scale),
+ * Source Serif 4 / Source Sans 3 / JetBrains Mono, balanced type scale (for the pitch, use the browser zoom),
  * 8 px spacing unit, 10 px radius, one motion moment (scan sweep on variable change).
  * Layout (2026-11-15): top bar with four views; the Map view is a filter panel and the map; the cell viewer is a dialog over the map.
  * Fonts (2026-11-15, P-015): served by the site itself from the Fontsource packages (SIL Open Font License 1.1), not from
@@ -85,17 +85,6 @@
     --shadow: 0 8px 24px rgb(0 0 0 / 0.45);
     color-scheme: dark;
   }
-}
-
-/* Presentation mode: the wide scale (base 18 px), readable from the back of a room */
-:root.present {
-  --t-caption: 0.75rem;
-  --t-small: 0.875rem;
-  --t-body: 1.125rem;
-  --t-h3: 1.4375rem;
-  --t-h2: 1.75rem;
-  --t-h1: 2.1875rem;
-  --t-display: 2.75rem;
 }
 
 *,

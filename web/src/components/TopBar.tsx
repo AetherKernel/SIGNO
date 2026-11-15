@@ -1,7 +1,7 @@
 // AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15. Reviewed and owned by team AETHER.
 //
-// Top bar: the name, the four views (?view=map|trends|checks|method) as real links, the sample-data notice and the
-// presentation switch. A click on a view pushes one history entry (so Back and Forward work); the app then moves focus
+// Top bar: the name, the four views (?view=map|trends|checks|method) as real links, the sample-data notice. For the pitch, use the
+// browser zoom (Ctrl +). A click on a view pushes one history entry (so Back and Forward work); the app then moves focus
 // to <main>. On phones the views take a second row that scrolls sideways.
 
 import type { MouseEvent } from 'react'
@@ -15,11 +15,9 @@ interface Props {
   /** Link target of a view, so "open in a new tab" and copy link work. */
   hrefFor: (view: AppView) => string
   onNavigate: (view: AppView) => void
-  present: boolean
-  onTogglePresent: () => void
 }
 
-export function TopBar({ manifest, view, hrefFor, onNavigate, present, onTogglePresent }: Props) {
+export function TopBar({ manifest, view, hrefFor, onNavigate }: Props) {
   const go = (event: MouseEvent<HTMLAnchorElement>, target: AppView) => {
     // Let the browser handle new-tab and new-window clicks.
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
@@ -47,9 +45,6 @@ export function TopBar({ manifest, view, hrefFor, onNavigate, present, onToggleP
       </nav>
       <div className="topactions">
         {manifest && <DataStatusBanner status={manifest.dataStatus} />}
-        <button type="button" className="btn ghost" aria-pressed={present} onClick={onTogglePresent}>
-          Present
-        </button>
       </div>
     </header>
   )

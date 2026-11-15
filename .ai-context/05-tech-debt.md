@@ -29,6 +29,7 @@
 
 ## Done
 
+- 2026-11-15: "Present" (presentation mode) button removed at José's request; for the pitch the team uses the browser zoom.
 - 2026-11-15: lighter site and fewer requests (approved by José).
   - **One file per square for the area viewer:** `cells/{cellId}.json` (`CellBundle`) holds each variable's yearly values
     and the square's trend row. Opening a square was 5 series files plus the 5 whole trend layers (about 55 kB compressed,
