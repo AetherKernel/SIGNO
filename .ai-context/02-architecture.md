@@ -71,7 +71,7 @@ The app has four views, chosen with `?view=` (default `map`). The top bar links 
 
 | View | `?view=` | What it shows |
 |---|---|---|
-| Map | `map` | Left: the filters (`MapFilters.tsx`): map type, trend variable and filter, year with play, square opacity, country borders, base map, legend, and a first-visit hint with the La Pampa case. Centre: the map (`TrendMap.tsx`): NASA GIBS imagery under translucent 1° squares, cropped to the region. On phones the filters open as a bottom sheet from the **Filters** button, and the compact legend stays in the bar. Clicking a square opens the **area viewer** |
+| Map | `map` | Left: the filters (`MapFilters.tsx`): map type, trend variable and filter, year with play, square opacity, country borders, base map, legend, and a first-visit hint with the La Pampa case. Centre: the map (`TrendMap.tsx`): NASA GIBS imagery under translucent 1° squares, focused on the region (the rest of the continent is veiled). On phones the filters open as a bottom sheet from the **Filters** button, and the compact legend stays in the bar. Clicking a square opens the **area viewer** |
 | Trends | `trends` | Zone selector (whole Amazon, Brazilian Amazon, Peruvian Amazon), four headline cards (Hansen tree cover, tree cover loss, daytime temperature, rainfall), a table with one row per measure, a detail chart (yearly values, the Sen line, and a thin bar per year for the lowest and highest month), "What this means", and "How the test works and how we checked it" with the trust checks from `trendChecks` |
 | Cross-checks | `checks` | How the two tree cover sources agree, loss against fire, the hotspots and the La Pampa case (MAAP #233). A hotspot or the case opens its square on the map |
 | Method & sources | `method` | How the verdict is reached (method, α, what "significant" means), the method of the cover trends, status, the sources with their DOIs, and the limits |
@@ -82,8 +82,9 @@ The app has four views, chosen with `?view=` (default `map`). The top bar links 
 - **Tree cover loss** (`loss`) and **burned area** (`burned`): one year at a time, from `cover.json`.
 - **Trend** (`trend`): one measure at a time, in slope colours (PuOr: orange falling, purple rising) per decade. A dot marks a cell that is not significant, so colour is never the only cue. The filter (`show`) keeps all cells, only the significant ones, the falling or the rising ones. The variables are NDVI, EVI, daytime LST, rainfall, burned area, Hansen tree cover loss and MODIS tree cover. Default opacity is 55 % for tree cover, 70 % for trend and 80 % for loss and burned area.
 
-Map layers, bottom to top: imagery · outside-region mask · squares · country borders · selected square outline. The
-map opens cropped to the region and cannot be zoomed out beyond it. The scan sweep runs when the layer changes and is
+Map layers, bottom to top: imagery · outside-region veil · squares · country borders · selected square outline. The
+map opens framed on the region; outside it the imagery stays visible under a translucent veil (context, no blank
+space), and pan and zoom stay inside the region (José, 2026-11-15). The scan sweep runs when the layer changes and is
 off with `prefers-reduced-motion`.
 
 **Area viewer** (dialog over the map, `CellViewer.tsx`): the summary in one paragraph; the documented-case note (La Pampa:

@@ -123,7 +123,9 @@ Worldview draws its imagery from NASA GIBS, which serves WMTS tiles without cred
   Each layer's deepest level is the map's zoom limit, and the UI says so.
 - The trend grid is an SVG overlay rendered by React in Web Mercator units, so it lines up with the imagery.
 - **Crop to the region.**
-  - Outside the region box is covered with the map background, and the region edge is drawn.
+  - Outside the region box the imagery stays visible under a translucent veil in the page colour, so the continent
+    gives context without blank space; the region edge is drawn. A solid cover was tried first and José preferred
+    the veil (2026-11-15).
   - The map cannot be panned or zoomed out beyond the region.
   - The box is the API's `region.bbox` until the team picks the boundary (P-008).
 

@@ -111,8 +111,9 @@ export function TrendMap(props: Props) {
     if (start) map.setView([start.lat, start.lon], Math.max(start.zoom, map.getMinZoom()))
     else map.fitBounds(bounds, frame)
 
-    // Everything outside the region is covered (the "crop"), and the region's edge is drawn.
-    // The region is the API's bounding box until the team picks the real boundary (P-008).
+    // Outside the region the imagery stays visible under a veil (context, not focus), and the region's edge is drawn.
+    // Pan and zoom stay inside the region (maxBounds + minZoom above). The region is the API's bounding box until the
+    // team picks the real boundary (P-008).
     map.createPane('mask').style.zIndex = '350'
     map.createPane('borders').style.zIndex = '450'
     map.createPane('selection').style.zIndex = '460'

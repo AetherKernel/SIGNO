@@ -689,10 +689,11 @@ body {
   pointer-events: none;
 }
 
-/* Crop to the study region: the outside takes the map background colour; the edge is a thin line */
+/* Focus on the study region: the rest of the continent stays visible under a veil in the page colour (lighter in
+   light mode, darker in dark mode), so there is context without blank space; the edge is a thin line. */
 .region-mask {
-  fill: var(--map-bg);
-  fill-opacity: 1;
+  fill: var(--bg);
+  fill-opacity: 0.6;
 }
 
 .region-edge {

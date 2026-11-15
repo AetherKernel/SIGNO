@@ -142,7 +142,7 @@ Four views, chosen with `?view=` (map, trends, checks, method). The top bar link
 
 | View | What it shows |
 |---|---|
-| **Map** (default) | Left: filters (map type, trend variable and filter, year and play, square opacity, country borders, base map, legend, first-visit hint). Centre: the map, NASA GIBS imagery under translucent 1° squares, cropped to the region. Click a square to open the area viewer |
+| **Map** (default) | Left: filters (map type, trend variable and filter, year and play, square opacity, country borders, base map, legend, first-visit hint). Centre: the map, NASA GIBS imagery under translucent 1° squares, focused on the region (the rest of the continent is veiled; pan and zoom stay inside). Click a square to open the area viewer |
 | **Trends** | Zone selector (whole Amazon, Brazilian Amazon, Peruvian Amazon); four headline cards (Hansen tree cover, tree cover loss, daytime temperature, rainfall); a table with one row per measure; a chart for the chosen measure with the Sen line; "What this means"; "How the test works and how we checked it" with the trust checks |
 | **Cross-checks** | How the two tree cover sources agree; loss against fire; hotspots and the La Pampa case (MAAP #233 link). A hotspot or the case opens its square on the map |
 | **Method & sources** | How the verdict is reached (method, α, what "significant" means); the method of the cover trends; the sources with their DOIs; the limits |
