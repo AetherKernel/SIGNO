@@ -22,7 +22,7 @@ SIGNO/
 ├── CLAUDE.md      # Working rules for the AI coding assistant (in Spanish)
 ├── data/          # Not versioned, except data/README.md: where to download every dataset
 ├── docs/          # Internal planning documents (Spanish)
-├── notebooks/     # Draft notebook (unfinished, not part of the submission)
+├── notebooks/     # No notebook is part of the submission (see its README)
 ├── pipeline/      # Python: download → clip to the Amazon → clean → exports for the web → trend test and validation
 ├── web/           # The app deployed on Vercel (Root Directory)
 │   ├── shared/    # Data contract (types) and API route map, used by both layers
@@ -275,8 +275,8 @@ solve the challenge, and design decisions are made by the team.
 - **Claude (Anthropic), via Claude Code (data side):** checked candidate data sources (existence, access, license,
   citation) and drafted `data/README.md` and `notebooks/README.md` (marked with a header comment). It wrote the data
   pipeline in `pipeline/` (download, clipping, unit conversion, zone averages, and on 2026-11-15 the modules
-  `tiles.py`, `hansen.py`, `grace.py`, `export_maps.py`, `export_api.py`, `export_cover.py`, `validate.py` and `verify.py`, plus the
-  draft notebook in `notebooks/`; every file carries a header comment), following the team's
+  `tiles.py`, `hansen.py`, `grace.py`, `export_maps.py`, `export_api.py`, `export_cover.py`, `validate.py` and `verify.py`;
+  every file carries a header comment), following the team's
   choices of region, zones, datasets, periods and six-month semesters. `validate.py` computes descriptive cross-checks.
 - **The trend test (ADR-006), written with Claude (Anthropic) via Claude Code on 2026-11-15:** `pipeline/trends.py` (the
   test, the slopes, the false discovery rate, the checks V1–V4 and `zones.json`), `pipeline/test_trends.py` (13 tests on

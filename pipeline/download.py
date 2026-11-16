@@ -33,7 +33,7 @@ def login():
         auth = earthaccess.login(strategy=strategy)
         if auth and auth.authenticated:
             return auth
-    raise SystemExit("Earthdata login failed. See notebooks/README.md for how to provide credentials.")
+    raise SystemExit("Earthdata login failed. See pipeline/README.md for how to provide credentials.")
 
 
 def month_of(granule) -> str:

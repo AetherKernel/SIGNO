@@ -281,7 +281,7 @@ José also chose Tabler Icons as the icon set (brand card 06).
 - **Date:** 2026-11-15
 - **Status:** Withdrawn (José, 2026-11-15, night). It had been accepted by Alexis earlier that day and proposed by José on 2026-11-14.
 
-**Withdrawal (15 Nov, night).** The notebook route was not finished as a shared route and was not used for the published results. The team removed it from the READMEs, from the pipeline messages and from the Method view of the web app. The notebook stays in `notebooks/` as a draft. The supported way to reproduce the results is the pipeline on a local machine (`python -m pipeline.run_all`, then `python -m pipeline.verify`; see `pipeline/README.md`). The text below is the decision as it was written. It is kept as a record and no longer describes a supported route.
+**Withdrawal (15 Nov, night).** The notebook route was not finished as a shared route and was not used for the published results. The team removed it from the READMEs, from the pipeline messages and from the Method view of the web app. The draft notebook was removed from the repository the same night (decided by José); it remains in the git history. The supported way to reproduce the results is the pipeline on a local machine (`python -m pipeline.run_all`, then `python -m pipeline.verify`; see `pipeline/README.md`). The text below is the decision as it was written. It is kept as a record and no longer describes a supported route.
 
 **Context.** Some people want the explored data but not the web app. They need a route that runs on any machine, not only
 on the team's Windows PC. The repository holds the generated files, but a reader cannot check them without running the
