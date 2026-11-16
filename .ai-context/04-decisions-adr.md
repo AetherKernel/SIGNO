@@ -142,7 +142,7 @@ Worldview draws its imagery from NASA GIBS, which serves WMTS tiles without cred
 ## ADR-006: Trend test: Mann-Kendall on yearly values
 
 - **Date:** 2026-11-15
-- **Status:** Accepted (team decision, Alexis, 2026-11-15). Confirmation by José and Kiara pending (05, P-028)
+- **Status:** Accepted (team decision, Alexis, 2026-11-15). Confirmed by José and Kiara on 2026-11-15, including the parameters delegated to Claude (05, P-028)
 
 **Context.** The trend test is the core of SIGNO: it decides which change is real and which is noise (01). Under the
 Space Apps AI rule the team chooses the method, and the AI assistant only implements what the team decided. The team
@@ -306,7 +306,7 @@ pipeline.
 ## ADR-009: Hansen loss tested as one trend from 2011 and one tree cover in the interface
 
 - **Date:** 2026-11-15
-- **Status:** Accepted (Alexis, 2026-11-15). Pending confirmation by José and Kiara together with ADR-006 (05, P-028)
+- **Status:** Accepted (Alexis, 2026-11-15). Confirmed by José and Kiara on 2026-11-15, together with ADR-006 (05, P-028)
 
 **Context.** Hansen's Global Forest Change v1.13 reprocessed its loss data from 2011 onward, not for 2001–2010. The user
 notes say "users will notice inconsistencies as a result" and that "care must be taken when comparing change across any
@@ -347,7 +347,7 @@ a year, and MODIS 2025 is anomalous.
 - The years 2001–2010 are not tested (10 years, low power), so they say nothing either way about change before 2011.
 - The map, the area viewer and the Trends view show the loss trend of 2011–2025 (the years 2001–2010 are shown greyed, not used).
 - A new Colab run reproduces these results, because the inputs are the same (ADR-008).
-- Team confirmation with ADR-006 (P-028) is still pending. Until then these are the first-run numbers.
+- Confirmed by the whole team with ADR-006 on 2026-11-15 (P-028).
 
 **Amendment (15 Nov, evening).** Alexis asked for one answer per measure. Hansen loss is therefore one trend, 2011–2025 (`HANSEN_LOSS_TREND_YEARS = (2011, 2025)`, `HANSEN_METHOD_CHANGE_YEAR = 2011`). All years 2001–2025 are published and shown. The years 2001–2010 are real Hansen data from the earlier method: they are greyed in the charts, with an info tooltip, and are not used in the trend. Every Hansen chart marks 2011 with a dashed line and a tooltip. This amendment supersedes the two-segment presentation above. The evidence stays in `trendChecks.hansenConsistency` (2001–2010: r 0.85, ratio 1.15; 2011–2025: r 0.20, ratio 2.70; one test across 2011 would rise while PRODES falls). Result 2011–2025: 566 cells tested, 45 rising and 2 falling. The `cover.json` fields are `lossTrendYears`, `methodChangeYear` and `hansenNote`.
 

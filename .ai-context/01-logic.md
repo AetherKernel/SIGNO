@@ -11,8 +11,8 @@ variables from NASA data, and separate real change from noise. One-off events ar
 |---|---|---|
 | 2026-11-14 | **Problem:** where the Amazon forest is losing greenness and warming in a sustained way, and whether that change is statistically significant or just noise | Team (José, Alexis, Kiara) |
 | 2026-11-14 | **Region:** the Amazon as one natural region, defined by geography and not by countries or administrative regions | Team |
-| 2026-11-15 | **Trend test:** Mann-Kendall on yearly values, Sen's slope, Benjamini-Hochberg FDR per variable, α = 0.05, and the validation plan V1–V4 (ADR-006). Parameters from the team kit were delegated to Claude | Team (Alexis, 2026-11-15); José and Kiara to confirm (05, P-028) |
-| 2026-11-15 | **Hansen loss:** tested as one trend, 2011–2025, never across 2011 (ADR-009); one tree cover (Hansen) in the interface; MODIS 2025 left out of the cross-check change (ADR-009) | Team (Alexis, 2026-11-15); José and Kiara to confirm (05, P-028) |
+| 2026-11-15 | **Trend test:** Mann-Kendall on yearly values, Sen's slope, Benjamini-Hochberg FDR per variable, α = 0.05, and the validation plan V1–V4 (ADR-006). Parameters from the team kit were delegated to Claude | Team (Alexis, 2026-11-15); confirmed by José and Kiara, 2026-11-15 (05, P-028) |
+| 2026-11-15 | **Hansen loss:** tested as one trend, 2011–2025, never across 2011 (ADR-009); one tree cover (Hansen) in the interface; MODIS 2025 left out of the cross-check change (ADR-009) | Team (Alexis, 2026-11-15); confirmed by José and Kiara, 2026-11-15 (05, P-028) |
 | 2026-11-15 (evening) | **One answer per measure (amends ADR-009):** one Hansen loss trend, 2011–2025, with all years 2001–2025 shown (2001–2010 greyed, not used); a 95 % confidence interval for every slope (P-029); daytime LST published to 2026-10, its trend still to 2020 (B1); a "?" mark where a known limit affects a value | Team (Alexis, 2026-11-15); José to review the interface rules |
 
 **Context.** The Amazon spans nine countries and faces deforestation, degradation, fires and recent extreme

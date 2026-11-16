@@ -11,8 +11,8 @@ apart from noise.
 > Status (15 Nov 2026): NASA and Hansen data for 2000–2026 is processed, clipped to the Amazon, cross-checked and
 > exported to the web app's API source (`web/server/data/`) ([`pipeline/README.md`](pipeline/README.md)). The team's
 > trend test is applied (ADR-006): the app shows where each measure rose or fell, with the test's own checks. The live
-> prototype is built from this export (real data, no sample-data notice). Hansen loss is tested as one trend, 2011–2025, with all years shown (ADR-009), and checked against INPE PRODES. Every trend has a 95 % confidence interval, checked against SciPy. Team confirmation of ADR-006 and ADR-009 and the
-> browser check of the interface are pending (`.ai-context/05-tech-debt.md`, P-028 and P-025).
+> prototype is built from this export (real data, no sample-data notice). Hansen loss is tested as one trend, 2011–2025, with all years shown (ADR-009), and checked against INPE PRODES. Every trend has a 95 % confidence interval, checked against SciPy. The whole team confirmed ADR-006 and ADR-009 on 15 Nov. The
+> browser check of the interface is pending (`.ai-context/05-tech-debt.md`, P-025).
 
 ## Repository layout
 
