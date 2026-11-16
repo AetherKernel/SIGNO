@@ -30,8 +30,8 @@ Keep the original file names: the pipeline finds the zips by name anywhere under
 `pipeline/README.md` (`> data/interim/logs/<PRODUCT>.log`), create `data/interim/logs/` first. The shell needs it; the pipeline does not.
 
 2. **Provide outside the repo:** an Earthdata Login account (<https://urs.earthdata.nasa.gov>) with the
-   **NASA GESDISC DATA ARCHIVE** application approved, and your credentials in `~/_netrc` (Windows) or `~/.netrc`, or in
-   Colab Secrets. Never put credentials inside the repo.
+   **NASA GESDISC DATA ARCHIVE** application approved, and your credentials in `~/_netrc` (Windows) or `~/.netrc`.
+   Never put credentials inside the repo.
 
 3. **Do not create these; the pipeline creates them itself:**
    - `data/raw/<PRODUCT>/`: temporary global files and tiles, deleted after each step.
@@ -56,8 +56,8 @@ Keep the original file names: the pipeline finds the zips by name anywhere under
 1. Create a free **Earthdata Login** account: <https://urs.earthdata.nasa.gov>.
 2. In your Earthdata profile, go to *Applications → Authorized Apps → Approve More* and approve
    **NASA GESDISC DATA ARCHIVE** (needed for GLDAS and IMERG).
-3. In Google Colab, store your credentials as **Secrets** (key icon in the left bar), never in a cell:
-   `EARTHDATA_TOKEN` (or `EARTHDATA_USERNAME` and `EARTHDATA_PASSWORD`). See `notebooks/README.md`.
+3. Save your credentials in a netrc file outside the repository (`C:\Users\<user>\_netrc` on Windows, `~/.netrc` on
+   Linux and macOS), never in code. See `pipeline/README.md`.
 
 ## Study area
 
@@ -70,7 +70,7 @@ Keep the original file names: the pipeline finds the zips by name anywhere under
 ## NASA datasets
 
 The four monthly products are NASA open data ("openly shared, without restriction", [EOSDIS Data Use Policy](https://earthdata.nasa.gov/earth-observation-data/data-use-policy)),
-require Earthdata Login, and are hosted in Earthdata Cloud (AWS us-west-2). From Colab, download over HTTPS.
+require Earthdata Login, and are hosted in Earthdata Cloud (AWS us-west-2). Outside AWS us-west-2, download over HTTPS (the earthaccess default).
 The three NASA sources added on 2026-11-15 (below) are also open data and use Earthdata Login.
 
 | Variable | Product (short name, version) | Grid · step | Period available | Format · size | DOI |

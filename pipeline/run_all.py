@@ -113,8 +113,8 @@ def preflight(only: str | None) -> list[str]:
         netrc = any((Path.home() / n).is_file() for n in (".netrc", "_netrc"))
         print(f"Earthdata credentials: {'environment variables' if env else 'netrc file' if netrc else 'NOT FOUND'}")
         if not (env or netrc):
-            problems.append("No Earthdata credentials: create the netrc file (pipeline/README.md, Login) or, in Colab, "
-                            "the Secrets of section 2 (notebooks/README.md).")
+            problems.append("No Earthdata credentials: create the netrc file (pipeline/README.md, Login) or set "
+                            "the environment variables EARTHDATA_TOKEN, or EARTHDATA_USERNAME and EARTHDATA_PASSWORD.")
     if only != "downloads":
         raisg = sorted(RAW.rglob(BOUNDARY_FILES["raisg_biome"])) if RAW.exists() else []
         print(f"RAISG zip ({BOUNDARY_FILES['raisg_biome']}): {'found' if raisg else 'NOT FOUND'}")

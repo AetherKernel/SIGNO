@@ -12,7 +12,7 @@ Each month is tried up to 3 times; months that still fail are listed at the end 
 
 Login (Earthdata account required, never put credentials in code):
   * local: a ~/.netrc (Windows: ~/_netrc) file, or the interactive prompt
-  * Colab: Secrets EARTHDATA_USERNAME/EARTHDATA_PASSWORD or EARTHDATA_TOKEN, then strategy "environment"
+  * environment variables EARTHDATA_USERNAME/EARTHDATA_PASSWORD or EARTHDATA_TOKEN, then strategy "environment"
 """
 import argparse
 import calendar

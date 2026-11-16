@@ -22,7 +22,7 @@ SIGNO/
 ├── CLAUDE.md      # Working rules for the AI coding assistant (in Spanish)
 ├── data/          # Not versioned, except data/README.md: where to download every dataset
 ├── docs/          # Internal planning documents (Spanish)
-├── notebooks/     # Google Colab notebook that runs the whole pipeline
+├── notebooks/     # Draft notebook (unfinished, not part of the submission)
 ├── pipeline/      # Python: download → clip to the Amazon → clean → exports for the web → trend test and validation
 ├── web/           # The app deployed on Vercel (Root Directory)
 │   ├── shared/    # Data contract (types) and API route map, used by both layers
@@ -72,9 +72,7 @@ Reproduce the data (Python 3.12+, an Earthdata Login account; steps and order in
 5. Download the RAISG zip `Biomas_2025.zip` by hand into `data/raw/boundaries/` (link in [`data/README.md`](data/README.md)).
 6. Run `python -m pipeline.run_all`. It checks the setup, downloads the NASA and Hansen sources, runs the exports and the trend test, and verifies the results. Running the same command again resumes where it stopped.
 
-**In Google Colab:** open the notebook (`notebooks/signo_pipeline_colab.ipynb`, link in [`notebooks/README.md`](notebooks/README.md)), store your Earthdata Secrets, then run sections 1 to 4 (section 4 asks for `Biomas_2025.zip`) and section 4b, which runs the same command.
-
-**Expected time.** On the team's PC (Windows, 15 Nov 2026): the exports take about 10 minutes on Windows (44 before the HDF5 fix), and the downloads take about 1.5–2.5 hours with four sources at a time. In Colab (free tier) the whole run took 1 h 22 min on 15 Nov 2026 (downloads 1 h 14 min with four sources at a time) and gave the same results as the repository (147 files identical, 3 with only reworded text, 0 different) before the Hansen loss change of 15 Nov (ADR-009).
+**Expected time.** On the team's PC (Windows, 15 Nov 2026): the exports take about 10 minutes on Windows (44 before the HDF5 fix), and the downloads take about 1.5–2.5 hours with four sources at a time.
 
 The same steps one at a time (the same commands, in order; see [`pipeline/README.md`](pipeline/README.md)):
 
@@ -278,7 +276,7 @@ solve the challenge, and design decisions are made by the team.
   citation) and drafted `data/README.md` and `notebooks/README.md` (marked with a header comment). It wrote the data
   pipeline in `pipeline/` (download, clipping, unit conversion, zone averages, and on 2026-11-15 the modules
   `tiles.py`, `hansen.py`, `grace.py`, `export_maps.py`, `export_api.py`, `export_cover.py`, `validate.py` and `verify.py`, plus the
-  Colab notebook `notebooks/signo_pipeline_colab.ipynb`; every file carries a header comment), following the team's
+  draft notebook in `notebooks/`; every file carries a header comment), following the team's
   choices of region, zones, datasets, periods and six-month semesters. `validate.py` computes descriptive cross-checks.
 - **The trend test (ADR-006), written with Claude (Anthropic) via Claude Code on 2026-11-15:** `pipeline/trends.py` (the
   test, the slopes, the false discovery rate, the checks V1–V4 and `zones.json`), `pipeline/test_trends.py` (13 tests on

@@ -4,7 +4,7 @@
 
 Turns NASA's and Hansen's files into light files for the web: zone values by month, six-month period and year (JSON),
 0.05° map layers (PNG), a 1° API source (JSON), tree cover and loss per 1° cell (JSON), cross-checks and the trend test (JSON). Runs
-locally or in Google Colab. Step 8 applies the team's trend test (ADR-006, see `.ai-context/01-logic.md`, *Method*), and
+locally. Step 8 applies the team's trend test (ADR-006, see `.ai-context/01-logic.md`, *Method*), and
 step 9 writes the country borders for the map.
 
 ```
@@ -71,16 +71,14 @@ It runs the whole pipeline in five stages:
 IMERG to 2025-09, MCD64A1 to 2026-09, MOD44B to 2025. Hansen and GRACE have no dates: GRACE always fetches NASA's current
 file (on 15 Nov 2026 it held 259 months, 2002-04 to 2026-09).
 
-On Colab (free tier) the same command took 1 h 22 min on 15 Nov 2026; see *Reproduce and verify*.
-
 ### Step by step
 
 The same steps one at a time:
 
 ```bash
 py -m venv .venv
-source .venv/Scripts/activate                                        # Windows (Git Bash). Linux/macOS/Colab: source .venv/bin/activate
-.venv/Scripts/python -m pip install -r pipeline/requirements.txt   # Linux/Colab: .venv/bin/python
+source .venv/Scripts/activate                                        # Windows (Git Bash). Linux/macOS: source .venv/bin/activate
+.venv/Scripts/python -m pip install -r pipeline/requirements.txt   # Linux/macOS: .venv/bin/python
 
 python -m pipeline.download --dry-run                       # what NASA has, nothing downloaded
 python -m pipeline.download --products MOD13C2 MOD11C3 --start 2000-01 --end 2026-10   # monthly MODIS (needs Earthdata Login)
@@ -108,8 +106,8 @@ Natural Earth countries is downloaded into the same folder automatically when it
 **Login.** Locally, a netrc file with your Earthdata credentials, or the interactive prompt. The netrc file
 is `~/.netrc` on Linux and `C:\Users\<user>\_netrc` on Windows, with one line:
 `machine urs.earthdata.nasa.gov login USER password PASS`. On Windows, Notepad often saves it as `_netrc.txt`,
-which does not work: check the file name. Keep the file outside the repository. In Colab, Secrets `EARTHDATA_TOKEN` (or `EARTHDATA_USERNAME` and `EARTHDATA_PASSWORD`) copied to
-environment variables (see `notebooks/README.md`). Never write credentials in code or commit them.
+which does not work: check the file name. Keep the file outside the repository. The pipeline also reads the environment variables `EARTHDATA_TOKEN` (or `EARTHDATA_USERNAME` and `EARTHDATA_PASSWORD`).
+Never write credentials in code or commit them.
 Hansen tiles are plain HTTPS downloads and need no login. `tiles.py` and `grace.py` use the same login as `download.py`.
 
 **Volume of a full run (2000–2026).** For the four monthly products, downloads are about 56 GB for the two MODIS
@@ -153,7 +151,7 @@ finished tile is skipped on the next run (`data/interim/HANSEN/tiles/`). `grace.
 it fails.
 
 **Parallel runs and logs.** The four products can run at the same time, one process each, with a log per product.
-This is how the full run was started (from the repository root; on Linux or Colab use `.venv/bin/python`):
+This is how the full run was started (from the repository root; on Linux or macOS use `.venv/bin/python`):
 
 ```bash
 .venv/Scripts/python.exe -u -m pipeline.download --products MOD13C2 --start 2000-01 --end 2026-10 > data/interim/logs/MOD13C2.log 2>&1
@@ -722,7 +720,7 @@ a changed slope, an edited text, one changed PNG pixel and a missing file.
 |---|---|---|---|
 | 1. Trend test only | `python -m pipeline.trends`, then `python -m pipeline.verify` | the repository | minutes; no download |
 | 2. Exports from the intermediate data | steps `export_json` → `export_maps` → `export_api` → `export_cover` → `validate` → `trends` → `export_borders`, then `verify` | `data/interim/` from a previous run | `data/interim/` about 1.9 GB; 44 min 10 s on the team's PC (Windows, 15 Nov 2026, before the HDF5 fix; about 10 min after it; per step below) |
-| 3. Full run from NASA | the whole pipeline or the Colab notebook, then `verify` | an Earthdata Login | 1 h 22 min in Colab (15 Nov 2026). About 80 GB transferred; about 1.9 GB kept in `data/interim/`. The four sources added on 15 Nov took about 1 h 10 min in parallel on the team's PC |
+| 3. Full run from NASA | the whole pipeline (`python -m pipeline.run_all`), then `verify` | an Earthdata Login | About 80 GB transferred; about 1.9 GB kept in `data/interim/`. The four sources added on 15 Nov took about 1 h 10 min in parallel on the team's PC |
 
 **Level 1 result (15 Nov 2026, Windows).** `python -m pipeline.trends` re-run from the committed files gave the same
 results: all 11,738 numbers of the changed files and every significance flag were identical. Only the expected texts
@@ -735,20 +733,9 @@ wording) and 0 are DIFFERENT: the exports reproduce the published results (level
 
 **HDF5 fix (`pipeline/__init__.py`, 15 Nov 2026).** On Windows, the exports took 44 min. The file sets
 `HDF5_PLUGIN_PRELOAD="::"`, so HDF5 stops searching for compression plugins each time it opens a variable. With the fix the
-exports took 10 min, and all 150 output files were identical. In Colab (Linux) the exports were already fast without it.
+exports took 10 min, and all 150 output files were identical.
 
-**Level 3 result (Colab, 15 Nov 2026).** The notebook's section 4b ran `python -m pipeline.run_all` on the free Colab tier
-(Python 3.13.18, 115 GB free disk), starting from an empty disk; the data was downloaded again from NASA. Total: 1 h 22 min
-10 s. The downloads took 1 h 13 min 56 s with four sources at a time (one after another, about 3 h 50 min). The slowest
-source was MCD64A1 (1 h 13 min 51 s). Each source downloaded the same number of files as the published run. The steps
-after the downloads took: export_json 1:32, export_maps 0:26, export_api 1:08, export_cover 0:12, validate 0:12,
-test_trends 0:04, trends 4:31, export_borders 0:03, verify 0:06 (minutes:seconds). Result of `pipeline.verify`: 147 IDENTICAL,
-3 TEXT (`trends/ndvi.json`, `trends/evi.json`, `validation.json`: only the P-035 wording), 0 ROUNDING, 0 DIFFERENT, of 150.
-All 11,738 numbers and every significance flag of the 3 TEXT files are identical, and the 129 PNG map layers are identical
-pixel by pixel. The results reproduce exactly with data downloaded again from NASA. Per-step times are also in
-`notebooks/README.md`.
-
-These results are from before the Hansen loss change and the confidence intervals of 15 Nov (ADR-009). The 15 Nov Colab run reproduced the results published before that change. Only the `trends` step (and validate's change check) changed after it, with the same inputs, so a new Colab run reproduces the new results.
+These results are from before the Hansen loss change and the confidence intervals of 15 Nov (ADR-009). Only the `trends` step (and validate's change check) changed after it, with the same inputs.
 
 **Expected differences (not errors):**
 

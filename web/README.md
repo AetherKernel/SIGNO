@@ -74,7 +74,7 @@ The steps are the same on Windows, macOS and Linux. Run each command on its own 
    - **Cross-checks (`?view=checks`).** Check the card **Hansen loss vs official deforestation (INPE PRODES)**: it leads with what agrees and explains **Why the trend starts in 2011**. Click a hotspot: the map opens on tree cover loss at the peak year, with the square
      open.
    - **Method & sources (`?view=method`).** Check the method, the significance level, the sources with their DOIs, and the
-     limits. The **Code and reproduction** block gives the repository, the Colab link and the commands `python -m pipeline.trends`
+     limits. The **Code and reproduction** block gives the repository and the commands `python -m pipeline.trends`
      and `python -m pipeline.verify`. The GLDAS rainfall check (r = 0.991) and the region name **Amazon biome (RAISG 2025)**
      (with a tooltip; the outline is not drawn) are there too.
    - **Keyboard.** Tab to the squares: one stop for the whole grid. Arrow keys move between squares, Enter or Space opens

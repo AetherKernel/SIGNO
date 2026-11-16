@@ -229,7 +229,7 @@ The comparison with NASA Giovanni (P-007, C3) is not part of V1–V4 (05, P-007)
   Landsat 8 or 9; PRODES rises in the same years). Starting in 2013 would not be robust; 2011 stays as the documented
   reprocessing year, not chosen after seeing the data.
 - `trends` runs last. Re-running `export_api`, `export_cover` or `validate` removes its results (`pipeline/README.md`).
-- The Colab notebook runs this step (section 14b) and then `pipeline.verify` (15b). It ran end to end on 15 Nov 2026 with the same results (ADR-008; 05, P-018).
+- The notebook route of ADR-008 was withdrawn on 15 Nov 2026 (night). The supported way to run this step is `python -m pipeline.trends`, then `python -m pipeline.verify`.
 - The first run's numbers are in `pipeline/README.md` (*Trend test*). The numbers can change on a re-run, so the validation file is the source.
 
 **AI rule.** The team chose the test family, the variables, the periods, the pre-registered rules and the validation plan.
@@ -279,7 +279,9 @@ José also chose Tabler Icons as the icon set (brand card 06).
 ## ADR-008: Google Colab as the reproducible route for the data (without the web app)
 
 - **Date:** 2026-11-15
-- **Status:** Accepted (Alexis, 2026-11-15). Proposed by José on 2026-11-14.
+- **Status:** Withdrawn (José, 2026-11-15, night). It had been accepted by Alexis earlier that day and proposed by José on 2026-11-14.
+
+**Withdrawal (15 Nov, night).** The notebook route was not finished as a shared route and was not used for the published results. The team removed it from the READMEs, from the pipeline messages and from the Method view of the web app. The notebook stays in `notebooks/` as a draft. The supported way to reproduce the results is the pipeline on a local machine (`python -m pipeline.run_all`, then `python -m pipeline.verify`; see `pipeline/README.md`). The text below is the decision as it was written. It is kept as a record and no longer describes a supported route.
 
 **Context.** Some people want the explored data but not the web app. They need a route that runs on any machine, not only
 on the team's Windows PC. The repository holds the generated files, but a reader cannot check them without running the
@@ -346,7 +348,7 @@ a year, and MODIS 2025 is anomalous.
 
 - The years 2001–2010 are not tested (10 years, low power), so they say nothing either way about change before 2011.
 - The map, the area viewer and the Trends view show the loss trend of 2011–2025 (the years 2001–2010 are shown greyed, not used).
-- A new Colab run reproduces these results, because the inputs are the same (ADR-008).
+- A new run of the pipeline reproduces these results, because the inputs are the same.
 - Confirmed by the whole team with ADR-006 on 2026-11-15 (P-028).
 
 **Amendment (15 Nov, evening).** Alexis asked for one answer per measure. Hansen loss is therefore one trend, 2011–2025 (`HANSEN_LOSS_TREND_YEARS = (2011, 2025)`, `HANSEN_METHOD_CHANGE_YEAR = 2011`). All years 2001–2025 are published and shown. The years 2001–2010 are real Hansen data from the earlier method: they are greyed in the charts, with an info tooltip, and are not used in the trend. Every Hansen chart marks 2011 with a dashed line and a tooltip. This amendment supersedes the two-segment presentation above. The evidence stays in `trendChecks.hansenConsistency` (2001–2010: r 0.85, ratio 1.15; 2011–2025: r 0.20, ratio 2.70; one test across 2011 would rise while PRODES falls). Result 2011–2025: 566 cells tested, 45 rising and 2 falling. The `cover.json` fields are `lossTrendYears`, `methodChangeYear` and `hansenNote`.

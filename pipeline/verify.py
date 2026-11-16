@@ -2,7 +2,7 @@
 """Reproducibility check: compare the pipeline outputs on disk with a reference copy.
 
 The reference is, by default, the version committed in git HEAD (extracted with `git archive`, so the working tree is
-not touched). Run it after re-running the pipeline (locally or in Colab) to see whether the same results came out.
+not touched). Run it after re-running the pipeline to see whether the same results came out.
 
     python -m pipeline.verify                         # compare with the files committed in git HEAD
     python -m pipeline.verify --ref /path/to/SIGNO    # compare with another copy of the repository

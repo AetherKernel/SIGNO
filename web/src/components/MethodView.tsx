@@ -6,7 +6,7 @@
 // method is the team's (P-002): this page never describes a method the data does not state.
 // 2026-11-15: one tree cover; one loss trend (2011-2025) with the Hansen method change and its sources; MODIS described only as the
 // independent check of where Hansen sees loss (Cross-checks). Also: no internal codes; the region is named in plain words (RAISG
-// outline not drawn); a "Code and reproduction" block (repository, Colab, how to re-run the test) and the rainfall cross-check.
+// outline not drawn); a "Code and reproduction" block (repository, how to re-run the test) and the rainfall cross-check.
 
 import { useEffect } from 'react'
 import { API_BASE_PATH, apiPaths } from '../../shared/apiPaths.ts'
@@ -20,7 +20,6 @@ import { InfoTip } from './InfoTip.tsx'
 import { ViewLink } from './ViewLink.tsx'
 
 const REPO_URL = 'https://github.com/AetherKernel/SIGNO'
-const COLAB_URL = 'https://colab.research.google.com/github/AetherKernel/SIGNO/blob/main/notebooks/signo_pipeline_colab.ipynb'
 
 export interface MethodViewProps {
   manifest: Manifest
@@ -272,9 +271,6 @@ export function MethodView({ manifest, cover }: MethodViewProps) {
             <strong>{t('Code and reproduction', 'Código y reproducción')}</strong>
             <a className="small" href={REPO_URL} target="_blank" rel="noreferrer">
               {t('Repository', 'Repositorio')}: {REPO_URL}
-            </a>
-            <a className="small" href={COLAB_URL} target="_blank" rel="noreferrer">
-              Colab: {t('run the pipeline notebook', 'ejecuta el cuaderno del pipeline')}
             </a>
             <span className="small muted">
               {t(
