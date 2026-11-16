@@ -251,5 +251,5 @@ data/
 
 The light results are not here. They are the JSON files, `maps/` and `validation.json` in `web/public/data/`, and the
 API source in `web/server/data/` (`region.json`, `variables.json`, `trends/`, `series/`, `cover.json`,
-`validation.json`). Both folders are meant to be versioned; committing them is a team decision (P-023). See
+`validation.json`). Both folders are versioned. See
 `web/README.md` and `web/server/data/README.md`.

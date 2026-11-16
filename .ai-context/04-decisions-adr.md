@@ -9,7 +9,7 @@
 the owner wants to understand every step that is applied, and Drive syncing a `.git` folder can corrupt the
 repository (file locks, conflict copies). The team already created `github.com/AetherKernel/SIGNO`.
 
-**Decision.** The repository is cloned at `C:\Users\DiNiCHi\dev\SIGNO`, outside Drive, and holds the code and
+**Decision.** The repository is cloned in a local folder outside Drive and holds the code and
 `.ai-context/`. The Drive folder `03 Proyectos IA/SIGNO` keeps only team documents. The repo is registered in the
 workspace `projects.toml` as `SIGNO-repo` (a different key from the Drive folder name, so both can coexist in
 `--all`), which gives it the same context-sync checks.

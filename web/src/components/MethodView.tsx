@@ -137,8 +137,8 @@ export function MethodView({ manifest, cover }: MethodViewProps) {
                 <dt>{t('MODIS, the independent check', 'MODIS, el contraste independiente')}</dt>
                 <dd>
                   {t(
-                    'MODIS tree cover is not mapped or tested as a trend. It is an independent satellite check (NASA MODIS) used to confirm where Hansen sees loss, in the Cross-checks.',
-                    'La cobertura MODIS no se mapea ni se prueba como tendencia. Es un contraste satelital independiente (NASA MODIS) que se usa para confirmar dónde ve pérdida Hansen, en los Contrastes.',
+                    'MODIS tree cover is not shown as a measure or on the map. It is an independent satellite check (NASA MODIS) used to confirm where Hansen sees loss, in the Cross-checks. The API files also include a trend test of MODIS tree cover, which this site does not show.',
+                    'La cobertura MODIS no se muestra como medida ni en el mapa. Es un contraste satelital independiente (NASA MODIS) que se usa para confirmar dónde ve pérdida Hansen, en los Contrastes. Los archivos de la API incluyen además un test de tendencia de la cobertura MODIS, que este sitio no muestra.',
                   )}
                 </dd>
               </div>
@@ -297,7 +297,7 @@ export function MethodView({ manifest, cover }: MethodViewProps) {
           {manifest.dataStatus === 'mock'
             ? t('synthetic sample data', 'datos de muestra sintéticos')
             : t('produced by the team pipeline', 'producidos por el pipeline del equipo')}{' '}
-          · {t('generated', 'generados el')} {manifest.generatedAt.slice(0, 10)}
+          · {t('site built', 'sitio generado el')} {manifest.generatedAt.slice(0, 16).replace('T', ' ')} UTC
         </p>
       </section>
 
@@ -346,8 +346,8 @@ export function MethodView({ manifest, cover }: MethodViewProps) {
                 <dt>{t('Loss is not the official deforestation', 'Pérdida no es la deforestación oficial')}</dt>
                 <dd>
                   {t(
-                    'Hansen loss in the Brazilian Amazon is several times the official INPE PRODES deforestation, because it also counts canopy killed by fire and degradation.',
-                    'La pérdida de Hansen en la Amazonía brasileña es varias veces la deforestación oficial de INPE PRODES, porque también cuenta el dosel muerto por incendios y la degradación.',
+                    'Hansen loss in the Brazilian Amazon is higher than the official INPE PRODES deforestation (the Cross-checks give the ratio for each period), because it also counts canopy killed by fire and degradation.',
+                    'La pérdida de Hansen en la Amazonía brasileña es mayor que la deforestación oficial de INPE PRODES (los Contrastes dan la razón de cada periodo), porque también cuenta el dosel muerto por incendios y la degradación.',
                   )}
                 </dd>
               </div>
@@ -357,8 +357,8 @@ export function MethodView({ manifest, cover }: MethodViewProps) {
                   {t('MODIS confirms where tree cover changed, not how much there is.', 'MODIS confirma dónde cambió la cobertura, no cuánta hay.')}
                   <InfoTip>
                     {t(
-                      'In the cross-checks, MODIS reads about 22 points lower than Hansen over dense forest and is noisier from year to year (1–2 points per zone).',
-                      'En los contrastes, MODIS marca unos 22 puntos menos que Hansen en bosque denso y es más ruidoso de un año a otro (1–2 puntos por zona).',
+                      'In the cross-checks, MODIS reads about 22 points lower than Hansen on average and is noisier from year to year (1–2 points per zone).',
+                      'En los contrastes, MODIS marca unos 22 puntos menos que Hansen en promedio y es más ruidoso de un año a otro (1–2 puntos por zona).',
                     )}
                   </InfoTip>
                 </dd>

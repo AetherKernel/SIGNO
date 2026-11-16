@@ -147,7 +147,7 @@ different things: in 2024 the area-weighted mean is 78.6 % for Hansen and 62.4 %
 forest. MODIS is also noisy from year to year (about ±1.5 points), and its 2025 value is anomalous. MODIS stays in the
 Cross-checks and in this Method section, as the independent check of where loss happened.
 
-**Key results (first run, 15 Nov 2026; `web/server/data/validation.json` is the source).**
+**Key results (run of 15 Nov 2026; `web/server/data/validation.json` is the source).**
 
 - Squares with a clear rise and fall: daytime temperature rose in 429 squares and fell in none; NDVI rose in 158 and fell
   in 48; EVI rose in 68 and fell in 3; rainfall fell in 69 and rose in none; Hansen tree cover loss rose in 45 squares and fell in 2 (2011–2025; the first run's 2001–2025 figures, 318 rising and 20 falling, are superseded);
@@ -155,8 +155,8 @@ Cross-checks and in this Method section, as the independent check of where loss 
   with a zero slope, so 48 burned-area squares are clear in all.
 - Whole Amazon (zone test, not corrected): daytime temperature rose by about 0.33 °C per decade and EVI rose, both clearly;
   Hansen loss rose clearly in 2011–2025 (+12,040 km² per year per decade, 95 % CI +5,145 to +19,582); MODIS tree cover fell clearly; NDVI did not change clearly.
-- Checks: with the years shuffled, almost no square is flagged (at most 0.18 % of squares for burned area, none for the
-  other measures). A simulated trend of the typical size is found in 53 to 92 % of the squares on average, depending on the
+- Checks: with the years shuffled, almost no square is flagged (at most 0.18 % of squares, for burned area and for MODIS tree cover;
+  none for the other five measures). A simulated trend of the typical size is found in 53 to 92 % of the squares on average, depending on the
   measure. For each slope, the 95 % confidence interval contains the Sen slope in every tested square. The slopes are identical to
   SciPy's `theilslopes`; the interval bounds differ by a median of 0.3 % of the interval width (21 zone tests; largest 2.3 %),
   because SciPy rounds the ranks and we interpolate (Gilbert 1987).
@@ -222,7 +222,7 @@ yet: [`data/README.md`](data/README.md).
   Hansen/UMD/Google/USGS/NASA", CC BY 4.0, https://glad.earthengine.app/view/global-forest-change. User notes (2011 reprocessing, Landsat 8 from 2013, Landsat 9 from 2022): https://storage.googleapis.com/earthenginepartners-hansen/GFC-2025-v1.13/download.html
 - INPE. *Série Histórica Taxas Prodes Amazônia*, Apresentação Coletiva Prodes 2026, 16 Oct 2026, p. 4 (PRODES clear-cut, Brazilian Legal Amazon; used for the Hansen check). https://www.gov.br/inpe/pt-br/assuntos/ultimas-noticias/brasil-alcanca-menores-taxas-de-desmatamento-da-serie-historica-na-amazonia-e-no-cerrado
 
-**Tools:** [earthaccess](https://github.com/nsidc/earthaccess), [NASA Harmony](https://harmony.earthdata.nasa.gov/),
+**Tools:** [earthaccess](https://github.com/nsidc/earthaccess),
 [NASA Giovanni](https://giovanni.gsfc.nasa.gov/) (planned comparison, not yet done; P-007, C3). Statistics:
 [pymannkendall](https://github.com/mmhs013/pymannkendall) (Hussain and Mahmud, 2019, *Journal of Open Source Software*
 4(39): 1556, https://doi.org/10.21105/joss.01556) and [statsmodels](https://www.statsmodels.org) (false discovery rate,
@@ -257,9 +257,12 @@ itself from the [Fontsource](https://fontsource.org) packages.
 
 Planned after the hackathon (details in `.ai-context/05-tech-debt.md`):
 
-- **Language by region:** offer the interface language from the visitor's region, with a confirmation and a selector in
-  the footer. Today the switch is manual, and English is the default.
-- **Spanish data texts:** publish variable names, method descriptions and notes in Spanish from the data pipeline.
+- **Sharper science:** a comparison with NASA Giovanni, and a test that accounts for neighbouring squares.
+- **More detail and context:** from 1° to 0.05°, the final Amazon boundary, land cover for each square.
+- **Easier for everyone:** the interface language offered by the visitor's region (today the switch is manual and
+  English is the default), the data texts in Spanish from the pipeline, a better map on phones, and the guide tried
+  with students, teachers and journalists.
+- **Open and reproducible:** quicker ways to re-run the results, and every decision recorded in the open.
 
 ## Use of AI
 
@@ -282,7 +285,7 @@ solve the challenge, and design decisions are made by the team.
   test, the slopes, the false discovery rate, the checks V1–V4 and `zones.json`), `pipeline/test_trends.py` (13 tests on
   synthetic series) and `pipeline/export_borders.py` (country borders). The team chose the method, the variables, the
   periods, the pre-registered rules and the validation plan. Where the team left a parameter open, the value comes from
-  the team's kit and was delegated to Claude: the Sen slope, the false discovery rate per variable, the significance level
+  the team's kit and was delegated to Claude: the Sen slope, its 95 % confidence interval, the false discovery rate per variable, the significance level
   of 0.05, the 80 % rule for complete years and 20 shuffles with a fixed seed. Each file has a header comment.
 - **Models by task (15 Nov 2026), all via Claude Code:**
   - **Claude Opus 5.5:** the data review, the integration plan, and the review of the trend code.

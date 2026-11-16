@@ -170,7 +170,7 @@ Trends, the square's JSON files, copy link).
 zone test, one test per zone and measure, not corrected for multiple tests. The counts of squares are corrected (false
 discovery rate 5 %). Hansen loss is tested from 2011 (2011–2025 only); the years 2001–2010 are shown, greyed, with an info tooltip, and are not used in the trend. Sen lines are solid when the trend is clear and dashed when it is not. Satellite drift years (NDVI, EVI, daytime temperature from 2021) are greyed. A change that involves a drift year gets a "?" mark.
 
-**Interface rules (15 Nov 2026, for José's review).**
+**Interface rules (15 Nov 2026).**
 
 - One row or answer per measure. All values are visible.
 - A value or change affected by a known limit carries a "?" mark and a short tooltip. An unclear trend shows its value with "?", its p-value and its CI. A change from A to B that involves a drift year (NDVI, EVI, daytime LST from 2021) gets "?" and the NASA note: the satellite passes earlier, so part of the change may come from the overpass time.
@@ -225,7 +225,7 @@ discovery rate 5 %). Hansen loss is tested from 2011 (2011–2025 only); the yea
 | P-024 | Raster overlays (fire blocks and 0.05° detail from the PNGs, through `rasters.json`). `rasters.json` is served (added after the 18:00 freeze of 15 Nov); no view uses it yet |
 | P-026 | UX plan partly implemented. Not built: the forest-context charts and the small multiples of the Trends view; the 17 questions of the plan are open |
 | P-025 | Browser check at 375 px, in dark mode, with the keyboard and the console, covering the map, the area viewer and the Trends view |
-| P-028 | Team confirmation of ADR-006 and ADR-009 (José and Kiara) |
+| P-028 | Done (15 Nov): José and Kiara confirmed ADR-006 and ADR-009 |
 | P-029 | Done (15 Nov): 95 % confidence intervals of the slopes are published and cross-checked against SciPy (`theilslopes`). Still open under P-029: the grid answer A3. The comparison with NASA Giovanni is open under P-007 (C3) |
 | P-013 | Land cover from MapBiomas: not added (a data decision with Alexis) |
 | P-014 | Crop to the real Amazon boundary (after P-008). Post-deadline option: an outline from a redistributable boundary, e.g. RESOLVE Ecoregions or BasinATLAS (CC BY 4.0) |

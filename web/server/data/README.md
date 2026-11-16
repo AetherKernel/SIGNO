@@ -3,8 +3,9 @@
 # Pipeline export folder (API source)
 
 The pipeline writes the files that the web backend reads from this folder. The site is built from them with
-`SIGNO_DATA_SOURCE=files` (or `npm run dev:real` / `npm run build:real`). Until Vercel is switched to them (P-009), the
-live site uses synthetic mock data (`server/sources/mockSource.ts`).
+`SIGNO_DATA_SOURCE=files` (or `npm run dev:real` / `npm run build:real`). The live site is built from them:
+Vercel runs `npm run build:real` (`web/vercel.json`). `npm run dev` and `npm run build` use synthetic mock data
+(`server/sources/mockSource.ts`) for development.
 
 The types live in [`shared/contracts.ts`](../../shared/contracts.ts) (`Region`, `Variable`, `CellTrend`,
 `MethodInfo`, `SeriesPoint`, `SemesterValue`, `CoverLayer`, `ValidationReport`, `RasterIndex`) and in
@@ -91,6 +92,4 @@ npm run build:real   # or npm run dev:real; same on bash, PowerShell and cmd
 
 ## Vercel
 
-In Vercel, either set the environment variable `SIGNO_DATA_SOURCE=files` (Project Settings → Environment Variables)
-or use the build command `npm run build:real`, then redeploy. No frontend change is needed. The files must be in git
-first (P-023).
+Vercel uses the build command `npm run build:real` (`web/vercel.json`). The files are versioned in this folder.

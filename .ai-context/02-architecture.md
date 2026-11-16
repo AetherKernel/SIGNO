@@ -4,7 +4,7 @@
 
 | Place | Holds | Why |
 |---|---|---|
-| This repo, `C:\Users\DiNiCHi\dev\SIGNO`, remote `github.com/AetherKernel/SIGNO` | Code, notebooks, these docs | Outside Google Drive (ADR-001) |
+| This repo (a local clone outside Google Drive), remote `github.com/AetherKernel/SIGNO` | Code, notebooks, these docs | Outside Google Drive (ADR-001) |
 | Drive `03 Proyectos IA/SIGNO` | Team documents: research, notes, drafts, design system core | Team only, not code |
 | Drive `03 Proyectos IA/SIGNO/submission` | Submission material in English: demo video, slides, AI-generated images (watermarked), sources of the opening data point about the Amazon | Public link, this folder only (same pattern as the 2025 winners) |
 | `data/` in this repo (git-ignored except `data/README.md`) | Downloaded data | Too large to version, and some licenses forbid redistribution; `data/README.md` says where to get each file |

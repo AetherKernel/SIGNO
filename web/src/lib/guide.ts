@@ -37,8 +37,9 @@ export function guideSteps(t: Tr = EN, report: ValidationReport | null = null): 
         ? t(` from ${firstStart}; tree cover loss from ${lossStart}`, ` desde ${firstStart}; la pérdida de cobertura arbórea desde ${lossStart}`)
         : t(` from ${firstStart}`, ` desde ${firstStart}`)
       : ''
-  // The two error rates of the test: false alarms on shuffled years (the worst measure) and the share of simulated trends it finds.
-  const falseAlarms = Object.values(report?.trendChecks?.v1FalsePositives ?? {}).map((v) => v.meanShareSignificant)
+  // The two error rates of the test: false alarms on shuffled years (the worst single run of any measure, so that "at most"
+  // is the same number as in the Trends view) and the share of simulated trends it finds.
+  const falseAlarms = Object.values(report?.trendChecks?.v1FalsePositives ?? {}).map((v) => v.maxShareSignificant)
   const detections = Object.values(report?.trendChecks?.v2Detection ?? {}).map((v) => v.meanShareDetected)
   const errorLine =
     falseAlarms.length > 0 && detections.length > 0

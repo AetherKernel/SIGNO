@@ -202,7 +202,7 @@ function CellContent({ cell, manifest, cover, validation, titleId, summaryId, he
             {t('Area around', 'Área alrededor de')} {where}
           </h2>
           <p className="small muted">
-            {t('1° area (about 12,000 km²) · Square', 'Área de 1° (unos 12,000 km²) · Cuadro')} {cell.cellId}
+            {t('1° area (about 12,000 km²) · Square', 'Área de 1° (unos 12 000 km²) · Cuadro')} {cell.cellId}
             {place && (
               <span className="cv-pill">
                 {place.kind === 'case' ? t('Documented case', 'Caso documentado') : t('Cross-check hotspot', 'Punto crítico de los contrastes')}

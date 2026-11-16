@@ -52,7 +52,10 @@ function agreement(hansen: Trend | undefined, prodes: Trend | undefined, t: (en:
 
 function SegmentBlock({ segment, peaks }: { segment: HansenConsistencySegment; peaks: number[] }) {
   const { t } = useLang()
+  const hansenInfo = useHansenInfo()
   const [y0, y1] = segment.years
+  // The years before the method change are compared with PRODES only: the site publishes no trend for them.
+  const early = y1 < hansenInfo.year
   const { r, ratio } = segment.hansenBrazilVsProdes
   const modis = segment.modisCheck.r
   const prodes = segment.zoneTrends.prodes
@@ -84,7 +87,11 @@ function SegmentBlock({ segment, peaks }: { segment: HansenConsistencySegment; p
       </p>
       <dl className="hc-facts">
         <div>
-          <dt>{t('Trend of Hansen loss', 'Tendencia de la pérdida de Hansen')}</dt>
+          <dt>
+            {early
+              ? t('Trend of Hansen loss (comparison only, earlier method; not a published trend)', 'Tendencia de la pérdida de Hansen (solo comparación, método anterior; no es una tendencia publicada)')
+              : t('Trend of Hansen loss', 'Tendencia de la pérdida de Hansen')}
+          </dt>
           <dd>
             {ZONES.filter((z) => segment.zoneTrends[z.id]).map((z) => (
               <span key={z.id} className="hc-line">

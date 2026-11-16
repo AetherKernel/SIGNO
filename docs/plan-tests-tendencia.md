@@ -3,7 +3,7 @@
 # Plan para habilitar las tendencias (test estadístico)
 
 **Estado:** ejecutado el 15 de noviembre de 2026 (ADR-006). Las respuestas del equipo están registradas en la sección 2.
-Pendiente: confirmación de José y Kiara de ADR-006 y ADR-009 (P-028) y revisión visual en el navegador (P-025). El 15 de noviembre se revisó la pérdida de Hansen: ver la sección 6. Después de la revisión de la tarde, la pérdida de Hansen se prueba como una sola tendencia (2011–2025), cada pendiente tiene un intervalo de confianza del 95 % (P-029; comprobado con scipy) y la temperatura de día se publica hasta 2026-10.
+Confirmado por José y Kiara el 15 de noviembre (P-028). Pendiente: revisión visual en el navegador (P-025). El 15 de noviembre se revisó la pérdida de Hansen: ver la sección 6. Después de la revisión de la tarde, la pérdida de Hansen se prueba como una sola tendencia (2011–2025), cada pendiente tiene un intervalo de confianza del 95 % (P-029; comprobado con scipy) y la temperatura de día se publica hasta 2026-10.
 
 ## 1. Por qué este plan no elige el método
 
@@ -107,8 +107,7 @@ sencillo (`web/README.md`). Pendiente de revisión por el equipo. El 15 de novie
 
 ### F. Tiempo y responsables
 
-**F1. Responsable de la decisión.** Alexis registró la decisión el 15 de noviembre. **Pendiente:** confirmación de José y
-Kiara (P-028).
+**F1. Responsable de la decisión.** Alexis registró la decisión el 15 de noviembre. José y Kiara la confirmaron el 15 de noviembre (P-028).
 
 **F2. Hora límite.** La entrega es el domingo 15 de noviembre de 2026, a las 23:59 (hora de Lima). La hora interna de
 implementación no consta en el registro.
@@ -123,7 +122,7 @@ implementación no consta en el registro.
 | 4 | Validación (P-007) | Hecho para V1–V4 en `validation.json` (`trendChecks`). Pendiente: comparación con Giovanni (C3) |
 | 5 | Front | Hecho: capa de tendencia en el mapa, vista Tendencias, comprobaciones de confianza y ficha de la celda. Pendiente: revisión visual (P-025) |
 | 6 | Documentación | Hecha: `README.md`, `pipeline/README.md`, `web/README.md` y `.ai-context` |
-| 7 | Hansen como una sola tendencia 2011–2025 (ADR-009, sección 6) | Hecho: pipeline (`trends.py`, `validate.py`, `config.py`), validación contra PRODES, interfaz con una sola cobertura de árboles. Pendiente: confirmación de José y Kiara (P-028) |
+| 7 | Hansen como una sola tendencia 2011–2025 (ADR-009, sección 6) | Hecho: pipeline (`trends.py`, `validate.py`, `config.py`), validación contra PRODES, interfaz con una sola cobertura de árboles. Confirmado por José y Kiara el 15 de noviembre (P-028) |
 | 8 | Intervalos de confianza (P-029) y temperatura de día publicada hasta 2026-10 | Hecho (15 de noviembre, tarde): `slopeCi95` en celdas, zonas, lugares conocidos y comprobaciones; temperatura publicada, tendencia 2001–2020 (B1). Comprobado con scipy (P-029). Pendiente: registrar la respuesta A3 (rejilla de 1°) |
 
 ## 4. Datos objetivos (medidos el 2026-11-15 sobre `web/server/data/`)
@@ -179,7 +178,7 @@ que se corrigió el mismo día y se prueba solo desde 2011 (sección 6). Una nue
 ## 6. Revisión del 15 de noviembre: Hansen como una tendencia desde 2011
 
 Decisión de Alexis del 15 de noviembre de 2026, registrada como ADR-009 en `.ai-context/04-decisions-adr.md`. Estado:
-aceptada por Alexis; pendiente de confirmación por José y Kiara junto con ADR-006 (P-028).
+aceptada por Alexis y confirmada por José y Kiara el 15 de noviembre, junto con ADR-006 (P-028).
 
 **Enmienda (tarde del 15 de noviembre).** Alexis pidió una sola respuesta por medida. Por eso la pérdida de Hansen se prueba en una sola tendencia, 2011–2025 (`HANSEN_LOSS_TREND_YEARS` = 2011–2025; `HANSEN_METHOD_CHANGE_YEAR` = 2011). Esta enmienda sustituye a la presentación en dos tramos. La evidencia de esa presentación se conserva en `trendChecks.hansenConsistency`. Todos los años 2001–2025 se publican y se muestran; 2001–2010 aparecen en gris y no se usan en la tendencia.
 

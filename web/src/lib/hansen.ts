@@ -42,9 +42,9 @@ export function hansenInfoOf(cover: CoverLayer | null, validation: ValidationRep
   }
 }
 
-/** A ratio such as 2.7, with a decimal comma in Spanish text ("2,7"). */
+/** A ratio such as 2.7 or 1.15 (two decimals at most), with a decimal comma in Spanish text ("2,7"). */
 export function formatRatio(ratio: number, t: Tr = EN): string {
-  const text = ratio.toFixed(1)
+  const text = String(Number(ratio.toFixed(2)))
   return t(text, text.replace('.', ','))
 }
 

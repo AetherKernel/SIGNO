@@ -27,7 +27,7 @@ data/interim/              one file per product and month or year, masks, logs  
    │  9. export_borders.py country borders (Natural Earth); writes one file, independent of the others
    ▼
 web/public/data/           amazon_monthly.json · amazon_semester.json · amazon_annual.json · validation.json · borders.json · maps/   (versioned)
-web/server/data/           region.json · variables.json · trends/ · series/ · cover.json · zones.json · validation.json   (API source; commit pending, P-023)
+web/server/data/           region.json · variables.json · trends/ · series/ · cover.json · zones.json · validation.json   (API source; versioned)
 ```
 
 Order of the steps: 1 → 1b → 1c → 1d → 3 → 4 → 5 → 6 → 7 → 8. Step 2 runs inside step 1 for each month. The export steps
@@ -769,7 +769,7 @@ Found while reviewing the outputs. Each item limits what the data can say. The t
   marked incomplete by the backend and must not be compared with a full one.
 - **Agreement and change r values are descriptive.** They carry no p-value, and neighbouring cells are not independent
   (spatial autocorrelation), so they cannot be read as tests.
-- **The trend results are first-run numbers (Hansen loss: the one trend from 2011, of 15 Nov).** They come from the run of 15 Nov 2026 (validation file written 10:36 UTC).
+- **The trend results are first-run numbers (Hansen loss: the one trend from 2011, of 15 Nov).** They come from the run of 15 Nov 2026 (trend checks written 2026-11-16 00:07 UTC, which is 15 Nov 19:07 in Lima).
   `trends.py` was changed afterwards (rounding of tied values), so a re-run can change the numbers slightly. The
   `trendChecks` in `validation.json` are the source.
 - **Hansen loss rises as a level shift, not a steady climb.** From 2016 on the level is higher: about 17,900 km² per year in
