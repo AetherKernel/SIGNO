@@ -1,4 +1,7 @@
 # AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-14. Reviewed by team AETHER.
+# AI-generated addition, 2026-11-15: Hansen method-change year, Hansen loss trend years and PRODES reference series (values given by the team).
+# AI-generated change, 2026-11-15 (even later): LST_TREND_LAST_YEAR and DRIFT_FROM_YEAR added; daytime LST is published to the end of the series (team decision of Alexis), its trend test stays 2001-2020.
+# AI-generated change, 2026-11-15 (later the same day): one Hansen loss trend over 2011-2025 (the separate 2001-2010 segment was removed by team decision); adds the 95 % confidence interval constants of Sen's slope.
 """Single place for every setting of the SIGNO data pipeline.
 
 Values marked TEAM DECISION are choices the team owns; change them here, not inside the code.
@@ -43,9 +46,15 @@ MOD13C2_ACCEPTED_RELIABILITY = (0, 1)
 # TEAM DECISIONS taken on 2026-11-15 (see .ai-context/05, P-019 and P-020):
 # C1: analyse full years only, from January 2001 (February 2000 is a partial first month of Terra).
 ANALYSIS_START = "2001-01"
-# B1: daytime and nighttime LST only until the end of 2020; afterwards Terra's orbit drift biases them
+# B1: the LST TREND TEST ends in 2020; afterwards Terra's orbit drift biases the values
 #     (overpass 10:32 -> 08:56 local time by 2026; night LST biased warm). Diagnostics are still exported in full.
+LST_TREND_LAST_YEAR = 2020
+# Nighttime LST (rule D4) is still suppressed after this month in export_json.py. Since 2026-11-15 daytime LST is NOT cut
+# any more: it is published to the end of the series and the years from DRIFT_FROM_YEAR are shown with a "?" (Alexis).
 LST_LAST_MONTH = "2020-12"
+# First year affected by Terra's orbit drift for MOD13C2 NDVI/EVI (r = 0.85 between overpass time and anomaly, pre-registered
+# drift check D1 in trends.py) and MOD11C3 daytime LST (B1). Published values from this year on carry a "?" in the web app.
+DRIFT_FROM_YEAR = 2021
 # D1: GLDAS evapotranspiration is climate context only (static land cover in the model), not a forest indicator.
 
 # Space Apps AI rule: every generated data file declares how AI was used.
@@ -94,3 +103,32 @@ TREND_DRIFT_R = 0.5                 # PRE-REGISTERED (D1): |r| of NDVI/EVI anoma
 TREND_PERMUTATIONS = 20             # V1/V2 repetitions of the shuffled-years check
 TREND_SEED = 20261115               # fixed seed of the shuffles, so the validation numbers are reproducible
 TREND_YEARS_PER_DECADE = 10
+TREND_CI_LEVEL = 0.95               # confidence level of the interval of Sen's slope (Gilbert 1987)
+TREND_CI_Z = 1.959964               # z(1 - alpha/2) for that level
+
+# TEAM DECISION (2026-11-15, Alexis; validated by the lead): ONE Hansen yearly loss trend, over 2011-2025 only, the years
+# Hansen processed with one consistent method (its direction agrees with INPE PRODES). Hansen/UMD GFC v1.13 user notes
+# reprocessed loss from 2011 onward but not before. All loss years 2001-2025 stay published; only the trend skips 2001-2010.
+HANSEN_METHOD_CHANGE_YEAR = 2011
+# "lossKm2" keeps its id so the web map layer keeps working; the trend covers these years.
+HANSEN_LOSS_TREND_YEARS = (2011, 2025)
+HANSEN_NOTES_URL = "https://storage.googleapis.com/earthenginepartners-hansen/GFC-2025-v1.13/download.html"
+HANSEN_NOTES_QUOTES = [
+    "The reprocessing of data from 2011 onward in measuring loss",
+    "However, the years preceding 2011 have not yet been reprocessed in this manner, and users will notice inconsistencies as a result.",
+    "The use of Landsat 8 OLI data for 2013 onward and Landsat 9 OLI for 2022 onward",
+    "care must be taken when comparing change across any interval",
+    "These data ... are a relative indicator of spatiotemporal trends in forest loss dynamics globally.",
+    "definitive area estimation should not be made using pixels counts from the forest loss layers.",
+]
+# Official INPE PRODES yearly deforestation, Brazilian Legal Amazon, km2 (PRODES year Y = August Y-1 to July Y).
+PRODES_AMAZON_KM2 = {2001: 18165, 2002: 21650, 2003: 25396, 2004: 27772, 2005: 19014, 2006: 14286, 2007: 11651,
+                     2008: 12911, 2009: 7464, 2010: 7000, 2011: 6418, 2012: 4571, 2013: 5891, 2014: 5012, 2015: 6207,
+                     2016: 7893, 2017: 6947, 2018: 7536, 2019: 10129, 2020: 10851, 2021: 13038, 2022: 11594,
+                     2023: 9064, 2024: 6518, 2025: 5731}
+PRODES_SOURCE = {
+    "title": "INPE, Série Histórica Taxas Prodes Amazônia (Apresentação Coletiva Prodes 2026, 16 Oct 2026, p. 4)",
+    "url": "https://www.gov.br/inpe/pt-br/assuntos/ultimas-noticias/brasil-alcanca-menores-taxas-de-desmatamento-da-serie-historica-na-amazonia-e-no-cerrado",
+    "scope": "Brazilian Legal Amazon (nine states); PRODES year Y = August Y-1 to July Y; clear-cut of primary forest, polygons of 6.25 ha or more",
+    "note": "Official deforestation; Hansen loss is stand-replacing loss of any tree cover (fire, logging, mining, clearing, secondary forest) per calendar year, so the ratio is not expected to be 1.",
+}

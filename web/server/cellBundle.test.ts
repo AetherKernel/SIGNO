@@ -40,6 +40,13 @@ describe('CellBundleCollector', () => {
     assert.equal('points' in bundle.variables.ndvi, false, 'monthly points stay in the series file')
   })
 
+  it('passes the 95 % interval of the slope into the cell file', () => {
+    const c = new CellBundleCollector()
+    c.add(series('ndvi', 'r08c09', 0.8), { ...trend('r08c09', -0.01), slopeCi95: [-0.02, 0] })
+    const [bundle] = c.bundles('real', ['ndvi'])
+    assert.deepEqual(bundle.variables.ndvi.trend?.slopeCi95, [-0.02, 0])
+  })
+
   it('keeps one bundle per cell and a null trend when the layer has no row', () => {
     const c = new CellBundleCollector()
     c.add(series('ndvi', 'r01c01', 0.7), null)

@@ -153,7 +153,8 @@
   font-variant-numeric: tabular-nums;
 }
 
-.cv-value.faded {
+.cv-value.faded,
+.cv-exact td.faded {
   color: var(--muted);
 }
 
@@ -617,4 +618,37 @@ dialog.viewer[open] {
   stroke: var(--accent);
   stroke-width: 1.6;
   stroke-linecap: round;
+}
+
+/* 2026-11-15: no clear trend: dashed and lighter, as in the Trends view */
+.cv-sen.not-clear {
+  stroke: var(--muted);
+  stroke-dasharray: 5 4;
+  stroke-width: 1.4;
+}
+
+/* 2026-11-15: a value with its InfoTip, and the dashed marker of the Hansen method change (2011) */
+.cv-reading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+}
+
+.cv-method {
+  stroke: var(--muted);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}
+
+.cv-method-label {
+  fill: var(--muted);
+  font-family: var(--f-data);
+  font-size: 10px;
+}
+
+@media (max-width: 767px) {
+  .cv-reading {
+    justify-content: flex-start;
+  }
 }

@@ -66,68 +66,68 @@
     ]
    },
    "changeVsLoss": {
-    "r": -0.719,
+    "r": -0.729,
     "cells": 226909,
-    "definition": "MOD44B mean(2024,2025) - mean(2001,2002), percentage points",
+    "definition": "MOD44B mean(2023,2024) - mean(2001,2002), percentage points; Hansen loss share 2001-2024 (MOD44B 2025 is flagged and not used)",
     "byLossDecile": [
      {
       "decile": 1,
       "hansenLossShareMean": 0.0,
-      "modisChangePpMean": 1.19,
-      "cells": 21554
+      "modisChangePpMean": 2.09,
+      "cells": 22281
      },
      {
       "decile": 2,
       "hansenLossShareMean": 0.0001,
-      "modisChangePpMean": 0.74,
-      "cells": 23778
+      "modisChangePpMean": 2.08,
+      "cells": 22890
      },
      {
       "decile": 3,
       "hansenLossShareMean": 0.0004,
-      "modisChangePpMean": 0.16,
-      "cells": 22740
+      "modisChangePpMean": 1.72,
+      "cells": 22896
      },
      {
       "decile": 4,
-      "hansenLossShareMean": 0.001,
-      "modisChangePpMean": -0.03,
-      "cells": 22688
+      "hansenLossShareMean": 0.0009,
+      "modisChangePpMean": 1.44,
+      "cells": 22696
      },
      {
       "decile": 5,
-      "hansenLossShareMean": 0.003,
-      "modisChangePpMean": 0.56,
-      "cells": 22694
+      "hansenLossShareMean": 0.0027,
+      "modisChangePpMean": 1.66,
+      "cells": 22691
      },
      {
       "decile": 6,
-      "hansenLossShareMean": 0.0101,
-      "modisChangePpMean": 0.48,
+      "hansenLossShareMean": 0.0092,
+      "modisChangePpMean": 1.57,
       "cells": 22691
      },
      {
       "decile": 7,
-      "hansenLossShareMean": 0.0348,
-      "modisChangePpMean": -0.01,
+      "hansenLossShareMean": 0.0317,
+      "modisChangePpMean": 1.21,
       "cells": 22691
      },
      {
       "decile": 8,
-      "hansenLossShareMean": 0.105,
-      "modisChangePpMean": -1.41,
+      "hansenLossShareMean": 0.097,
+      "modisChangePpMean": -0.03,
       "cells": 22691
      },
      {
       "decile": 9,
-      "hansenLossShareMean": 0.2499,
-      "modisChangePpMean": -6.41,
+      "hansenLossShareMean": 0.2355,
+      "modisChangePpMean": -4.58,
       "cells": 22691
      },
      {
       "decile": 10,
-      "hansenLossShareMean": 0.5405,
-      "modisChangePpMean": -22.64,
+      "hansenLossShareMean": 0.5225,
+      "modisChangePpMean": -20.5,
       "cells": 22691
      }
     ]
@@ -321,7 +321,7 @@
      "peakLossYear": 2020,
      "peakLossShare": 0.271,
      "hansenTreeCover2000": 99.6,
-     "modisChangePp": -48.9,
+     "modisChangePp": -46.1,
      "burnedYears": [
       2018,
       2020,
@@ -339,7 +339,7 @@
      "peakLossYear": 2017,
      "peakLossShare": 0.766,
      "hansenTreeCover2000": 99.0,
-     "modisChangePp": -60.3,
+     "modisChangePp": -60.8,
      "burnedYears": [
       2004,
       2017,
@@ -358,7 +358,7 @@
      "peakLossYear": 2018,
      "peakLossShare": 0.487,
      "hansenTreeCover2000": 99.5,
-     "modisChangePp": -48.9,
+     "modisChangePp": -45.5,
      "burnedYears": [
       2017,
       2018,
@@ -377,7 +377,7 @@
      "peakLossYear": 2006,
      "peakLossShare": 0.454,
      "hansenTreeCover2000": 99.2,
-     "modisChangePp": -65.3,
+     "modisChangePp": -63.0,
      "burnedYears": [
       2005,
       2006,
@@ -399,7 +399,7 @@
      "peakLossYear": 2022,
      "peakLossShare": 0.568,
      "hansenTreeCover2000": 99.7,
-     "modisChangePp": -55.3,
+     "modisChangePp": -41.5,
      "burnedYears": [
       2022,
       2024
@@ -413,7 +413,7 @@
      "peakLossYear": 2014,
      "peakLossShare": 0.324,
      "hansenTreeCover2000": 99.6,
-     "modisChangePp": -57.0,
+     "modisChangePp": -54.7,
      "burnedYears": [
       2014,
       2015,
@@ -435,7 +435,7 @@
      "peakLossYear": 2024,
      "peakLossShare": 0.701,
      "hansenTreeCover2000": 99.6,
-     "modisChangePp": -29.3,
+     "modisChangePp": -13.6,
      "burnedYears": [
       2008,
       2024
@@ -449,7 +449,7 @@
      "peakLossYear": 2020,
      "peakLossShare": 0.457,
      "hansenTreeCover2000": 99.7,
-     "modisChangePp": -58.2,
+     "modisChangePp": -54.2,
      "burnedYears": [
       2019,
       2020,
@@ -467,7 +467,7 @@
      "peakLossYear": 2020,
      "peakLossShare": 0.752,
      "hansenTreeCover2000": 99.7,
-     "modisChangePp": -56.3,
+     "modisChangePp": -52.3,
      "burnedYears": [
       2020,
       2021,
@@ -484,7 +484,7 @@
      "peakLossYear": 2020,
      "peakLossShare": 0.485,
      "hansenTreeCover2000": 99.3,
-     "modisChangePp": -50.8,
+     "modisChangePp": -43.3,
      "burnedYears": [
       2020,
       2021,
@@ -562,68 +562,68 @@
     ]
    },
    "changeVsLoss": {
-    "r": -0.781,
+    "r": -0.786,
     "cells": 136799,
-    "definition": "MOD44B mean(2024,2025) - mean(2001,2002), percentage points",
+    "definition": "MOD44B mean(2023,2024) - mean(2001,2002), percentage points; Hansen loss share 2001-2024 (MOD44B 2025 is flagged and not used)",
     "byLossDecile": [
      {
       "decile": 1,
       "hansenLossShareMean": 0.0,
-      "modisChangePpMean": 1.63,
-      "cells": 11363
+      "modisChangePpMean": 2.53,
+      "cells": 11711
      },
      {
       "decile": 2,
       "hansenLossShareMean": 0.0001,
-      "modisChangePpMean": 1.28,
-      "cells": 15987
+      "modisChangePpMean": 2.5,
+      "cells": 15369
      },
      {
       "decile": 3,
-      "hansenLossShareMean": 0.0004,
-      "modisChangePpMean": 0.65,
-      "cells": 13649
+      "hansenLossShareMean": 0.0003,
+      "modisChangePpMean": 1.88,
+      "cells": 13909
      },
      {
       "decile": 4,
-      "hansenLossShareMean": 0.001,
-      "modisChangePpMean": 0.26,
-      "cells": 13720
+      "hansenLossShareMean": 0.0009,
+      "modisChangePpMean": 1.49,
+      "cells": 13731
      },
      {
       "decile": 5,
-      "hansenLossShareMean": 0.0035,
-      "modisChangePpMean": 0.66,
+      "hansenLossShareMean": 0.0032,
+      "modisChangePpMean": 1.6,
       "cells": 13679
      },
      {
       "decile": 6,
-      "hansenLossShareMean": 0.0173,
-      "modisChangePpMean": 0.47,
-      "cells": 13681
+      "hansenLossShareMean": 0.0156,
+      "modisChangePpMean": 1.3,
+      "cells": 13680
      },
      {
       "decile": 7,
-      "hansenLossShareMean": 0.0706,
-      "modisChangePpMean": -0.15,
+      "hansenLossShareMean": 0.0645,
+      "modisChangePpMean": 0.73,
       "cells": 13680
      },
      {
       "decile": 8,
-      "hansenLossShareMean": 0.1781,
-      "modisChangePpMean": -3.27,
+      "hansenLossShareMean": 0.1673,
+      "modisChangePpMean": -2.0,
       "cells": 13680
      },
      {
       "decile": 9,
-      "hansenLossShareMean": 0.3329,
-      "modisChangePpMean": -10.27,
+      "hansenLossShareMean": 0.3182,
+      "modisChangePpMean": -8.7,
       "cells": 13680
      },
      {
       "decile": 10,
-      "hansenLossShareMean": 0.604,
-      "modisChangePpMean": -26.95,
+      "hansenLossShareMean": 0.5885,
+      "modisChangePpMean": -25.12,
       "cells": 13680
      }
     ]
@@ -817,7 +817,7 @@
      "peakLossYear": 2020,
      "peakLossShare": 0.271,
      "hansenTreeCover2000": 99.6,
-     "modisChangePp": -48.9,
+     "modisChangePp": -46.1,
      "burnedYears": [
       2018,
       2020,
@@ -835,7 +835,7 @@
      "peakLossYear": 2017,
      "peakLossShare": 0.766,
      "hansenTreeCover2000": 99.0,
-     "modisChangePp": -60.3,
+     "modisChangePp": -60.8,
      "burnedYears": [
       2004,
       2017,
@@ -854,7 +854,7 @@
      "peakLossYear": 2018,
      "peakLossShare": 0.487,
      "hansenTreeCover2000": 99.5,
-     "modisChangePp": -48.9,
+     "modisChangePp": -45.5,
      "burnedYears": [
       2017,
       2018,
@@ -873,7 +873,7 @@
      "peakLossYear": 2006,
      "peakLossShare": 0.454,
      "hansenTreeCover2000": 99.2,
-     "modisChangePp": -65.3,
+     "modisChangePp": -63.0,
      "burnedYears": [
       2005,
       2006,
@@ -895,7 +895,7 @@
      "peakLossYear": 2022,
      "peakLossShare": 0.568,
      "hansenTreeCover2000": 99.7,
-     "modisChangePp": -55.3,
+     "modisChangePp": -41.5,
      "burnedYears": [
       2022,
       2024
@@ -909,7 +909,7 @@
      "peakLossYear": 2014,
      "peakLossShare": 0.324,
      "hansenTreeCover2000": 99.6,
-     "modisChangePp": -57.0,
+     "modisChangePp": -54.7,
      "burnedYears": [
       2014,
       2015,
@@ -931,7 +931,7 @@
      "peakLossYear": 2024,
      "peakLossShare": 0.701,
      "hansenTreeCover2000": 99.6,
-     "modisChangePp": -29.3,
+     "modisChangePp": -13.6,
      "burnedYears": [
       2008,
       2024
@@ -945,7 +945,7 @@
      "peakLossYear": 2020,
      "peakLossShare": 0.457,
      "hansenTreeCover2000": 99.7,
-     "modisChangePp": -58.2,
+     "modisChangePp": -54.2,
      "burnedYears": [
       2019,
       2020,
@@ -963,7 +963,7 @@
      "peakLossYear": 2020,
      "peakLossShare": 0.752,
      "hansenTreeCover2000": 99.7,
-     "modisChangePp": -56.3,
+     "modisChangePp": -52.3,
      "burnedYears": [
       2020,
       2021,
@@ -980,7 +980,7 @@
      "peakLossYear": 2020,
      "peakLossShare": 0.485,
      "hansenTreeCover2000": 99.3,
-     "modisChangePp": -50.8,
+     "modisChangePp": -43.3,
      "burnedYears": [
       2020,
       2021,
@@ -1058,68 +1058,68 @@
     ]
    },
    "changeVsLoss": {
-    "r": -0.603,
+    "r": -0.578,
     "cells": 25648,
-    "definition": "MOD44B mean(2024,2025) - mean(2001,2002), percentage points",
+    "definition": "MOD44B mean(2023,2024) - mean(2001,2002), percentage points; Hansen loss share 2001-2024 (MOD44B 2025 is flagged and not used)",
     "byLossDecile": [
      {
       "decile": 1,
       "hansenLossShareMean": 0.0,
-      "modisChangePpMean": 2.01,
-      "cells": 2288
+      "modisChangePpMean": 2.07,
+      "cells": 2343
      },
      {
       "decile": 2,
       "hansenLossShareMean": 0.0002,
-      "modisChangePpMean": 2.06,
-      "cells": 2837
+      "modisChangePpMean": 2.2,
+      "cells": 2774
      },
      {
       "decile": 3,
       "hansenLossShareMean": 0.0005,
-      "modisChangePpMean": 2.43,
-      "cells": 2570
+      "modisChangePpMean": 2.46,
+      "cells": 2577
      },
      {
       "decile": 4,
-      "hansenLossShareMean": 0.0012,
-      "modisChangePpMean": 2.54,
+      "hansenLossShareMean": 0.0011,
+      "modisChangePpMean": 2.61,
       "cells": 2564
      },
      {
       "decile": 5,
-      "hansenLossShareMean": 0.0029,
-      "modisChangePpMean": 2.99,
-      "cells": 2565
+      "hansenLossShareMean": 0.0027,
+      "modisChangePpMean": 3.24,
+      "cells": 2566
      },
      {
       "decile": 6,
-      "hansenLossShareMean": 0.007,
-      "modisChangePpMean": 3.01,
+      "hansenLossShareMean": 0.0065,
+      "modisChangePpMean": 3.33,
       "cells": 2565
      },
      {
       "decile": 7,
-      "hansenLossShareMean": 0.0181,
-      "modisChangePpMean": 2.21,
+      "hansenLossShareMean": 0.0167,
+      "modisChangePpMean": 2.82,
       "cells": 2564
      },
      {
       "decile": 8,
-      "hansenLossShareMean": 0.0486,
-      "modisChangePpMean": 1.05,
+      "hansenLossShareMean": 0.0451,
+      "modisChangePpMean": 2.38,
       "cells": 2565
      },
      {
       "decile": 9,
-      "hansenLossShareMean": 0.1323,
-      "modisChangePpMean": -2.26,
+      "hansenLossShareMean": 0.1237,
+      "modisChangePpMean": -0.18,
       "cells": 2565
      },
      {
       "decile": 10,
-      "hansenLossShareMean": 0.3785,
-      "modisChangePpMean": -11.82,
+      "hansenLossShareMean": 0.3601,
+      "modisChangePpMean": -9.5,
       "cells": 2565
      }
     ]
@@ -1313,7 +1313,7 @@
      "peakLossYear": 2024,
      "peakLossShare": 0.536,
      "hansenTreeCover2000": 97.7,
-     "modisChangePp": -51.9,
+     "modisChangePp": -26.3,
      "burnedYears": [
       2005,
       2007,
@@ -1336,7 +1336,7 @@
      "peakLossYear": 2007,
      "peakLossShare": 0.514,
      "hansenTreeCover2000": 99.5,
-     "modisChangePp": -11.0,
+     "modisChangePp": -6.7,
      "burnedYears": [
       2006,
       2007,
@@ -1351,7 +1351,7 @@
      "peakLossYear": 2013,
      "peakLossShare": 0.331,
      "hansenTreeCover2000": 98.2,
-     "modisChangePp": -22.7,
+     "modisChangePp": -14.5,
      "burnedYears": [
       2013,
       2014,
@@ -1368,7 +1368,7 @@
      "peakLossYear": 2022,
      "peakLossShare": 0.197,
      "hansenTreeCover2000": 98.8,
-     "modisChangePp": -45.6,
+     "modisChangePp": -36.9,
      "burnedYears": [
       2005,
       2007,
@@ -1392,7 +1392,7 @@
      "peakLossYear": 2007,
      "peakLossShare": 0.361,
      "hansenTreeCover2000": 99.9,
-     "modisChangePp": -15.1,
+     "modisChangePp": -12.9,
      "burnedYears": [
       2006,
       2007,
@@ -1407,7 +1407,7 @@
      "peakLossYear": 2019,
      "peakLossShare": 0.146,
      "hansenTreeCover2000": 97.9,
-     "modisChangePp": -39.6,
+     "modisChangePp": -38.6,
      "burnedYears": [
       2004,
       2008,
@@ -1434,7 +1434,7 @@
      "peakLossYear": 2008,
      "peakLossShare": 0.142,
      "hansenTreeCover2000": 96.3,
-     "modisChangePp": -26.7,
+     "modisChangePp": -22.1,
      "burnedYears": [
       2007,
       2008,
@@ -1454,7 +1454,7 @@
      "peakLossYear": 2022,
      "peakLossShare": 0.408,
      "hansenTreeCover2000": 99.3,
-     "modisChangePp": -47.5,
+     "modisChangePp": -42.5,
      "burnedYears": [
       2005,
       2010,
@@ -1472,7 +1472,7 @@
      "peakLossYear": 2012,
      "peakLossShare": 0.422,
      "hansenTreeCover2000": 99.5,
-     "modisChangePp": -18.8,
+     "modisChangePp": -10.9,
      "burnedYears": [
       2012,
       2013,
@@ -1487,7 +1487,7 @@
      "peakLossYear": 2010,
      "peakLossShare": 0.196,
      "hansenTreeCover2000": 99.3,
-     "modisChangePp": -41.2,
+     "modisChangePp": -41.3,
      "burnedYears": [
       2011
      ]
@@ -1647,7 +1647,7 @@
   }
  ],
  "meta": {
-  "generatedUtc": "2026-11-15T06:53:49+00:00",
+  "generatedUtc": "2026-11-15T21:34:05+00:00",
   "sources": {
    "MOD44B": "10.5067/MODIS/MOD44B.061",
    "HANSEN": "10.1126/science.1244693",
@@ -1657,14 +1657,16 @@
   "aiDisclosure": "Generated by the SIGNO pipeline (pipeline/), code written with Claude (Anthropic) via Claude Code following the team's choices; values come only from the cited NASA and Hansen/UMD datasets."
  },
  "trendChecks": {
-  "generatedUtc": "2026-11-15T10:43:02+00:00",
+  "generatedUtc": "2026-11-16T00:07:35+00:00",
   "design": {
    "alpha": 0.05,
+   "ciLevel": 0.95,
+   "ciMethod": "95 % confidence interval of Sen's slope from the Mann-Kendall variance (Gilbert 1987)",
    "minCompleteShare": 0.8,
    "autocorrelationRuleThreshold": 0.2,
    "permutations": 20,
    "seed": 20261115,
-   "text": "Mann-Kendall test on yearly values with Sen's slope, Benjamini-Hochberg FDR across the tested cells of each variable. Pre-registered rules (autocorrelation, satellite drift) applied as written. V1 shuffles the years of every cell and reruns the whole procedure; V2 adds to the shuffled series a linear trend equal to the median |Sen slope| of the real significant cells."
+   "text": "Hansen loss has one trend, over 2011-2025 (the years Hansen processed with one consistent method), never across the 2011 method change; 2001-2010 are shown but not tested. Mann-Kendall test on yearly values with Sen's slope, Benjamini-Hochberg FDR across the tested cells of each variable. Rules fixed before seeing the results (autocorrelation, satellite drift) applied as written. The shuffled-years check shuffles the years of every cell and reruns the whole procedure; shuffling each square on its own checks against memoryless noise that is independent between squares. The simulated-trend check adds to the shuffled series a linear trend equal to the median |Sen slope| of the real significant cells; the same test trend is added to every square, and the detection rate is an average over squares with very different noise."
   },
   "variables": [
    {
@@ -1675,7 +1677,7 @@
      2001,
      2020
     ],
-    "units": "unitless per decade",
+    "units": "NDVI units per decade",
     "cellsTotal": 566,
     "cellsTested": 566,
     "significantIncreasing": 158,
@@ -1692,7 +1694,7 @@
      2001,
      2020
     ],
-    "units": "unitless per decade",
+    "units": "EVI units per decade",
     "cellsTotal": 566,
     "cellsTested": 566,
     "significantIncreasing": 68,
@@ -1755,18 +1757,18 @@
    {
     "variableId": "lossKm2",
     "testUsed": "Mann-Kendall (original)",
-    "autocorrelationShare": 0.1625,
+    "autocorrelationShare": 0.0707,
     "period": [
-     2001,
+     2011,
      2025
     ],
     "units": "km² per year per decade",
     "cellsTotal": 566,
     "cellsTested": 566,
-    "significantIncreasing": 318,
-    "significantDecreasing": 20,
-    "medianSlopePerDecade": 2.4,
-    "medianSlopePerDecadeSignificant": 5.1801,
+    "significantIncreasing": 45,
+    "significantDecreasing": 2,
+    "medianSlopePerDecade": 3.4273,
+    "medianSlopePerDecadeSignificant": 43.5,
     "cellsWithMissingYear": 0
    },
    {
@@ -1787,6 +1789,219 @@
     "cellsWithMissingYear": 0
    }
   ],
+  "hansenConsistency": {
+   "methodChangeYear": 2011,
+   "hansenNotes": {
+    "title": "Hansen/UMD Global Forest Change v1.13 user notes",
+    "url": "https://storage.googleapis.com/earthenginepartners-hansen/GFC-2025-v1.13/download.html",
+    "quotes": [
+     "The reprocessing of data from 2011 onward in measuring loss",
+     "However, the years preceding 2011 have not yet been reprocessed in this manner, and users will notice inconsistencies as a result.",
+     "The use of Landsat 8 OLI data for 2013 onward and Landsat 9 OLI for 2022 onward",
+     "care must be taken when comparing change across any interval",
+     "These data ... are a relative indicator of spatiotemporal trends in forest loss dynamics globally.",
+     "definitive area estimation should not be made using pixels counts from the forest loss layers."
+    ]
+   },
+   "prodes": {
+    "title": "INPE, Série Histórica Taxas Prodes Amazônia (Apresentação Coletiva Prodes 2026, 16 Oct 2026, p. 4)",
+    "url": "https://www.gov.br/inpe/pt-br/assuntos/ultimas-noticias/brasil-alcanca-menores-taxas-de-desmatamento-da-serie-historica-na-amazonia-e-no-cerrado",
+    "scope": "Brazilian Legal Amazon (nine states); PRODES year Y = August Y-1 to July Y; clear-cut of primary forest, polygons of 6.25 ha or more",
+    "note": "Official deforestation; Hansen loss is stand-replacing loss of any tree cover (fire, logging, mining, clearing, secondary forest) per calendar year, so the ratio is not expected to be 1.",
+    "years": [
+     2001,
+     2002,
+     2003,
+     2004,
+     2005,
+     2006,
+     2007,
+     2008,
+     2009,
+     2010,
+     2011,
+     2012,
+     2013,
+     2014,
+     2015,
+     2016,
+     2017,
+     2018,
+     2019,
+     2020,
+     2021,
+     2022,
+     2023,
+     2024,
+     2025
+    ],
+    "km2": [
+     18165,
+     21650,
+     25396,
+     27772,
+     19014,
+     14286,
+     11651,
+     12911,
+     7464,
+     7000,
+     6418,
+     4571,
+     5891,
+     5012,
+     6207,
+     7893,
+     6947,
+     7536,
+     10129,
+     10851,
+     13038,
+     11594,
+     9064,
+     6518,
+     5731
+    ]
+   },
+   "segments": [
+    {
+     "years": [
+      2001,
+      2010
+     ],
+     "hansenBrazilVsProdes": {
+      "r": 0.85,
+      "ratio": 1.15
+     },
+     "zoneTrends": {
+      "amazon": {
+       "slopePerDecade": -10005.0,
+       "pValue": 0.1074,
+       "significant": false,
+       "n": 10,
+       "trend": "none"
+      },
+      "amazon_brazil": {
+       "slopePerDecade": -12670.0,
+       "pValue": 0.073638,
+       "significant": false,
+       "n": 10,
+       "trend": "none"
+      },
+      "amazon_peru": {
+       "slopePerDecade": 784.62,
+       "pValue": 0.020045,
+       "significant": true,
+       "n": 10,
+       "trend": "increasing"
+      },
+      "prodes": {
+       "slopePerDecade": -20266.0,
+       "pValue": 0.012266,
+       "significant": true,
+       "n": 10,
+       "trend": "decreasing"
+      }
+     },
+     "modisCheck": {
+      "r": -0.79,
+      "definition": "Across the 566 cells: Hansen loss summed over the segment as % of the cell area (cell area = 111.32**2 * cos(lat) km²) vs the change in MODIS tree cover (mean of the last 3 years of the segment minus mean of the 3 years starting the year before the segment; the late segment ends in 2024 because MODIS 2025 is flagged). A negative r means MODIS confirms where Hansen sees loss."
+     },
+     "cells": {
+      "tested": 566,
+      "significantIncreasing": 0,
+      "significantDecreasing": 0
+     }
+    },
+    {
+     "years": [
+      2011,
+      2025
+     ],
+     "hansenBrazilVsProdes": {
+      "r": 0.2,
+      "ratio": 2.7
+     },
+     "zoneTrends": {
+      "amazon": {
+       "slopePerDecade": 12040.0,
+       "pValue": 0.0075332,
+       "significant": true,
+       "n": 15,
+       "trend": "increasing"
+      },
+      "amazon_brazil": {
+       "slopePerDecade": 8709.0,
+       "pValue": 0.029448,
+       "significant": true,
+       "n": 15,
+       "trend": "increasing"
+      },
+      "amazon_peru": {
+       "slopePerDecade": 455.91,
+       "pValue": 0.047761,
+       "significant": true,
+       "n": 15,
+       "trend": "increasing"
+      },
+      "prodes": {
+       "slopePerDecade": 3700.0,
+       "pValue": 0.047761,
+       "significant": true,
+       "n": 15,
+       "trend": "increasing"
+      }
+     },
+     "modisCheck": {
+      "r": -0.47,
+      "definition": "Across the 566 cells: Hansen loss summed over the segment as % of the cell area (cell area = 111.32**2 * cos(lat) km²) vs the change in MODIS tree cover (mean of the last 3 years of the segment minus mean of the 3 years starting the year before the segment; the late segment ends in 2024 because MODIS 2025 is flagged). A negative r means MODIS confirms where Hansen sees loss."
+     },
+     "cells": {
+      "tested": 566,
+      "significantIncreasing": 45,
+      "significantDecreasing": 2
+     }
+    }
+   ],
+   "acrossBreak": {
+    "years": [
+     2001,
+     2025
+    ],
+    "zoneTrends": {
+     "amazon": {
+      "slopePerDecade": 4768.4,
+      "pValue": 0.047125,
+      "significant": true,
+      "n": 25,
+      "trend": "increasing"
+     },
+     "amazon_brazil": {
+      "slopePerDecade": 1618.9,
+      "pValue": 0.41369,
+      "significant": false,
+      "n": 25,
+      "trend": "none"
+     },
+     "amazon_peru": {
+      "slopePerDecade": 831.06,
+      "pValue": 1.0545e-06,
+      "significant": true,
+      "n": 25,
+      "trend": "increasing"
+     },
+     "prodes": {
+      "slopePerDecade": -4663.3,
+      "pValue": 0.014196,
+      "significant": true,
+      "n": 25,
+      "trend": "decreasing"
+     }
+    },
+    "note": "Not used: one test across the 2011 method change gives a rising Amazon trend while the official PRODES series falls."
+   },
+   "text": "Hansen loss in the Brazilian Amazon tracks the official INPE PRODES series in 2001-2010 (r = 0.85, Hansen/PRODES ratio 1.15) but not in 2011-2025 (r = 0.2, ratio 2.7), after Hansen reprocessed its data from 2011. Testing 2001-2025 in one piece gives an increasing trend for the Amazon (p = 0.047125) while PRODES shows a decreasing trend (p = 0.014196): a result of the 2011 method change. So the published loss trend uses only 2011-2025, the years Hansen processed with one consistent method; all loss years 2001-2025 are shown, and 2001-2010 are real Hansen data from the earlier method that are not tested for a trend. In 2011-2025 the whole-Amazon Hansen series shows an increasing trend (p = 0.0075332) and PRODES shows an increasing trend (p = 0.047761); for comparison, 2001-2010 gives no clear trend for Hansen (p = 0.1074) and a decreasing trend for PRODES (p = 0.012266). Where Hansen sees more loss, MODIS tree cover falls more (r = -0.79 in 2001-2010, -0.47 in 2011-2025)."
+  },
   "d1Drift": {
    "years": [
     2015,
@@ -1843,8 +2058,8 @@
    },
    "modisTreeCover": {
     "permutations": 20,
-    "meanShareSignificant": 0.0,
-    "maxShareSignificant": 0.0
+    "meanShareSignificant": 9e-05,
+    "maxShareSignificant": 0.00177
    }
   },
   "v2Detection": {
@@ -1879,16 +2094,16 @@
     "meanShareDetectedIncreasing": 0.7734
    },
    "lossKm2": {
-    "injectedSlopePerDecade": 6.3883,
-    "meanShareDetected": 0.5483,
-    "minShareDetected": 0.5212,
-    "meanShareDetectedIncreasing": 0.5471
+    "injectedSlopePerDecade": 44.444,
+    "meanShareDetected": 0.7444,
+    "minShareDetected": 0.7208,
+    "meanShareDetectedIncreasing": 0.7443
    },
    "modisTreeCover": {
     "injectedSlopePerDecade": 3.0732,
-    "meanShareDetected": 0.8533,
-    "minShareDetected": 0.8145,
-    "meanShareDetectedIncreasing": 0.8532
+    "meanShareDetected": 0.8549,
+    "minShareDetected": 0.8339,
+    "meanShareDetectedIncreasing": 0.8549
    }
   },
   "v3KnownPlaces": [
@@ -1900,16 +2115,24 @@
      "amazon_brazil"
     ],
     "lossKm2": {
-     "slopePerDecade": 6.7968,
-     "pValue": 0.76142,
-     "qValue": 0.79808,
+     "slopePerDecade": -2.8,
+     "slopeCi95": [
+      -125.02,
+      110.4
+     ],
+     "pValue": 1.0,
+     "qValue": 1.0,
      "significant": false,
-     "direction": "increasing",
+     "direction": "decreasing",
      "expectedDirection": "increasing",
-     "directionAsExpected": true
+     "directionAsExpected": false
     },
     "modisTreeCover": {
      "slopePerDecade": -6.5623,
+     "slopeCi95": [
+      -7.5253,
+      -5.7808
+     ],
      "pValue": 7.9896e-09,
      "qValue": 5.0246e-07,
      "significant": true,
@@ -1926,16 +2149,24 @@
      "amazon_brazil"
     ],
     "lossKm2": {
-     "slopePerDecade": -42.19,
-     "pValue": 0.088211,
-     "qValue": 0.12089,
+     "slopePerDecade": 29.143,
+     "slopeCi95": [
+      -25.165,
+      108.02
+     ],
+     "pValue": 0.48842,
+     "qValue": 0.62972,
      "significant": false,
-     "direction": "decreasing",
+     "direction": "increasing",
      "expectedDirection": "increasing",
-     "directionAsExpected": false
+     "directionAsExpected": true
     },
     "modisTreeCover": {
      "slopePerDecade": -4.1597,
+     "slopeCi95": [
+      -5.3187,
+      -2.7577
+     ],
      "pValue": 5.2581e-06,
      "qValue": 7.2587e-05,
      "significant": true,
@@ -1952,9 +2183,13 @@
      "amazon_brazil"
     ],
     "lossKm2": {
-     "slopePerDecade": 11.232,
-     "pValue": 0.45472,
-     "qValue": 0.51995,
+     "slopePerDecade": 31.75,
+     "slopeCi95": [
+      -26.833,
+      93.649
+     ],
+     "pValue": 0.19821,
+     "qValue": 0.3539,
      "significant": false,
      "direction": "increasing",
      "expectedDirection": "increasing",
@@ -1962,6 +2197,10 @@
     },
     "modisTreeCover": {
      "slopePerDecade": -1.6477,
+     "slopeCi95": [
+      -3.1901,
+      0.078119
+     ],
      "pValue": 0.058386,
      "qValue": 0.15335,
      "significant": false,
@@ -1978,16 +2217,24 @@
      "amazon_brazil"
     ],
     "lossKm2": {
-     "slopePerDecade": -26.562,
-     "pValue": 0.38751,
-     "qValue": 0.44671,
+     "slopePerDecade": 38.25,
+     "slopeCi95": [
+      -15.582,
+      167.03
+     ],
+     "pValue": 0.074825,
+     "qValue": 0.19977,
      "significant": false,
-     "direction": "decreasing",
+     "direction": "increasing",
      "expectedDirection": "increasing",
-     "directionAsExpected": false
+     "directionAsExpected": true
     },
     "modisTreeCover": {
      "slopePerDecade": -5.1595,
+     "slopeCi95": [
+      -7.25,
+      -2.8383
+     ],
      "pValue": 9.6082e-05,
      "qValue": 0.00093762,
      "significant": true,
@@ -2004,16 +2251,24 @@
      "amazon_brazil"
     ],
     "lossKm2": {
-     "slopePerDecade": -20.702,
-     "pValue": 0.23361,
-     "qValue": 0.28435,
+     "slopePerDecade": 11.7,
+     "slopeCi95": [
+      -36.817,
+      72.477
+     ],
+     "pValue": 0.76653,
+     "qValue": 0.85236,
      "significant": false,
-     "direction": "decreasing",
+     "direction": "increasing",
      "expectedDirection": "increasing",
-     "directionAsExpected": false
+     "directionAsExpected": true
     },
     "modisTreeCover": {
      "slopePerDecade": -3.6503,
+     "slopeCi95": [
+      -4.265,
+      -2.8006
+     ],
      "pValue": 2.6978e-08,
      "qValue": 1.018e-06,
      "significant": true,
@@ -2030,16 +2285,24 @@
      "amazon_brazil"
     ],
     "lossKm2": {
-     "slopePerDecade": 5.8333,
-     "pValue": 0.83352,
-     "qValue": 0.85466,
+     "slopePerDecade": -7.3,
+     "slopeCi95": [
+      -132.12,
+      159.49
+     ],
+     "pValue": 1.0,
+     "qValue": 1.0,
      "significant": false,
-     "direction": "increasing",
+     "direction": "decreasing",
      "expectedDirection": "increasing",
-     "directionAsExpected": true
+     "directionAsExpected": false
     },
     "modisTreeCover": {
      "slopePerDecade": -8.1429,
+     "slopeCi95": [
+      -8.6437,
+      -7.5112
+     ],
      "pValue": 3.332e-10,
      "qValue": 4.7148e-08,
      "significant": true,
@@ -2056,9 +2319,13 @@
      "amazon_brazil"
     ],
     "lossKm2": {
-     "slopePerDecade": -23.548,
-     "pValue": 0.38751,
-     "qValue": 0.44671,
+     "slopePerDecade": -34.625,
+     "slopeCi95": [
+      -166.03,
+      64.706
+     ],
+     "pValue": 0.48842,
+     "qValue": 0.62972,
      "significant": false,
      "direction": "decreasing",
      "expectedDirection": "increasing",
@@ -2066,6 +2333,10 @@
     },
     "modisTreeCover": {
      "slopePerDecade": -7.9721,
+     "slopeCi95": [
+      -9.122,
+      -6.8002
+     ],
      "pValue": 4.0555e-08,
      "qValue": 1.3502e-06,
      "significant": true,
@@ -2082,9 +2353,13 @@
      "amazon_brazil"
     ],
     "lossKm2": {
-     "slopePerDecade": 10.345,
-     "pValue": 0.69134,
-     "qValue": 0.73277,
+     "slopePerDecade": 75.778,
+     "slopeCi95": [
+      -33.076,
+      302.69
+     ],
+     "pValue": 0.27628,
+     "qValue": 0.44049,
      "significant": false,
      "direction": "increasing",
      "expectedDirection": "increasing",
@@ -2092,6 +2367,10 @@
     },
     "modisTreeCover": {
      "slopePerDecade": -7.575,
+     "slopeCi95": [
+      -8.4456,
+      -6.5092
+     ],
      "pValue": 1.053e-08,
      "qValue": 5.9598e-07,
      "significant": true,
@@ -2108,16 +2387,24 @@
      "amazon_brazil"
     ],
     "lossKm2": {
-     "slopePerDecade": 50.947,
-     "pValue": 0.006285,
-     "qValue": 0.013078,
-     "significant": true,
+     "slopePerDecade": 104.38,
+     "slopeCi95": [
+      29.608,
+      255.33
+     ],
+     "pValue": 0.017531,
+     "qValue": 0.090203,
+     "significant": false,
      "direction": "increasing",
      "expectedDirection": "increasing",
      "directionAsExpected": true
     },
     "modisTreeCover": {
      "slopePerDecade": -3.7479,
+     "slopeCi95": [
+      -4.8594,
+      -2.7105
+     ],
      "pValue": 6.5593e-06,
      "qValue": 8.2502e-05,
      "significant": true,
@@ -2133,16 +2420,24 @@
      "amazon_peru"
     ],
     "lossKm2": {
-     "slopePerDecade": 72.896,
-     "pValue": 3.5677e-05,
-     "qValue": 0.00021949,
-     "significant": true,
+     "slopePerDecade": 58.125,
+     "slopeCi95": [
+      0.57987,
+      121.31
+     ],
+     "pValue": 0.047761,
+     "qValue": 0.16384,
+     "significant": false,
      "direction": "increasing",
      "expectedDirection": "increasing",
      "directionAsExpected": true
     },
     "modisTreeCover": {
      "slopePerDecade": -1.9767,
+     "slopeCi95": [
+      -3.6388,
+      0.05806
+     ],
      "pValue": 0.058524,
      "qValue": 0.15335,
      "significant": false,
@@ -2158,16 +2453,24 @@
      "amazon_peru"
     ],
     "lossKm2": {
-     "slopePerDecade": 25.611,
-     "pValue": 0.026506,
-     "qValue": 0.045052,
-     "significant": true,
+     "slopePerDecade": 25.556,
+     "slopeCi95": [
+      -30.985,
+      74.229
+     ],
+     "pValue": 0.23495,
+     "qValue": 0.39697,
+     "significant": false,
      "direction": "increasing",
      "expectedDirection": "increasing",
      "directionAsExpected": true
     },
     "modisTreeCover": {
      "slopePerDecade": -0.57455,
+     "slopeCi95": [
+      -2.6862,
+      0.83469
+     ],
      "pValue": 0.41369,
      "qValue": 0.60817,
      "significant": false,
@@ -2183,16 +2486,24 @@
      "amazon_peru"
     ],
     "lossKm2": {
-     "slopePerDecade": 30.1,
-     "pValue": 3.3576e-06,
-     "qValue": 5.1362e-05,
-     "significant": true,
+     "slopePerDecade": 45.6,
+     "slopeCi95": [
+      20.404,
+      77.076
+     ],
+     "pValue": 0.0055836,
+     "qValue": 0.054488,
+     "significant": false,
      "direction": "increasing",
      "expectedDirection": "increasing",
      "directionAsExpected": true
     },
     "modisTreeCover": {
      "slopePerDecade": -2.3078,
+     "slopeCi95": [
+      -3.9663,
+      -0.88628
+     ],
      "pValue": 0.00099107,
      "qValue": 0.0062327,
      "significant": true,
@@ -2208,16 +2519,24 @@
      "amazon_peru"
     ],
     "lossKm2": {
-     "slopePerDecade": 60.445,
-     "pValue": 2.3657e-05,
-     "qValue": 0.00018859,
-     "significant": true,
+     "slopePerDecade": 22.571,
+     "slopeCi95": [
+      -18.024,
+      76.367
+     ],
+     "pValue": 0.37305,
+     "qValue": 0.53591,
+     "significant": false,
      "direction": "increasing",
      "expectedDirection": "increasing",
      "directionAsExpected": true
     },
     "modisTreeCover": {
      "slopePerDecade": -0.75643,
+     "slopeCi95": [
+      -2.4149,
+      0.5644
+     ],
      "pValue": 0.18311,
      "qValue": 0.35616,
      "significant": false,
@@ -2233,9 +2552,13 @@
      "amazon_peru"
     ],
     "lossKm2": {
-     "slopePerDecade": 6.6389,
-     "pValue": 0.18311,
-     "qValue": 0.23083,
+     "slopePerDecade": 2.7778,
+     "slopeCi95": [
+      -18.361,
+      19.712
+     ],
+     "pValue": 0.84309,
+     "qValue": 0.9072,
      "significant": false,
      "direction": "increasing",
      "expectedDirection": "increasing",
@@ -2243,6 +2566,10 @@
     },
     "modisTreeCover": {
      "slopePerDecade": 0.069231,
+     "slopeCi95": [
+      -2.1309,
+      1.916
+     ],
      "pValue": 0.96273,
      "qValue": 0.98537,
      "significant": false,
@@ -2258,9 +2585,13 @@
     "caseId": "la_pampa",
     "label": "La Pampa, Madre de Dios (gold mining)",
     "lossKm2": {
-     "slopePerDecade": 37.244,
-     "pValue": 1.3848e-08,
-     "qValue": 7.838e-06,
+     "slopePerDecade": 43.5,
+     "slopeCi95": [
+      27.773,
+      53.297
+     ],
+     "pValue": 0.0002502,
+     "qValue": 0.01882,
      "significant": true,
      "direction": "increasing",
      "expectedDirection": "increasing",
@@ -2268,6 +2599,10 @@
     },
     "modisTreeCover": {
      "slopePerDecade": -2.0406,
+     "slopeCi95": [
+      -3.2526,
+      -1.001
+     ],
      "pValue": 0.00038388,
      "qValue": 0.0027856,
      "significant": true,
@@ -2281,6 +2616,10 @@
    "amazon": {
     "ndvi": {
      "slopePerDecade": 0.00097927,
+     "slopeCi95": [
+      -0.00172,
+      0.0042485
+     ],
      "pValue": 0.49566,
      "significant": false,
      "years": [
@@ -2302,6 +2641,10 @@
     },
     "evi": {
      "slopePerDecade": 0.0054411,
+     "slopeCi95": [
+      0.0033833,
+      0.00823
+     ],
      "pValue": 0.00024618,
      "significant": true,
      "years": [
@@ -2323,6 +2666,10 @@
     },
     "lst_day": {
      "slopePerDecade": 0.32909,
+     "slopeCi95": [
+      0.16854,
+      0.54506
+     ],
      "pValue": 6.5893e-05,
      "significant": true,
      "years": [
@@ -2344,6 +2691,10 @@
     },
     "precip": {
      "slopePerDecade": -36.966,
+     "slopeCi95": [
+      -145.72,
+      35.01
+     ],
      "pValue": 0.33336,
      "significant": false,
      "years": [
@@ -2365,6 +2716,10 @@
     },
     "burned_area": {
      "slopePerDecade": -3518.8,
+     "slopeCi95": [
+      -24497.0,
+      21067.0
+     ],
      "pValue": 0.79725,
      "significant": false,
      "years": [
@@ -2386,6 +2741,10 @@
     },
     "modisTreeCover": {
      "slopePerDecade": -0.86108,
+     "slopeCi95": [
+      -1.378,
+      -0.38923
+     ],
      "pValue": 0.0027875,
      "significant": true,
      "years": [
@@ -2406,22 +2765,26 @@
      "test": "original"
     },
     "lossKm2": {
-     "slopePerDecade": 4768.4,
-     "pValue": 0.047125,
+     "slopePerDecade": 12040.0,
+     "slopeCi95": [
+      5144.9,
+      19582.0
+     ],
+     "pValue": 0.0075332,
      "significant": true,
      "years": [
-      2001,
+      2011,
       2025
      ],
-     "n": 25,
+     "n": 15,
      "line": {
       "start": {
-       "year": 2001,
-       "value": 20406.0
+       "year": 2011,
+       "value": 18721.0
       },
       "end": {
        "year": 2025,
-       "value": 31850.0
+       "value": 35576.0
       }
      },
      "test": "original"
@@ -2430,6 +2793,10 @@
    "amazon_brazil": {
     "ndvi": {
      "slopePerDecade": -0.00028869,
+     "slopeCi95": [
+      -0.0036012,
+      0.0034399
+     ],
      "pValue": 0.92246,
      "significant": false,
      "years": [
@@ -2451,6 +2818,10 @@
     },
     "evi": {
      "slopePerDecade": 0.0049994,
+     "slopeCi95": [
+      0.0028933,
+      0.0074086
+     ],
      "pValue": 0.00024618,
      "significant": true,
      "years": [
@@ -2472,6 +2843,10 @@
     },
     "lst_day": {
      "slopePerDecade": 0.38253,
+     "slopeCi95": [
+      0.22599,
+      0.60676
+     ],
      "pValue": 0.00019065,
      "significant": true,
      "years": [
@@ -2493,6 +2868,10 @@
     },
     "precip": {
      "slopePerDecade": -78.248,
+     "slopeCi95": [
+      -205.6,
+      25.086
+     ],
      "pValue": 0.13026,
      "significant": false,
      "years": [
@@ -2514,6 +2893,10 @@
     },
     "burned_area": {
      "slopePerDecade": -7551.5,
+     "slopeCi95": [
+      -19026.0,
+      7269.0
+     ],
      "pValue": 0.31525,
      "significant": false,
      "years": [
@@ -2535,6 +2918,10 @@
     },
     "modisTreeCover": {
      "slopePerDecade": -1.2505,
+     "slopeCi95": [
+      -1.5881,
+      -0.78653
+     ],
      "pValue": 7.914e-05,
      "significant": true,
      "years": [
@@ -2555,22 +2942,26 @@
      "test": "original"
     },
     "lossKm2": {
-     "slopePerDecade": 1618.9,
-     "pValue": 0.41369,
-     "significant": false,
+     "slopePerDecade": 8709.0,
+     "slopeCi95": [
+      666.34,
+      14861.0
+     ],
+     "pValue": 0.029448,
+     "significant": true,
      "years": [
-      2001,
+      2011,
       2025
      ],
-     "n": 25,
+     "n": 15,
      "line": {
       "start": {
-       "year": 2001,
-       "value": 17527.0
+       "year": 2011,
+       "value": 14164.0
       },
       "end": {
        "year": 2025,
-       "value": 21413.0
+       "value": 26356.0
       }
      },
      "test": "original"
@@ -2579,6 +2970,10 @@
    "amazon_peru": {
     "ndvi": {
      "slopePerDecade": 0.0038683,
+     "slopeCi95": [
+      0.0014789,
+      0.0069156
+     ],
      "pValue": 0.0052435,
      "significant": true,
      "years": [
@@ -2600,6 +2995,10 @@
     },
     "evi": {
      "slopePerDecade": 0.0075258,
+     "slopeCi95": [
+      0.0022529,
+      0.011438
+     ],
      "pValue": 0.0058198,
      "significant": true,
      "years": [
@@ -2621,6 +3020,10 @@
     },
     "lst_day": {
      "slopePerDecade": 0.3147,
+     "slopeCi95": [
+      0.14089,
+      0.48969
+     ],
      "pValue": 0.00040558,
      "significant": true,
      "years": [
@@ -2642,6 +3045,10 @@
     },
     "precip": {
      "slopePerDecade": -113.54,
+     "slopeCi95": [
+      -264.94,
+      22.857
+     ],
      "pValue": 0.096534,
      "significant": false,
      "years": [
@@ -2663,6 +3070,10 @@
     },
     "burned_area": {
      "slopePerDecade": 85.343,
+     "slopeCi95": [
+      -135.15,
+      244.57
+     ],
      "pValue": 0.31525,
      "significant": false,
      "years": [
@@ -2684,6 +3095,10 @@
     },
     "modisTreeCover": {
      "slopePerDecade": 0.5825,
+     "slopeCi95": [
+      -0.059445,
+      1.4181
+     ],
      "pValue": 0.058524,
      "significant": false,
      "years": [
@@ -2704,22 +3119,26 @@
      "test": "original"
     },
     "lossKm2": {
-     "slopePerDecade": 831.06,
-     "pValue": 1.0545e-06,
+     "slopePerDecade": 455.91,
+     "slopeCi95": [
+      2.1842,
+      1072.3
+     ],
+     "pValue": 0.047761,
      "significant": true,
      "years": [
-      2001,
+      2011,
       2025
      ],
-     "n": 25,
+     "n": 15,
      "line": {
       "start": {
-       "year": 2001,
-       "value": 1070.7
+       "year": 2011,
+       "value": 2035.0
       },
       "end": {
        "year": 2025,
-       "value": 3065.3
+       "value": 2673.2
       }
      },
      "test": "original"

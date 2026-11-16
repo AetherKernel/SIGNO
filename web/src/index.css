@@ -1,4 +1,5 @@
 /* AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-14; redesigned 2026-11-15. Reviewed and owned by team AETHER.
+ * 2026-11-15: InfoTip (the (i) button with a tooltip) styles at the end of the file.
  *
  * SIGNO design tokens, decided by José on 2026-11-14 (concept "Sala de análisis", vocabulary "expediente"):
  * light-first palette with a teal accent that is not in the data scale, ColorBrewer PuOr for trends,
@@ -969,6 +970,12 @@ body {
   opacity: 0.1;
 }
 
+.chart .method-edge {
+  stroke: var(--muted);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}
+
 .chart .band-edge {
   stroke: var(--accent);
   stroke-width: 1;
@@ -1436,6 +1443,10 @@ body {
 .key-line.dashed {
   border-top-style: dashed;
   border-top-color: var(--muted);
+}
+
+.key-line.dashed.prodes {
+  border-top-color: var(--accent);
 }
 
 .chart .bar {
@@ -1965,4 +1976,125 @@ body {
       left 160ms ease,
       top 160ms ease;
   }
+}
+
+/* InfoTip: (i) button and its tooltip (src/components/InfoTip.tsx). The bubble is fixed and clamped to the viewport. */
+.infotip {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-inline: 2px;
+}
+
+.infotip-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.infotip-btn:hover {
+  background: var(--raised);
+}
+
+/* The "?" mark (2026-11-15): a number that is shown but not proven. */
+.infotip-q {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1.6px solid currentColor;
+  border-radius: 999px;
+  font: 700 11px/1 var(--f-body);
+}
+
+.infotip-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.infotip-bubble {
+  position: fixed;
+  z-index: 1000;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: min(280px, calc(100vw - 16px));
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  font-family: var(--f-body);
+  font-size: var(--t-small);
+  font-weight: 400;
+  line-height: 1.4;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+/* Cross-checks: Hansen loss vs PRODES card (src/components/HansenConsistencyCard.tsx) */
+.chart .line-prodes {
+  stroke: var(--accent);
+  stroke-width: 1.8;
+  stroke-dasharray: 5 3;
+}
+
+.chart .hc-method {
+  stroke: var(--muted);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}
+
+.hc-segments {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--u);
+}
+
+.hc-segment {
+  padding: var(--u) calc(var(--u) * 1.5);
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+  background: var(--surface);
+}
+
+.hc-lead {
+  margin: 0 0 2px;
+  font-weight: 600;
+}
+
+.hc-segment h4 {
+  margin: 0 0 4px;
+  font-family: var(--f-data);
+  font-size: var(--t-small);
+}
+
+.hc-facts {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  font-size: var(--t-small);
+}
+
+.hc-facts dt {
+  color: var(--muted);
+  font-size: var(--t-caption);
+  font-weight: 600;
+}
+
+.hc-facts dd {
+  margin: 0;
+}
+
+.hc-line {
+  display: block;
 }

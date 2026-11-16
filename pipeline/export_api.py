@@ -1,4 +1,5 @@
 # AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15. Reviewed by team AETHER.
+# AI-generated change, 2026-11-15 (team decision of Alexis): daytime LST is published through the last month available (its trend test stays 2001-2020, LST_TREND_LAST_YEAR); variables.json gets driftFromYear for ndvi, evi and lst_day.
 """Step 5 · Export the real data in the web app's contract (API v1 source files) to web/server/data/.
 
     python -m pipeline.export_api
@@ -24,8 +25,8 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from .config import (AI_DISCLOSURE, AMAZON_BOUNDARY, ANALYSIS_START, API_CELL_DEG, API_VARIABLES, BBOX, INTERIM,
-                     LST_LAST_MONTH, MOD13C2_ACCEPTED_RELIABILITY, ROOT)
+from .config import (AI_DISCLOSURE, AMAZON_BOUNDARY, ANALYSIS_START, API_CELL_DEG, API_VARIABLES, BBOX, DRIFT_FROM_YEAR,
+                     INTERIM, LST_TREND_LAST_YEAR, MOD13C2_ACCEPTED_RELIABILITY, ROOT)
 from .export_json import iter_months
 from .tiles import LAT as LAT05, LON as LON05
 from .zones import zone_masks
@@ -44,9 +45,8 @@ SPECS = {
             {"shortName": "MOD13C2", "version": "061", "provider": "LP DAAC", "doi": "10.5067/MODIS/MOD13C2.061", "kind": "satellite"}, None),
     "lst_day": ("MOD11C3", "lst_day", "Daytime land surface temperature",
                 "How hot the ground surface is in the morning overpass, measured from space. Forest keeps the surface "
-                "cooler than cleared land. Shown until 2020: later, the satellite's orbit drift biases it.", "°C",
-                {"shortName": "MOD11C3", "version": "061", "provider": "LP DAAC", "doi": "10.5067/MODIS/MOD11C3.061", "kind": "satellite"},
-                LST_LAST_MONTH),
+                "cooler than cleared land. From 2021 the satellite's orbit drift biases it (shown with a ?; the trend test uses 2001-2020 only).", "°C",
+                {"shortName": "MOD11C3", "version": "061", "provider": "LP DAAC", "doi": "10.5067/MODIS/MOD11C3.061", "kind": "satellite"}, None),
     "precip": ("GPM_3IMERGM", "precip", "Rainfall",
                "Monthly rain from NASA's satellite constellation, calibrated with rain gauges. Helps tell a drought "
                "from forest loss.", "mm/month",
@@ -61,11 +61,13 @@ SEMESTER_AGGREGATION = {"precip": "sum", "burned_area": "sum"}  # every other va
 # Units of the trend slope (the test runs on yearly values, so they differ from the monthly units above).
 SLOPE_UNITS = {"ndvi": "unitless per decade", "evi": "unitless per decade", "lst_day": "°C per decade",
                "precip": "mm per year, per decade", "burned_area": "% of cell per year, per decade"}
+# Variables whose values from DRIFT_FROM_YEAR on are affected by Terra's orbit drift (the web app greys and "?"-marks them).
+DRIFT_VARS = {"ndvi", "evi", "lst_day"}
 # Years that enter the trend test of each variable, as pipeline/trends.py applies them (hardcoded here, keep in sync):
-# LST ends in 2020 (team rule B1, Terra orbit drift); NDVI and EVI also end in 2020 because the pre-registered rule D1
+# LST ends in config.LST_TREND_LAST_YEAR (2020) (team rule B1, Terra orbit drift); NDVI and EVI also end in 2020 because the pre-registered rule D1
 # found |r| >= 0.5 between the overpass time and their anomaly (r = 0.85); rainfall ends in 2024 (2025 stops in
 # September); burned area uses 2001-2025. pipeline/trends.py must run after this script (it fills the trend results).
-TREND_YEARS = {"ndvi": (2001, 2020), "evi": (2001, 2020), "lst_day": (2001, 2020), "precip": (2001, 2024),
+TREND_YEARS = {"ndvi": (2001, 2020), "evi": (2001, 2020), "lst_day": (2001, LST_TREND_LAST_YEAR), "precip": (2001, 2024),
                "burned_area": (2001, 2025)}
 SCALE = {"burned_area": 100.0}  # share -> percent of cell
 DECIMALS = {"ndvi": 4, "evi": 4, "lst_day": 2, "precip": 1, "burned_area": 3}
@@ -170,7 +172,8 @@ def main():
                           "temporalResolution": "monthly", "period": period, "product": product,
                           "semesterAggregation": SEMESTER_AGGREGATION.get(vid, "mean"),
                           "slopeUnits": SLOPE_UNITS[vid],
-                          "trendYears": {"start": TREND_YEARS[vid][0], "end": TREND_YEARS[vid][1]}})
+                          "trendYears": {"start": TREND_YEARS[vid][0], "end": TREND_YEARS[vid][1]},
+                          **({"driftFromYear": DRIFT_FROM_YEAR} if vid in DRIFT_VARS else {})})
         layer = {"variableId": vid, "regionId": "amazon", "period": period, "cellSizeDeg": API_CELL_DEG,
                  "method": {"name": "No trend test applied yet",
                             "description": "Real NASA data, monthly mean of each cell. The statistical trend test is "

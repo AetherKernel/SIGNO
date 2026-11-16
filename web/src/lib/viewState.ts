@@ -1,4 +1,5 @@
 // AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15. Reviewed and owned by team AETHER.
+// 2026-11-15: CoverSource removed (tree cover is Hansen only; an old ?src=modis is ignored).
 //
 // View state that lives in the URL (?view=&map=&var=&year=&show=&op=&borders=&base=&cell=&z=&lat=&lon=), so any view
 // can be shared. Parsing is defensive: a malformed parameter falls back to the default instead of breaking the page.
@@ -75,9 +76,6 @@ export function parseView(z: string | null, lat: string | null, lon: string | nu
     view.zoom <= 20
   return ok ? view : null
 }
-
-/** Source of the tree cover values. The map only uses Hansen; MODIS stays in the area viewer and the cross-checks. */
-export type CoverSource = 'hansen' | 'modis'
 
 /** The year asked for in the URL when the layer has it, else its last year (2025 in the current export). */
 export function resolveYear(years: number[], param: string | null, flaggedYears: number[] = []): number {

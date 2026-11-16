@@ -60,7 +60,7 @@ function placeBubble(ring: Box, w: number, h: number): { left: number; top: numb
 
 export function GuideTour({ validation, onClose, onCase }: Props) {
   const { t } = useLang()
-  const steps = guideSteps(t)
+  const steps = guideSteps(t, validation)
   const cases = guideCases(validation, t)
   const total = steps.length + 1
   const [index, setIndex] = useState(0)

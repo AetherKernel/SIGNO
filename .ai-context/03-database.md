@@ -41,6 +41,7 @@ erDiagram
 | | `semesterAggregation` | `"sum"` \| `"mean"` | How the backend combines the months of a six-month period: `sum` for rain and burned area, `mean` otherwise |
 | | `slopeUnits` | string (optional) | Units of the trend slope, always "per decade" (e.g. "°C per decade", "mm per year, per decade"). They differ from `units` because the test runs on yearly values |
 | | `trendYears` | {start, end} (optional) | First and last year the trend test uses for this variable (NDVI and EVI 2001–2020, LST 2001–2020, rainfall 2001–2024, burned area 2001–2025) |
+| | `driftFromYear` | number (optional) | First year of satellite drift for NDVI, EVI and daytime LST (2021). Those years are shown greyed with a "?" mark on changes and are not tested |
 | TrendLayer | `variableId`, `regionId`, `period` | | What and where |
 | | `cellSizeDeg` | number | Square cell size in degrees (1.0 in the pipeline export) |
 | | `method` | {name, description, alpha} | The method (free text, written by the pipeline) and significance level. After `trends.py`: "Mann-Kendall trend test on yearly values" (ADR-006). "No trend test applied yet" only before step 8 runs |
@@ -50,6 +51,7 @@ erDiagram
 | | `lat`, `lon` | number | Cell centre |
 | | `slopePerDecade` | number \| null | Sen's slope × 10: change in variable units per decade. `null` when the cell is not tested (fewer than 80 % of its years complete) |
 | | `pValue` | number \| null | Raw p-value of the Mann-Kendall test on the yearly values; `null` if not tested |
+| | `slopeCi95` | [low, high] \| null (optional) | A list of two numbers: the 95 % confidence interval of the Sen slope per decade (Gilbert 1987), with low ≤ slope ≤ high. `null` when not tested |
 | | `significant` | boolean | `true` when the Benjamini-Hochberg q-value is below `method.alpha`, per variable (ADR-006). `false` when not tested |
 | | `line` | SenLine (optional) | Sen line over the tested years: `{start: {year, value}, end: {year, value}}`, in the units of the yearly value. Only for tested cells |
 | | `validMonths` | integer | Non-missing months used |
@@ -64,22 +66,23 @@ erDiagram
 | CellBundle (`cells/{cellId}.json`, 2026-11-15) | `variables` | Record<variableId, {units, annual, trend}> | Per cell, for each variable with a series: the same `annual` as CellSeries and the cell's row of the trend layer (`trend`, CellTrend or null). Regrouped by `web/server/cellBundle.ts`; no new value. The area viewer loads this file; the monthly `points` stay in the series file |
 | CoverLayer | `years`, `lossYears`, `burnedYears` | number[] | Years of the tree cover arrays (2000–2025), of the loss arrays (2001–2025) and of the burned arrays (2001–2025) |
 | | `definitions` | Record<string, string> | Plain-language definition of each measure |
-| | `flags` | {source, year, note}[] | Known problems, e.g. the suspect MOD44B 2025 |
+| | `flags` | {source, year, note}[] | Known problems, e.g. the anomalous MOD44B 2025 |
+| | `methodChangeYear`, `lossTrendYears`, `hansenNote` | (optional) | 2011, the year Hansen reprocessed its loss; the trend years of the loss (2011–2025; all years 2001–2025 are shown); the plain-language note with Hansen's user-note quotes (15 Nov) |
 | | `trendMethod` | string (optional) | Plain-language method of the cover trends: years tested, test, FDR, AI disclosure |
 | CoverCell | `cellId`, `lat`, `lon` | | Same ids and centres as the trend grid |
 | | `hansenTreeCover` | (number \| null)[] | % of the cell: Hansen canopy cover in 2000, then at the end of each year. Never increases |
 | | `modisTreeCover` | (number \| null)[] | % of the cell, MOD44B. Reads lower over dense forest |
 | | `lossKm2` | (number \| null)[] | km² of stand-replacing loss per year |
 | | `burnedKm2` | (number \| null)[] | km² burned per calendar year |
-| | `trends` | {lossKm2, modisTreeCover} (optional) | Per measure: `slopePerDecade` (km² per year, or % of cell, per decade), `pValue` (raw), `significant` (after FDR) and `line`. A key is `null` when the cell is not tested. Hansen tree cover is never tested |
+| | `trends` | {lossKm2, modisTreeCover} (optional) | Per measure: `slopePerDecade` (km² per year, or % of cell, per decade), `slopeCi95` (95 % CI), `pValue` (raw), `significant` (after FDR) `line` and `period`. `lossKm2` covers 2011–2025 only (ADR-009); 2001–2010 is not tested. A key is `null` when the cell is not tested. Hansen tree cover is never tested |
 | ValidationReport | `meta` | {generatedAt, sources, note, aiDisclosure} | DOI per product short name; the note says that the r values carry no p-value |
-| | `trendChecks` (optional) | {generatedUtc, design, variables[], d1Drift, v1FalsePositives, v2Detection, v3KnownPlaces[], v4ZoneTrends} | The only part with p-values and significance: the checks of the trend test (V1–V4, rule D1). Written by `trends.py` |
+| | `trendChecks` (optional) | {generatedUtc, design, variables[] (with `lossKm2`), d1Drift, v1FalsePositives, v2Detection, v3KnownPlaces[], v4ZoneTrends, hansenConsistency} | The only part with p-values and significance: the checks of the trend test (V1–V4, rule D1) and the Hansen–PRODES check (`hansenConsistency`: the notes quotes, the PRODES series and its source, r and ratio per segment, zone trends against PRODES, the MODIS check, `acrossBreak`). Written by `trends.py`. `design` carries `ciMethod` and `ciLevel` (0.95); the known places (v3) and the zone checks (v4) carry confidence intervals too |
 | | `zones[]` | {zoneId, label, agreement2000, changeVsLoss, lossWithFire, hotspots} | Descriptive cross-checks per zone |
 | | `cases[]` | {id, label, lat, lon, reference, apiCellId, years, hansenTreeCover, modisTreeCover, lossYears, hansenLossShare, burnedMonths, burnedMonthsList, burnedPeriod} | A documented place and its citation |
 | RasterIndex | `grid` | {west, south, east, north, stepDeg, rows, cols, nodata, row0, col0} | The 0.05° grid shared by all PNG frames |
 | | `layers[]` | {id, source, doi, encoding, period?, frames[]} | `encoding` is `percent` or `sqrt_share`; a frame has `key`, `url` and `nMonths` |
-| ZonesReport | `zones` | {[zoneId]: {label, variables}} | `amazon`, `amazon_brazil`, `amazon_peru`. Per variable: `units`, `annual[]` (`{year, value, complete}`), `monthlyRange[]` (lowest and highest month per complete year; monthly variables only), `zoneTrend` (`slopePerDecade`, `pValue`, `significant`, `years`, `n`, `line`, `test`; not for Hansen tree cover) and `cellSummary` (`tested`, `significantIncreasing`, `significantDecreasing`). Zone tests are not corrected for multiple testing |
-| | `alpha`, `note`, `aiDisclosure`, `generatedUtc` | | Method note and the significance level of the zone tests |
+| ZonesReport | `zones` | {[zoneId]: {label, variables}} | `amazon`, `amazon_brazil`, `amazon_peru`. Per variable: `units`, `annual[]` (`{year, value, complete}`), `monthlyRange[]` (lowest and highest month per complete year; monthly variables only), `zoneTrend` (`slopePerDecade`, `slopeCi95`, `pValue`, `significant`, `years`, `n`, `line`, `test`; not for Hansen tree cover) and `cellSummary` (`tested`, `significantIncreasing`, `significantDecreasing`). For Hansen loss: `zoneTrend` (2011–2025) and `cellSummary`. Zone tests are not corrected for multiple testing |
+| | `alpha`, `note`, `aiDisclosure`, `generatedUtc`, `methodChangeYear` | | Method note, the significance level of the zone tests, and the year of Hansen's method change (2011) |
 | ManifestExtras | `zones`, `borders` | boolean (optional) | `zones`: `zones.json` is served. `borders`: `public/data/borders.json` exists (a static file, not an API file) |
 | BorderCollection | `features[]` | GeoJSON FeatureCollection | Country borders from Natural Earth 10m admin-0 (public domain), clipped to the box and simplified (about 0.02°). Properties `name`, `iso3`. Loaded from `/data/borders.json` |
 
@@ -109,7 +112,7 @@ The full source catalog (DOIs, access, licenses, caveats) lives in `data/README.
 | Tree cover (% tree, non-tree vegetation, bare ground) | `MOD44B` v061 (LP DAAC) | % (land pixels; water 200 and fill 253 excluded) | 250 m tiles → 0.05° · yearly | 2000–2025 (year Y = early March Y to early March Y+1) | No (tiles, clipped in Python) |
 | Burned area | `MCD64A1` v061 (LP DAAC) | share of mapped pixels per cell and month (km² per zone in outputs) | 500 m tiles → 0.05° · monthly | from 2000-11; 2000-11 to 2026-09 processed (2026-10 not yet published by NASA) | No (tiles, clipped in Python) |
 | Water storage | `TELLUS_GRAC-GRFO_MASCON_CRI_GRID_RL06.3_V4` (PO.DAAC) | cm equivalent water thickness, anomaly (JPL land scale factors not applied) | 0.5° · month | 2002-04 → 2026-09; 259 months, 35 missing | No (one file, clipped in Python) |
-| Forest cover and loss | Hansen/UMD GFC v1.13 (GFC-2025), `treecover2000`, `lossyear` (Google Cloud Storage, no login) | % canopy cover in 2000; loss share per year; canopy-weighted loss for tree cover | 30 m → 0.05° · yearly | 2000 (cover); loss 2001–2025 | Not applicable (GeoTIFF tiles) |
+| Forest cover and loss | Hansen/UMD GFC v1.13 (GFC-2025), `treecover2000`, `lossyear` (Google Cloud Storage, no login) | % canopy cover in 2000; loss share per year; canopy-weighted loss for tree cover | 30 m → 0.05° · yearly | 2000 (cover); loss 2001–2025 (tested from 2011 only, ADR-009) | Not applicable (GeoTIFF tiles) |
 
 Boundaries: RAISG *Biomas 2025* (record `id_bioma = 1`, latin-1 text, SIRGAS 2000), HydroBASINS v1c level 3
 (`PFAF_ID = 622`, WGS84), Natural Earth 10m countries (`ADM0_A3`, public domain, auto-downloaded).
@@ -147,7 +150,8 @@ Clipped grids: 630 × 740 (0.05°), 315 × 370 (0.1°), 126 × 148 (0.25°), 63 
 `zones` and `variables` (`series` differs).
 
 - `meta`: project, `generated_utc`, `amazon_boundary`, `clip_box`, `analysis_start` (2001-01), `lst_last_month`
-  (2020-12), `semesters`, `mod13c2_accepted_reliability`, `method`, `sources`.
+  (2020-12; applies only to night LST), `semesters`, `mod13c2_accepted_reliability`, `method`, `sources`. Day LST's
+  meta carries `lst_trend_last_year` (2020) and `drift_from_year` (2021) instead.
 - `zones.<id>`: `label`, `cells_0.05deg`, `area_km2`. Ids: `amazon`, `amazon_brazil`, `amazon_peru`.
 - `variables.<id>`: `source` (product or source name), `doi`, `units`, `description`, `kind` (`data`, `context` or
   `diag`), `zone_statistic` (`mean` or `area`), `semester_aggregation` (`mean` or `sum`).
@@ -164,7 +168,7 @@ Variables. `data`: `ndvi`, `evi`, `lst_day`, `lst_night`, `burned_area`. `contex
 
 - `web/public/data/validation.json` (snake_case, `pipeline/validate.py`): `meta` (`generated_utc`, `sources` (DOIs of
   MOD44B, Hansen, MCD64A1), `note`, `ai_disclosure`); `zones.<id>`: `agreement_2000` (r, cells, bias, RMSE,
-  `by_hansen_class`), `change_vs_hansen_loss` (r, cells, definition, `by_hansen_loss_decile`), `loss_with_fire`
+  `by_hansen_class`), `change_vs_hansen_loss` (r, cells, definition: MODIS mean(2023, 2024) − mean(2001, 2002) against Hansen loss 2001–2024, 2025 excluded; `by_hansen_loss_decile`), `loss_with_fire`
   (definition, per year: loss km², loss in burned cells, share, zone share of cells burned), `hotspots` (ten per zone:
   lat, lon, `api_cell_id`, loss share, peak year and share, cover 2000, MOD44B change, burned years) and
   `yearly_zone_means`; `cases` (one per documented place: Hansen and MOD44B cover, Hansen loss share, burned months).
@@ -173,12 +177,12 @@ Variables. `data`: `ndvi`, `evi`, `lst_day`, `lst_night`, `burned_area`. `contex
   Outside `trendChecks` it holds no p-values and no significance fields; the server rejects them.
 
 **`web/server/data/cover.json`** (`export_cover.py`, trends from `trends.py`): `cellSizeDeg`, `years` (2000–2025), `lossYears` and `burnedYears`
-(2001–2025), `definitions`, `flags`, `trendMethod` and `cells[]` (see *Data dictionary*, CoverCell).
+(2001–2025), `definitions`, `flags`, `trendMethod`, `methodChangeYear`, `lossTrendYears`, `hansenNote` and `cells[]` (see *Data dictionary*, CoverCell).
 
 **`web/server/data/zones.json`** (`trends.py`): `note`, `alpha`, `generatedUtc`, `aiDisclosure` and `zones` keyed by
 `amazon`, `amazon_brazil` and `amazon_peru`. Yearly values come from the area-weighted zone series
 (`amazon_monthly.json`, `amazon_annual.json`). Lowest and highest month per year are information only, never tested.
-Hansen tree cover is shown but not tested. Served at `/api/v1/zones.json` when present (`manifest.extras.zones`).
+Hansen tree cover is shown but not tested. Hansen loss has `zoneTrend` (2011–2025) only. Served at `/api/v1/zones.json` when present (`manifest.extras.zones`).
 
 **`web/public/data/borders.json`** (`export_borders.py`): GeoJSON FeatureCollection of the countries that touch the clip box,
 Natural Earth 10m admin-0 (public domain). Static file, not part of the API (`manifest.extras.borders`).
@@ -202,7 +206,7 @@ Natural Earth 10m admin-0 (public domain). Static file, not part of the API (`ma
   at export, and its effect is exported as `ndvi_good_share`.
 - Team rules applied at export (decided 2026-11-15, `pipeline/config.py`):
   - C1: series start at `ANALYSIS_START` = 2001-01 (February 2000 is a partial month).
-  - B1: `lst_day` and `lst_night` stop at `LST_LAST_MONTH` = 2020-12 (Terra orbit drift). The diagnostics
+  - B1: `lst_day` is published to 2026-10; its trend uses `LST_TREND_LAST_YEAR` = 2020 (Terra orbit drift; from `DRIFT_FROM_YEAR` = 2021 the years are greyed with "?"). Night LST is still cut at `LST_LAST_MONTH` = 2020-12. It is not in the web API (`web/server/data`) (rule D4); it is in `amazon_monthly.json`. The diagnostics
     `lst_clear_days` and `lst_day_local_time` are not cut.
   - D1: GLDAS evapotranspiration (`et`) is kind `context`, not a forest indicator.
   - Semesters: H1 = January–June, H2 = July–December (`SEMESTERS`). Semester aggregation is `sum` for precipitation,
@@ -221,5 +225,6 @@ Natural Earth 10m admin-0 (public domain). Static file, not part of the API (`ma
 - Trend results (ADR-006) are written only by `pipeline/trends.py`, the last step that writes them. Before it runs,
   `export_api` writes `slopePerDecade` and `pValue` as null and `significant` as false.
 - A cell is tested only with at least 80 % of its variable's years complete. Hansen tree cover is never tested.
+- Hansen loss is tested only from 2011 (2011–2025); 2001–2010 is shown, not tested, and no test crosses 2011. The loss trend is its own FDR family (ADR-009).
 - `significant` is decided after the Benjamini–Hochberg correction, per variable (cover loss and MODIS separately).
   `pValue` is the raw p-value. The browser shows these values and computes none of them.

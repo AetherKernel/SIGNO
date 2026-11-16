@@ -4,22 +4,36 @@
 // data cannot say. It is the former drawer (Method, Sources, Limits tabs) as one reading page. Everything shown comes
 // from the API (method, products, region) or from the team's decisions in .ai-context/01-logic.md. The statistical
 // method is the team's (P-002): this page never describes a method the data does not state.
+// 2026-11-15: one tree cover; one loss trend (2011-2025) with the Hansen method change and its sources; MODIS described only as the
+// independent check of where Hansen sees loss (Cross-checks). Also: no internal codes; the region is named in plain words (RAISG
+// outline not drawn); a "Code and reproduction" block (repository, Colab, how to re-run the test) and the rainfall cross-check.
 
 import { useEffect } from 'react'
 import { API_BASE_PATH, apiPaths } from '../../shared/apiPaths.ts'
-import type { Manifest } from '../../shared/contracts.ts'
-import { useTrendLayer } from '../hooks/useSignoData.ts'
+import type { CoverLayer, Manifest } from '../../shared/contracts.ts'
+import { useTrendLayer, useValidation } from '../hooks/useSignoData.ts'
 import { formatPeriod, formatYears, isTrendTestPending, plainMethodText } from '../lib/format.ts'
+import { hansenInfoOf, methodChangeText } from '../lib/hansen.ts'
+import { lossTrendYears } from '../lib/trendMap.ts'
 import { useLang } from '../lib/i18n.ts'
+import { InfoTip } from './InfoTip.tsx'
+import { ViewLink } from './ViewLink.tsx'
+
+const REPO_URL = 'https://github.com/AetherKernel/SIGNO'
+const COLAB_URL = 'https://colab.research.google.com/github/AetherKernel/SIGNO/blob/main/notebooks/signo_pipeline_colab.ipynb'
 
 export interface MethodViewProps {
   manifest: Manifest
-  /** Plain-language method of the cover trends (CoverLayer.trendMethod), when the cover layer is loaded. */
-  coverTrendMethod: string | null
+  /** The yearly cover layer, when loaded: gives the loss segments and the year Hansen changed its method. */
+  cover: CoverLayer | null
 }
 
-export function MethodView({ manifest, coverTrendMethod }: MethodViewProps) {
-  const { t } = useLang()
+export function MethodView({ manifest, cover }: MethodViewProps) {
+  const { t, lang } = useLang()
+  const validation = useValidation(manifest.extras.validation === true).data
+  const hansen = hansenInfoOf(cover, validation)
+  const consistency = validation?.trendChecks?.hansenConsistency
+  const lossYears = cover ? lossTrendYears(cover) : null
   const layer = useTrendLayer(manifest.variables[0]?.id ?? null).data
   const firstVariable = manifest.variables[0]
   const hasCover = manifest.extras.cover
@@ -43,12 +57,7 @@ export function MethodView({ manifest, coverTrendMethod }: MethodViewProps) {
 
       <section id="trend-test" className="page-section" aria-labelledby="h-method">
         <h2 id="h-method">{t('How the verdict is reached', 'Cómo se llega al veredicto')}</h2>
-        <p className="small muted">
-          {t(
-            'The method text below is published by the data pipeline in English.',
-            'El texto del método que sigue lo publica el pipeline de datos en inglés.',
-          )}
-        </p>
+        {lang === 'es' && <p className="small muted">El texto del método que sigue está publicado en inglés.</p>}
         <dl className="facts">
           <div>
             <dt>{t('Method', 'Método')}</dt>
@@ -91,18 +100,57 @@ export function MethodView({ manifest, coverTrendMethod }: MethodViewProps) {
               </div>
             </>
           )}
-          {coverTrendMethod && (
-            <div>
-              <dt>{t('Tree cover loss and MODIS tree cover', 'Pérdida de cobertura y cobertura MODIS')}</dt>
-              <dd>{coverTrendMethod}</dd>
-            </div>
+          {hasCover && (
+            <>
+              <div>
+                <dt>{t('Tree cover loss', 'Pérdida de cobertura arbórea')}</dt>
+                <dd>
+                  {lossYears
+                    ? t(
+                        `One trend over ${lossYears[0]}–${lossYears[1]}; all the years are shown. `,
+                        `Una tendencia sobre ${lossYears[0]}–${lossYears[1]}; se muestran todos los años. `,
+                      )
+                    : t('Loss is tested over its yearly values. ', 'La pérdida se prueba sobre sus valores anuales. ')}
+                  {t(
+                    'Each square gets a Mann-Kendall test and a Sen slope, corrected for the many squares tested at once (false discovery rate).',
+                    'Cada cuadro recibe un test de Mann-Kendall y una pendiente de Sen, corregidos por los muchos cuadros probados a la vez (tasa de falsos descubrimientos).',
+                  )}
+                  <InfoTip label={t('Why tree cover itself is not tested', 'Por qué la cobertura arbórea no se prueba')}>
+                    {t(
+                      'Tree cover itself is not tested: it can only go down, because regrowth is not counted.',
+                      'La cobertura arbórea no se prueba: solo puede bajar, porque no cuenta el rebrote.',
+                    )}
+                  </InfoTip>
+                </dd>
+              </div>
+              <div id="hansen-method-change">
+                <dt>{t(`Why the loss trend starts in ${hansen.year}`, `Por qué la tendencia de pérdida empieza en ${hansen.year}`)}</dt>
+                <dd>
+                  {t(
+                    `Hansen's team reprocessed loss from ${hansen.year} onward and not before, so a test across ${hansen.year} would mix two methods.`,
+                    `El equipo de Hansen reprocesó la pérdida desde ${hansen.year} y no antes, así que un test a través de ${hansen.year} mezclaría dos métodos.`,
+                  )}
+                  <InfoTip label={t('More about the method change', 'Más sobre el cambio de método')}>{methodChangeText(hansen, t)}</InfoTip>{' '}
+                  <ViewLink view="checks">{t('See the comparison with PRODES', 'Ver la comparación con PRODES')}</ViewLink>.
+                </dd>
+              </div>
+              <div>
+                <dt>{t('MODIS, the independent check', 'MODIS, el contraste independiente')}</dt>
+                <dd>
+                  {t(
+                    'MODIS tree cover is not mapped or tested as a trend. It is an independent satellite check (NASA MODIS) used to confirm where Hansen sees loss, in the Cross-checks.',
+                    'La cobertura MODIS no se mapea ni se prueba como tendencia. Es un contraste satelital independiente (NASA MODIS) que se usa para confirmar dónde ve pérdida Hansen, en los Contrastes.',
+                  )}
+                </dd>
+              </div>
+            </>
           )}
           <div>
             <dt>{t('Status', 'Estado')}</dt>
             <dd>
               {manifest.dataStatus === 'mock'
                 ? t('Sample data (synthetic). ', 'Datos de muestra (sintéticos). ')
-                : t('Real NASA data (pipeline export). ', 'Datos reales de la NASA (export del pipeline). ')}
+                : t('Real data from NASA and partners (Hansen/UMD). ', 'Datos reales de la NASA y de socios (Hansen/UMD). ')}
               {testPending ? t('The statistical test has not been applied to this export yet.', 'El test estadístico aún no se aplicó a este export.') : ''}
             </dd>
           </div>
@@ -127,6 +175,14 @@ export function MethodView({ manifest, coverTrendMethod }: MethodViewProps) {
                   doi:{v.product.doi}
                 </a>
               )}
+              {v.id === 'precip' && (
+                <span className="small muted">
+                  {t(
+                    'Checked against NASA GLDAS rainfall: r = 0.991 (monthly zone values; see pipeline/README).',
+                    'Contrastada con la lluvia de NASA GLDAS: r = 0,991 (valores mensuales por zona; ver pipeline/README).',
+                  )}
+                </span>
+              )}
             </div>
           ))}
           {hasCover && (
@@ -145,7 +201,7 @@ export function MethodView({ manifest, coverTrendMethod }: MethodViewProps) {
                 </a>
               </div>
               <div className="source">
-                <strong>{t('Tree cover, independent check (MODIS)', 'Cobertura, contraste independiente (MODIS)')}</strong>
+                <strong>{t('Independent check of loss (NASA MODIS tree cover)', 'Contraste independiente de la pérdida (cobertura de NASA MODIS)')}</strong>
                 <span className="mono small">MOD44B v061 · LP DAAC · {t('satellite observation', 'observación satelital')} · 250 m</span>
                 <span className="small muted">
                   {t(
@@ -159,14 +215,36 @@ export function MethodView({ manifest, coverTrendMethod }: MethodViewProps) {
               </div>
             </>
           )}
+          {consistency && (
+            <div className="source">
+              <strong>{t('Official deforestation (INPE PRODES)', 'Deforestación oficial (INPE PRODES)')}</strong>
+              <a className="small" href={consistency.prodes.url} target="_blank" rel="noreferrer">
+                {consistency.prodes.title}
+              </a>
+              <span className="small muted">
+                {t(
+                  'Used only to compare with Hansen loss in the Brazilian Amazon (Cross-checks).',
+                  'Se usa solo para comparar con la pérdida de Hansen en la Amazonía brasileña (Contrastes).',
+                )}
+              </span>
+              <a className="small" href={consistency.hansenNotes.url} target="_blank" rel="noreferrer">
+                {consistency.hansenNotes.title}
+              </a>
+            </div>
+          )}
           <div className="source">
             <strong>{t('Region', 'Región')}</strong>
             <span className="small">
-              {manifest.region.name} · {t('bounding box', 'recuadro')} {manifest.region.bbox.join(', ')}
+              {t('Amazon biome (RAISG 2025)', 'Bioma amazónico (RAISG 2025)')}
+              <InfoTip>
+                {t(
+                  "Squares that lie in RAISG's Amazon biome. The outline is not drawn because RAISG's terms do not allow redistributing it.",
+                  'Cuadros que caen en el bioma amazónico de RAISG. El contorno no se dibuja porque los términos de RAISG no permiten redistribuirlo.',
+                )}
+              </InfoTip>
             </span>
             <span className="small muted">
-              {t('Boundary source', 'Fuente del límite')}:{' '}
-              {manifest.region.boundarySource ?? t('pending team decision (P-008)', 'pendiente de decisión del equipo (P-008)')}
+              {t('bounding box', 'recuadro')} {manifest.region.bbox.join(', ')}
             </span>
           </div>
           <div className="source">
@@ -187,6 +265,21 @@ export function MethodView({ manifest, coverTrendMethod }: MethodViewProps) {
               {t(
                 'Imagery from NASA GIBS, part of NASA EOSDIS. Context only: it is not the analysed data.',
                 'Imágenes de NASA GIBS, parte de NASA EOSDIS. Solo contexto: no son los datos analizados.',
+              )}
+            </span>
+          </div>
+          <div className="source" id="code">
+            <strong>{t('Code and reproduction', 'Código y reproducción')}</strong>
+            <a className="small" href={REPO_URL} target="_blank" rel="noreferrer">
+              {t('Repository', 'Repositorio')}: {REPO_URL}
+            </a>
+            <a className="small" href={COLAB_URL} target="_blank" rel="noreferrer">
+              Colab: {t('run the pipeline notebook', 'ejecuta el cuaderno del pipeline')}
+            </a>
+            <span className="small muted">
+              {t(
+                'Re-run the trend test in minutes: python -m pipeline.trends, then python -m pipeline.verify (compares every output with the published files).',
+                'Repite el test de tendencia en minutos: python -m pipeline.trends, luego python -m pipeline.verify (compara cada salida con los archivos publicados).',
               )}
             </span>
           </div>
@@ -254,12 +347,24 @@ export function MethodView({ manifest, coverTrendMethod }: MethodViewProps) {
                 </dd>
               </div>
               <div>
-                <dt>{t('Two sources, two levels', 'Dos fuentes, dos niveles')}</dt>
+                <dt>{t('Loss is not the official deforestation', 'Pérdida no es la deforestación oficial')}</dt>
                 <dd>
                   {t(
-                    'MODIS reads about 22 points lower than Hansen over dense forest and is noisier from year to year (1–2 points per zone). Use it to confirm where tree cover changed, not how much there is. Years flagged as suspect are drawn hollow and noted next to the charts.',
-                    'MODIS marca unos 22 puntos menos que Hansen en bosque denso y es más ruidoso de un año a otro (1–2 puntos por zona). Úsalo para confirmar dónde cambió la cobertura, no cuánta hay. Los años marcados como dudosos se dibujan huecos y se anotan junto a los gráficos.',
+                    'Hansen loss in the Brazilian Amazon is several times the official INPE PRODES deforestation, because it also counts canopy killed by fire and degradation.',
+                    'La pérdida de Hansen en la Amazonía brasileña es varias veces la deforestación oficial de INPE PRODES, porque también cuenta el dosel muerto por incendios y la degradación.',
                   )}
+                </dd>
+              </div>
+              <div>
+                <dt>{t('MODIS reads lower', 'MODIS marca menos')}</dt>
+                <dd>
+                  {t('MODIS confirms where tree cover changed, not how much there is.', 'MODIS confirma dónde cambió la cobertura, no cuánta hay.')}
+                  <InfoTip>
+                    {t(
+                      'In the cross-checks, MODIS reads about 22 points lower than Hansen over dense forest and is noisier from year to year (1–2 points per zone).',
+                      'En los contrastes, MODIS marca unos 22 puntos menos que Hansen en bosque denso y es más ruidoso de un año a otro (1–2 puntos por zona).',
+                    )}
+                  </InfoTip>
                 </dd>
               </div>
             </>

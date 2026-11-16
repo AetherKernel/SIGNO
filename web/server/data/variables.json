@@ -21,7 +21,8 @@
   "trendYears": {
    "start": 2001,
    "end": 2020
-  }
+  },
+  "driftFromYear": 2021
  },
  {
   "id": "evi",
@@ -45,17 +46,18 @@
   "trendYears": {
    "start": 2001,
    "end": 2020
-  }
+  },
+  "driftFromYear": 2021
  },
  {
   "id": "lst_day",
   "name": "Daytime land surface temperature",
-  "description": "How hot the ground surface is in the morning overpass, measured from space. Forest keeps the surface cooler than cleared land. Shown until 2020: later, the satellite's orbit drift biases it.",
+  "description": "How hot the ground surface is in the morning overpass, measured from space. Forest keeps the surface cooler than cleared land. From 2021 the satellite's orbit drift biases it (shown with a ?; the trend test uses 2001-2020 only).",
   "units": "°C",
   "temporalResolution": "monthly",
   "period": {
    "start": "2001-01",
-   "end": "2020-12"
+   "end": "2026-10"
   },
   "product": {
    "shortName": "MOD11C3",
@@ -69,7 +71,8 @@
   "trendYears": {
    "start": 2001,
    "end": 2020
-  }
+  },
+  "driftFromYear": 2021
  },
  {
   "id": "precip",

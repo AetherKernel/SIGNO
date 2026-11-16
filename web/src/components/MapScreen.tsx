@@ -1,5 +1,6 @@
 // AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15 (legend range passed through, 2026-11-15).
 // Reviewed and owned by team AETHER.
+// 2026-11-15: the trend map offers loss 2011-2025 (no MODIS); ?src=modis falls back to Hansen silently.
 //
 // The Map view (?view=map): a filter panel on the left and the map, nothing else. Map types: tree cover, tree cover loss
 // and burned area (yearly, from cover.json) and trend (one measure at a time, from trends/{id}.json or from the cover
@@ -19,8 +20,10 @@ import {
   layerResults,
   makeTrendPaint,
   noneTested,
+  optionLabel,
   summaryLine,
   trendOptions,
+  type CoverTrendKey,
   type TrendPaintInfo,
 } from '../lib/trendMap.ts'
 import {
@@ -88,7 +91,7 @@ export function MapScreen({ manifest, cover, validation, flyRequest = null }: Pr
   const results = useMemo(() => {
     if (!trendOption) return null
     if (trendOption.kind === 'series') return layerData ? layerResults(layerData) : null
-    return cover.data ? coverResults(cover.data, trendOption.id as 'lossKm2' | 'modisTreeCover') : null
+    return cover.data ? coverResults(cover.data, trendOption.id as CoverTrendKey) : null
   }, [trendOption, layerData, cover.data])
   const trendPending = results !== null && noneTested(results)
 
@@ -154,14 +157,21 @@ export function MapScreen({ manifest, cover, validation, flyRequest = null }: Pr
   const cellParam = params.get('cell')
   const selected = cells?.find((c) => c.cellId === cellParam) ?? null
 
+  // Error rates of the trend test for the shown measure, from the published checks (null when they are not published).
+  const checks = validation.data?.trendChecks
+  const falseAlarm = trendOption ? checks?.v1FalsePositives[trendOption.id] : undefined
+  const detection = trendOption ? checks?.v2Detection[trendOption.id] : undefined
+  const errorRates = falseAlarm && detection ? { falseAlarm: falseAlarm.meanShareSignificant, detection: detection.meanShareDetected } : null
+
   const legendTrend: TrendLegendInfo | null =
     mapType === 'trend' && trendOption
       ? {
-          name: trendOption.name,
+          name: optionLabel(trendOption),
           slopeUnits: trendOption.slopeUnits,
           maxAbs: trendInfo?.maxAbs ?? 0,
           range: trendInfo?.range ?? null,
           pending: trendInfo?.pending ?? false,
+          errors: errorRates,
         }
       : null
 

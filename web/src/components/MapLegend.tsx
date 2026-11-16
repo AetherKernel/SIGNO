@@ -1,5 +1,7 @@
 // AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15; clipped trend ends ("≤", "≥") and the real
 // range of the coloured squares added 2026-11-15. Reviewed and owned by team AETHER.
+// 2026-11-15: the loss legend notes the 2011 Hansen method change (short text + InfoTip). The trend legend ends with one InfoTip that
+// gives the error rates of the test for the shown measure (false alarms on shuffled years, detection of a simulated trend).
 //
 // Legend of the map, one per map type. The title is a sentence with its units; below it one swatch row, end labels and
 // the extra keys (no data, none, dotted). Colour is never the only cue: the labels, the dots and the hatch carry the
@@ -8,8 +10,11 @@
 import { useId, type ReactNode } from 'react'
 import { BURNED_BREAKS, COVER_BREAKS, COVER_CLASSES, LOSS_BREAKS } from '../lib/cover.ts'
 import { formatSigned, legendBreaks, slopeUnitsLabel, SLOPE_CLASSES } from '../lib/format.ts'
+import { methodChangeText, useHansenInfo } from '../lib/hansen.ts'
 import { useLang } from '../lib/i18n.ts'
+import { formatShare } from '../lib/zoneTrends.ts'
 import type { MapType } from '../lib/viewState.ts'
+import { InfoTip } from './InfoTip.tsx'
 import { ViewLink } from './ViewLink.tsx'
 
 export interface TrendLegendInfo {
@@ -23,6 +28,8 @@ export interface TrendLegendInfo {
   range: { min: number; max: number } | null
   /** The trend test has no result for any square. */
   pending: boolean
+  /** Error rates of the test for this measure, from validation.json: share of squares flagged on shuffled years, and share found in a simulated trend. */
+  errors?: { falseAlarm: number; detection: number } | null
 }
 
 interface Props {
@@ -100,6 +107,7 @@ function AmountBar({ prefix, breaks, label }: { prefix: 'loss' | 'burn'; breaks:
 
 export function MapLegend({ mapType, year, trend, compact = false }: Props) {
   const { t } = useLang()
+  const hansen = useHansenInfo()
   const titleId = `legend-title-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`
   if (mapType === 'cover') {
     return (
@@ -161,6 +169,7 @@ export function MapLegend({ mapType, year, trend, compact = false }: Props) {
                   'Loss includes fire, logging, mining and clearing; it is not only deforestation.',
                   'La pérdida incluye fuego, tala, minería y desbroce; no es solo deforestación.',
                 )}
+                <InfoTip label={t(`Why ${hansen.year} is marked`, `Por qué se marca ${hansen.year}`)}>{methodChangeText(hansen, t)}</InfoTip>
               </p>
             )}
           </>
@@ -220,7 +229,15 @@ export function MapLegend({ mapType, year, trend, compact = false }: Props) {
           {!trend?.pending && <Key icon={<Dotted />}>{t('Dotted: no significant trend', 'Punteado: sin tendencia significativa')}</Key>}
           <Key icon={<Hatch />}>{t('Hatched: not tested', 'Rayado: sin probar')}</Key>
           <p className="small muted">
-            {t('Mann-Kendall test on yearly values, false discovery rate 5 %.', 'Test de Mann-Kendall sobre valores anuales, tasa de falsos descubrimientos del 5 %.')}{' '}
+            {t('Mann-Kendall test on yearly values, false discovery rate 5 %.', 'Test de Mann-Kendall sobre valores anuales, tasa de falsos descubrimientos del 5 %.')}
+            {trend?.errors && (
+              <InfoTip label={t('Error rates of this test', 'Tasas de error de este test')}>
+                {t(
+                  `Error rates for ${name}: on years shuffled at random the test flagged ${formatShare(trend.errors.falseAlarm)} of the squares (false alarms); on a simulated trend of the size found in the real data it found ${formatShare(trend.errors.detection)} of them (detection rate).`,
+                  `Tasas de error para ${name}: con los años barajados al azar el test marcó el ${formatShare(trend.errors.falseAlarm)} de los cuadros (falsas alarmas); con una tendencia simulada del tamaño de las halladas en los datos reales detectó el ${formatShare(trend.errors.detection)} (tasa de detección).`,
+                )}
+              </InfoTip>
+            )}{' '}
             <ViewLink view="method" hash="trend-test">
               {t('How the test works', 'Cómo funciona el test')}
             </ViewLink>

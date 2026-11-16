@@ -1,12 +1,13 @@
 // AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-14; redesigned 2026-11-15; views (?view=) added 2026-11-15.
 // Reviewed and owned by team AETHER.
+// 2026-11-15: provides the Hansen method-change year and ratio (HansenContext) to every chart.
 //
 // The shell: top bar, four views and the data every view shares. The view lives in the query string (?view=map|trends|checks|
 // method), so any view is a link; changing view pushes one history entry (Back and Forward work) and moves focus to <main>.
 // Map is the default, also for old links without ?view=. Trends, Cross-checks and Method are loaded on demand.
 // Data comes only from hooks (src/hooks) → service (src/services) → API v1 (published by server/).
 
-import { Suspense, useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import type { Hotspot, ValidationCase } from '../shared/contracts.ts'
 import { GuideTour } from './components/GuideTour.tsx'
 import { MapScreen } from './components/MapScreen.tsx'
@@ -15,6 +16,7 @@ import { ViewLoadError } from './components/ViewLoadError.tsx'
 import { useCover, useManifest, useValidation } from './hooks/useSignoData.ts'
 import { useUrlParams } from './hooks/useUrlParam.ts'
 import { markGuideSeen, shouldAutoOpenGuide, type GuideCase } from './lib/guide.ts'
+import { HansenContext, hansenInfoOf } from './lib/hansen.ts'
 import { LangContext, parseLang, translator, type Lang } from './lib/i18n.ts'
 import { lazyView } from './lib/lazyView.ts'
 import { APP_VIEWS, parseAppView, type AppView } from './lib/viewState.ts'
@@ -37,6 +39,8 @@ function App() {
   const extras = manifest.data?.extras
   const cover = useCover(extras?.cover === true)
   const validation = useValidation(extras?.validation === true)
+
+  const hansenInfo = useMemo(() => hansenInfoOf(cover.data, validation.data), [cover.data, validation.data])
 
   // A new view: move focus to <main> so keyboard and screen reader users start at its content, and name the page.
   useEffect(() => {
@@ -106,6 +110,7 @@ function App() {
 
   return (
     <LangContext.Provider value={lang}>
+    <HansenContext.Provider value={hansenInfo}>
     <div className="app">
       <TopBar
         manifest={manifest.data}
@@ -138,7 +143,7 @@ function App() {
                 }
               />
             )}
-            {view === 'method' && <MethodView manifest={manifest.data} coverTrendMethod={cover.data?.trendMethod ?? null} />}
+            {view === 'method' && <MethodView manifest={manifest.data} cover={cover.data} />}
           </Suspense>
         )}
       </main>
@@ -147,6 +152,7 @@ function App() {
         <GuideTour validation={validation.data} onClose={() => setGuideOpen(false)} onCase={showCase} />
       )}
     </div>
+    </HansenContext.Provider>
     </LangContext.Provider>
   )
 }

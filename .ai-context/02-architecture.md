@@ -57,9 +57,9 @@ shared as a link:
 |---|---|---|
 | Web app (React 19 + Vite 8 + TypeScript, ADR-003) | `web/src/` | Four views (see *Interface* below): the map with its filters and the area viewer, Trends, Cross-checks, and Method & sources. Runs on sample data by default; `dev:real` and `build:real` use the pipeline export |
 | API publisher (ADR-004) | `web/server/` | Publishes API v1 (06) from the mock or the pipeline export, after validating it. Since 2026-11-15 it also regroups each cell's yearly values and trend rows into `cells/{cellId}.json` (`cellBundle.ts`), the one file the area viewer loads |
-| Data pipeline | `pipeline/` | Complete for every source (15 Nov 2026): four monthly products (1,270 monthly files, 2026-11-14), MOD44B, MCD64A1, Hansen and GRACE (`tiles.py`, `hansen.py`, `grace.py`). Outputs: `export_json.py` (zone values → `web/public/data/*.json`), `export_maps.py` (0.05° PNG layers → `web/public/data/maps/`), `export_api.py` (1° API source → `web/server/data/`), `export_cover.py` (`cover.json`), `validate.py` (cross-checks → `validation.json` in both folders), `trends.py` (step 8: the team's trend test, ADR-006; fills the trend results, `zones.json` and `trendChecks`; must run last) and `export_borders.py` (step 9: `web/public/data/borders.json`, independent of the others). Monthly steps: `download.py` (earthaccess, one month at a time, up to 3 tries; reruns skip months already in `data/interim/`) → `clip_clean.py` (clip to the Amazon box, scale, units, checks; writes `data/interim/<PRODUCT>/<YYYY-MM>.nc`). Settings and team decisions in `pipeline/config.py`. Run from the repo root with `.venv` (`pipeline/requirements.txt`). Boundary zips go in `data/raw/boundaries/`. Details: `pipeline/README.md` |
-| Notebooks | `notebooks/` | `signo_pipeline_colab.ipynb` (16 sections, one cell per pipeline step, including `export_cover`) and the conventions in `notebooks/README.md`. Not yet run end to end in Colab, and it does not yet run `trends` or `export_borders`. Colab as the processing environment is not decided, so it is not recorded as an ADR (if adopted, ADR-007; 05, P-018) |
-| Trend analysis | `pipeline/trends.py`, `pipeline/test_trends.py` | Mann-Kendall test on yearly values, Sen's slope, Benjamini-Hochberg FDR, validation V1–V4 (ADR-006). Reads `web/server/data/` and `web/public/data/` |
+| Data pipeline | `pipeline/` | Complete for every source (15 Nov 2026): four monthly products (1,270 monthly files, 2026-11-14), MOD44B, MCD64A1, Hansen and GRACE (`tiles.py`, `hansen.py`, `grace.py`). Outputs: `export_json.py` (zone values → `web/public/data/*.json`), `export_maps.py` (0.05° PNG layers → `web/public/data/maps/`), `export_api.py` (1° API source → `web/server/data/`), `export_cover.py` (`cover.json`), `validate.py` (cross-checks → `validation.json` in both folders), `trends.py` (step 8: the team's trend test, ADR-006; fills the trend results, `zones.json` and `trendChecks`; must run last) and `export_borders.py` (step 9: `web/public/data/borders.json`, independent of the others). `verify.py` (reproducibility check, not a pipeline step: compares every output with the version in git HEAD; see `pipeline/README.md`, *Reproduce and verify*). `run_all.py` (one-command run: checks, parallel downloads four at a time, exports, trends, verify; `python -m pipeline.run_all`; see `pipeline/README.md`, *Run it*). Monthly steps: `download.py` (earthaccess, one month at a time, up to 3 tries; reruns skip months already in `data/interim/`) → `clip_clean.py` (clip to the Amazon box, scale, units, checks; writes `data/interim/<PRODUCT>/<YYYY-MM>.nc`). Settings and team decisions in `pipeline/config.py` (including the Hansen 2011 change and the PRODES series: `HANSEN_*`, `PRODES_*`, ADR-009; the LST trend years: `LST_TREND_LAST_YEAR`, `DRIFT_FROM_YEAR`). Run from the repo root with `.venv` (`pipeline/requirements.txt`). Boundary zips go in `data/raw/boundaries/`. Details: `pipeline/README.md` |
+| Notebooks | `notebooks/` | `signo_pipeline_colab.ipynb` (47 cells. Section 4b runs `pipeline.run_all`, the one-command route. Sections 5 to 14c are optional, one cell per pipeline step, guarded by `STEP_BY_STEP`; they include `trends`, `export_borders` and the reproducibility check `pipeline.verify` (section 15b)). Conventions in `notebooks/README.md`. Tested end to end in Colab on 15 Nov 2026: 1 h 22 min, results identical (ADR-008; 05, P-018) |
+| Trend analysis | `pipeline/trends.py`, `pipeline/test_trends.py` | Mann-Kendall test on yearly values, Sen's slope with 95 % confidence intervals (Gilbert 1987), Benjamini-Hochberg FDR, validation V1–V4 (ADR-006); Hansen loss as one trend, 2011–2025 (ADR-009). Reads `web/server/data/` and `web/public/data/` |
 
 **Data flow:** NASA Earthdata and Hansen/UMD (global files and tiles) → `data/raw/` (each file deleted after its step) → `data/interim/` (Amazon
 clip and 0.05° cell statistics, about 1.4–2.6 MB per MODIS month; failed months retried up to 3 times; logs per product in `data/interim/logs/`) → `web/server/data/` (API source: `export_api.py`, `export_cover.py`, `validate.py`, `trends.py`) and `web/public/data/` (JSON, PNG maps, `validation.json`, `borders.json`). Both are versioned (commit `4683512`) → Vercel builds them with `npm run build:real`. Only these outputs are published;
@@ -112,15 +112,15 @@ The app has four views, chosen with `?view=` (default `map`). The top bar links 
 | View | `?view=` | What it shows |
 |---|---|---|
 | Map | `map` | Left: the filters (`MapFilters.tsx`): map type, trend variable and filter, year with play, square opacity, country borders, base map, legend, and a first-visit hint with the La Pampa case. Centre: the map (`TrendMap.tsx`): NASA GIBS imagery under translucent 1° squares, focused on the region (the rest of the continent is veiled). On phones the filters open as a bottom sheet from the **Filters** button, and the compact legend stays in the bar. Clicking a square opens the **area viewer** |
-| Trends | `trends` | Zone selector (whole Amazon, Brazilian Amazon, Peruvian Amazon), four headline cards (Hansen tree cover, tree cover loss, daytime temperature, rainfall), a table with one row per measure, a detail chart (yearly values, the Sen line, and a thin bar per year for the lowest and highest month), "What this means", and "How the test works and how we checked it" with the trust checks from `trendChecks` |
-| Cross-checks | `checks` | How the two tree cover sources agree, loss against fire, the hotspots and the La Pampa case (MAAP #233). A hotspot or the case opens its square on the map |
+| Trends | `trends` | Zone selector (whole Amazon, Brazilian Amazon, Peruvian Amazon), four headline cards (Hansen tree cover, tree cover loss, daytime temperature, rainfall), a table with one row per measure (Hansen loss as one trend, 2011–2025), a detail chart (yearly values, the Sen line, and a thin bar per year for the lowest and highest month), "What this means", and "How the test works and how we checked it" with the trust checks from `trendChecks` |
+| Cross-checks | `checks` | How the two tree cover sources agree, loss against fire, Hansen loss against INPE PRODES (the card leads with what agrees and explains "Why the trend starts in 2011"), the hotspots and the La Pampa case (MAAP #233). A hotspot or the case opens its square on the map |
 | Method & sources | `method` | How the verdict is reached (method, α, what "significant" means), the method of the cover trends, status, the sources with their DOIs, and the limits |
 
 **Map types** (`?map=`; default tree cover).
 
-- **Tree cover** (`cover`): Hansen canopy cover of each square, six green classes (0–20 to 90–100 %). The map uses Hansen only. MODIS (MOD44B) is in the area viewer and the cross-checks.
+- **Tree cover** (`cover`): Hansen canopy cover of each square, six green classes (0–20 to 90–100 %). The map uses Hansen only. MODIS (MOD44B) is in the cross-checks and the Method view only.
 - **Tree cover loss** (`loss`) and **burned area** (`burned`): one year at a time, from `cover.json`.
-- **Trend** (`trend`): one measure at a time, in slope colours (PuOr: orange falling, purple rising) per decade. A dot marks a cell that is not significant, so colour is never the only cue. The filter (`show`) keeps all cells, only the significant ones, the falling or the rising ones. The variables are NDVI, EVI, daytime LST, rainfall, burned area, Hansen tree cover loss and MODIS tree cover. Default opacity is 55 % for tree cover, 70 % for trend and 80 % for loss and burned area.
+- **Trend** (`trend`): one measure at a time, in slope colours (PuOr: orange falling, purple rising) per decade. A dot marks a cell that is not significant, so colour is never the only cue. The filter (`show`) keeps all cells, only the significant ones, the falling or the rising ones. The variables are NDVI, EVI, daytime LST, rainfall, burned area and Hansen tree cover loss (the map's loss trend is 2011–2025). Default opacity is 55 % for tree cover, 70 % for trend and 80 % for loss and burned area.
 
 Map layers, bottom to top: imagery · outside-region veil · squares · country borders · selected square outline. The
 map opens framed on the region; outside it the imagery stays visible under a translucent veil (context, no blank
@@ -143,14 +143,14 @@ clear trends (falling first) and counts the rest, listed under "Other clear tren
 `SUMMARY_NAMED_TRENDS`); the documented-case note (La Pampa:
 0.05° numbers and the MAAP reference) or the hotspot note; **year travel** (`YearTravel.tsx`): From and To, a play button
 and the `[` and `]` keys; **What changed from A to B** (`CellChanges.tsx`): each measure in A, in B and the difference
-B minus A in its own units; the tree cover, loss and burned charts (`YearChart.tsx`); **Trends in this area**
+B minus A in its own units; the tree cover, loss and burned charts (`YearChart.tsx`), with a dashed marker at 2011 on the Hansen charts; **Trends in this area**
 (`CellTrends.tsx`): one line per measure with the backend's verdict; **Exact values** (`CellValues.tsx`): the yearly
 values and each test result; and links: open in Trends, the JSON files of the square, and copy link. Each
 measure's data loads on its own (`useCellProfile.ts`), so one failed file blanks only its own rows.
 
 **Trends view** (`TrendsView.tsx`, `ZoneChart.tsx`, `TrendMethod.tsx`): the numbers are the pipeline's
 (`zones.json`). The view tests, averages and counts nothing. "Clear trend" is the zone-level test, which is one test per zone and measure and is not corrected
-for multiple tests. The count of squares uses the corrected verdicts. Satellite drift years are greyed and the Terra note is shown next to them.
+for multiple tests. The count of squares uses the corrected verdicts. Sen lines are solid when the trend is clear and dashed when it is not (also in the area viewer). Satellite drift years are greyed and the Terra note is shown next to them. Hansen loss is tested from 2011 only; 2001–2010 is greyed with an info tooltip. Every trend shows its 95 % CI, and a clear trend shows it as "(95 % CI a to b)".
 
 **Copy rules** (the views keep them):
 
@@ -158,20 +158,22 @@ for multiple tests. The count of squares uses the corrected verdicts. Satellite 
   only arithmetic in the browser is B minus A on two backend values (area viewer) and the labels of the bars.
 - **Clear trend.** "Clear trend" or "Not clear" (zone tests) and "significant after the correction" (squares). A trend is a
   pattern in the measurements. No page states a cause.
-- **Loss is not deforestation.** Hansen loss is stand-replacing loss (fire, logging, mining, clearing); the UI names no cause.
+- **Loss is not deforestation.** Hansen loss is stand-replacing loss (fire, logging, mining, clearing); the UI names no cause. Loss before 2011 is shown but not tested, and the charts mark 2011.
 - **Co-location is not causation.** Loss and burned area in one square show where they coincide.
-- **Two sources, two levels.** Hansen cover cannot rise (regrowth is not counted). MODIS reads lower over dense forest, so
+- **One tree cover shown.** Only Hansen cover is shown; MODIS is in the cross-checks and Method view as the check of where loss happened. Hansen cover cannot rise (regrowth is not counted). MODIS reads lower over dense forest, so
   it confirms where cover changed, not how much.
 - **Cross-check statistics are descriptive.** r has no p-value and no significance wording. The trust checks of the Trends
   view state their own numbers (V1–V4).
 - **Differences are absolute** (units, points, °C, km²), never a percentage, and only same-period comparisons are made.
 - **Unitless indices** (NDVI, EVI) are labelled by name, not by a unit.
-- **Satellite drift.** NDVI, EVI and daytime temperature end in 2020 in the test; later years are greyed and labelled.
+- **Satellite drift.** NDVI, EVI and daytime temperature end in 2020 in the test; later years (from 2021) are greyed and labelled. A change that involves them gets a "?" mark.
+- **One answer per measure (15 Nov evening).** Each measure has one row or one answer. Values or changes affected by a known limit carry a "?" mark with a short tooltip. Burned area is shown once (km²).
 
 **Accessibility:**
 
 - The grid is one Tab stop; arrow keys move between squares, Enter or Space opens one.
 - The area viewer and the phone filters are native `<dialog>` elements, with Esc to close.
+- The info buttons (InfoTip) open on hover, focus and tap; Escape closes them.
 - Contrast is designed to AA in light and dark; a browser check is pending (P-025).
 - `prefers-reduced-motion` turns off the scan sweep and the map's zoom animation.
 
@@ -189,6 +191,14 @@ and paints black.
 Commands, run inside `web/`: `npm ci`, `npm run dev` (sample data: publishes the API, then starts Vite), `npm run dev:real`
 (pipeline export), `npm run build` (API, layer check, unit tests, type check, Vite build), `npm run build:real` (same, pipeline
 export), `npm run lint`, `npm run api:build`, `npm run check:layers`. Steps for a local check: `web/README.md`.
+
+### Components added on 15 Nov (ADR-009)
+
+- `web/src/components/InfoTip.tsx`: a small info button (Tabler icon, accent colour) with a tooltip on hover, focus and tap; Escape closes it. It replaces inline secondary notes and badges such as "suspect".
+- `web/src/components/MethodChangeNote.tsx`: the line under a yearly Hansen chart that explains the dashed 2011 marker, with an InfoTip for the full text.
+- `web/src/components/HansenConsistencyCard.tsx`: the Cross-checks card "Hansen loss vs official deforestation (INPE PRODES)", with a two-line chart. It shows published values only.
+- `web/src/lib/hansen.ts`: the 2011 method change as the UI needs it (year and ratio from the published files, shared through a React context).
+- `web/src/lib/trendWords.ts` (new, evening of 15 Nov): the words for the trend views and the "?" marks. `InfoTip` gained a "?" variant.
 
 ### Options that were evaluated
 
@@ -221,8 +231,8 @@ requires an Earthdata Login account per member; credentials never go in the repo
 | Contract validation | `npm run api:build` (or `npm run api:build:real` for the pipeline data) | Every published file matches the contract; bad pipeline data stops the build with the file, cell and problem |
 | Layer boundaries | `npm run check:layers` | `shared/` imports nothing, `server/` never imports `src/`, `src/` never imports `server/` or Node, views never call `fetch` |
 | Types | `tsc -b` (in `npm run build`) | `tsconfig.app.json` (src + shared), `tsconfig.server.json` (server + shared + scripts), `tsconfig.node.json` |
-| Unit tests | `npm test` (in `npm run build`) | 105 backend tests with `node:test`, in seven files: `server/validate.test.ts` (contract rules), `server/summary.test.ts` (summary counts, mock source satisfies the contract and is deterministic, source selection), `server/periods.test.ts` (six-month periods), `server/annual.test.ts` (calendar years), `server/cover.test.ts` (cover checks, validation report, raster index) `server/trends.test.ts` (trend fields of `cover.json` and `trendChecks`, `zones.json`, `borders.json`, `slopeUnits` and `trendYears`) and `server/cellBundle.test.ts` (the per-cell files `cells/{cellId}.json`) |
-| Trend test (pipeline) | `python -m pipeline.test_trends` | 7 tests on synthetic series: a linear trend is found with its sign, white noise is mostly not significant after FDR, Hamed–Rao runs, annual sums and means, the 80 % rule, and the Sen slope with missing years |
+| Unit tests | `npm test` (in `npm run build`) | 112 backend tests with `node:test`, in seven files: `server/validate.test.ts` (contract rules), `server/summary.test.ts` (summary counts, mock source satisfies the contract and is deterministic, source selection), `server/periods.test.ts` (six-month periods), `server/annual.test.ts` (calendar years), `server/cover.test.ts` (cover checks, validation report, raster index) `server/trends.test.ts` (trend fields of `cover.json` and `trendChecks`, `zones.json`, `borders.json`, `slopeUnits` and `trendYears`) and `server/cellBundle.test.ts` (the per-cell files `cells/{cellId}.json`) |
+| Trend test (pipeline) | `python -m pipeline.test_trends` | 13 tests on synthetic series (the 13th compares the confidence interval with `scipy.stats.theilslopes`): a linear trend is found with its sign, white noise is mostly not significant after FDR, Hamed–Rao runs, annual sums and means, the 80 % rule, the Sen slope with missing years, the Hansen loss trend starting at the method-change year, the confidence interval containing the Sen slope and the true slope, the interval of noise containing 0, and the LST trend ending at `LST_TREND_LAST_YEAR` |
 | Lint | `npm run lint` | oxlint with React and TypeScript plugins |
 
 A failing test, layer check or contract validation stops the Vercel build, so production keeps the last good

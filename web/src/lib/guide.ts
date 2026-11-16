@@ -6,10 +6,14 @@
 //
 // Every number in the demo cases is read from the API (validation.json, trendChecks). Nothing is counted, tested or
 // averaged here (ADR-004). Burned area is left out on purpose until the method review closes its open point.
+// 2026-11-15: "tree cover loss" (not "forest loss"); the years of the trends are read from the checks (loss starts in 2011); the case
+// "Greenness: rises in some places, falls in others"; step 4 gives the two error rates of the test.
 
 import type { ValidationReport } from '../../shared/contracts.ts'
 import { formatTrendSlope } from './format.ts'
 import { EN, type Tr } from './i18n.ts'
+import { ciInline } from './trendWords.ts'
+import { formatShare } from './zoneTrends.ts'
 
 /** URL parameters to set (a string) or remove (null), as useUrlParams takes them. */
 type ParamsPatch = Record<string, string | null>
@@ -22,15 +26,35 @@ export interface GuideStep {
   anchors: string[]
 }
 
-export function guideSteps(t: Tr = EN): GuideStep[] {
+export function guideSteps(t: Tr = EN, report: ValidationReport | null = null): GuideStep[] {
+  // Years of the trends, from the published checks: the monthly measures start in the first year they are tested, loss later (2011).
+  const variables = report?.trendChecks?.variables ?? []
+  const lossStart = variables.find((v) => v.variableId === 'lossKm2')?.period[0] ?? null
+  const firstStart = variables.length > 0 ? Math.min(...variables.filter((v) => v.variableId !== 'lossKm2' && v.variableId !== 'modisTreeCover').map((v) => v.period[0])) : null
+  const when =
+    firstStart !== null && Number.isFinite(firstStart)
+      ? lossStart !== null && lossStart > firstStart
+        ? t(` from ${firstStart}; tree cover loss from ${lossStart}`, ` desde ${firstStart}; la pérdida de cobertura arbórea desde ${lossStart}`)
+        : t(` from ${firstStart}`, ` desde ${firstStart}`)
+      : ''
+  // The two error rates of the test: false alarms on shuffled years (the worst measure) and the share of simulated trends it finds.
+  const falseAlarms = Object.values(report?.trendChecks?.v1FalsePositives ?? {}).map((v) => v.meanShareSignificant)
+  const detections = Object.values(report?.trendChecks?.v2Detection ?? {}).map((v) => v.meanShareDetected)
+  const errorLine =
+    falseAlarms.length > 0 && detections.length > 0
+      ? t(
+          `In our checks the test flagged at most ${formatShare(Math.max(...falseAlarms))} of the squares on shuffled years (false alarms) and found ${Math.round(Math.min(...detections) * 100)}–${Math.round(Math.max(...detections) * 100)} % of simulated trends.`,
+          `En nuestras comprobaciones el test marcó como máximo el ${formatShare(Math.max(...falseAlarms))} de los cuadros con años barajados (falsas alarmas) y encontró entre el ${Math.round(Math.min(...detections) * 100)} y el ${Math.round(Math.max(...detections) * 100)} % de las tendencias simuladas.`,
+        )
+      : null
   return [
     {
       id: 'measure',
       title: t('1. Pick what to look at', '1. Elige qué mirar'),
       body: [
         t(
-          'Choose the map (trend, tree cover, forest loss or fire) and, on the trend map, the measure.',
-          'Elige el mapa (tendencia, cobertura arbórea, pérdida de bosque o fuego) y, en el mapa de tendencia, la medida.',
+          'Choose the map (trend, tree cover, tree cover loss or fire) and, on the trend map, the measure.',
+          'Elige el mapa (tendencia, cobertura arbórea, pérdida de cobertura arbórea o fuego) y, en el mapa de tendencia, la medida.',
         ),
         t(
           'NDVI and EVI measure how green the vegetation is, seen from NASA satellites. Temperature is the land surface by day; rainfall comes from NASA GPM.',
@@ -44,8 +68,8 @@ export function guideSteps(t: Tr = EN): GuideStep[] {
       title: t('2. Read the map', '2. Lee el mapa'),
       body: [
         t(
-          'Each square is 1° (about 12,000 km²). Its colour is the trend: how much the measure changed per decade, from 2001. Orange falls, purple rises; stronger colour, bigger change.',
-          'Cada cuadro mide 1° (unos 12 000 km²). Su color es la tendencia: cuánto cambió la medida por década, desde 2001. Naranja baja, morado sube; cuanto más intenso, mayor el cambio.',
+          `Each square is 1° (about 12,000 km²). Its colour is the trend: how much the measure changed per decade${when}. Orange falls, purple rises; stronger colour, bigger change.`,
+          `Cada cuadro mide 1° (unos 12 000 km²). Su color es la tendencia: cuánto cambió la medida por década${when}. Naranja baja, morado sube; cuanto más intenso, mayor el cambio.`,
         ),
         t(
           'Dotted squares: no clear trend. Hatched squares: not tested, too few years with data.',
@@ -81,6 +105,7 @@ export function guideSteps(t: Tr = EN): GuideStep[] {
           '"Clear trend" means the change stands out from the normal ups and downs between years. With hundreds of squares tested at once, a few would look like trends by pure chance, so the bar is raised for all of them (false discovery rate 5 %).',
           '"Tendencia clara" significa que el cambio sobresale de las subidas y bajadas normales entre años. Con cientos de cuadros probados a la vez, unos pocos parecerían tendencias por puro azar, así que la exigencia sube para todos (tasa de falsos descubrimientos del 5 %).',
         ),
+        ...(errorLine ? [errorLine] : []),
       ],
       anchors: ['.viewnav a[href*="view=trends"]'],
     },
@@ -121,11 +146,11 @@ export function guideCases(report: ValidationReport | null, t: Tr = EN): GuideCa
     },
     {
       id: 'greenness',
-      title: t('Same process, opposite signs', 'Mismo proceso, signos opuestos'),
+      title: t('Greenness: rises in some places, falls in others', 'Verdor: sube en unos lugares, baja en otros'),
       text: ndvi
         ? t(
-            `Vegetation greenness (NDVI) fell in ${ndvi.significantDecreasing} squares and rose in ${ndvi.significantIncreasing} (${ndvi.period[0]}–${ndvi.period[1]}): the same Amazon changes in both directions.`,
-            `El verdor de la vegetación (NDVI) bajó en ${ndvi.significantDecreasing} cuadros y subió en ${ndvi.significantIncreasing} (${ndvi.period[0]}–${ndvi.period[1]}): la misma Amazonía cambia en ambos sentidos.`,
+            `Vegetation greenness (NDVI) fell in ${ndvi.significantDecreasing} squares and rose in ${ndvi.significantIncreasing} (${ndvi.period[0]}–${ndvi.period[1]}): the Amazon changes in both directions.`,
+            `El verdor de la vegetación (NDVI) bajó en ${ndvi.significantDecreasing} cuadros y subió en ${ndvi.significantIncreasing} (${ndvi.period[0]}–${ndvi.period[1]}): la Amazonía cambia en ambos sentidos.`,
           )
         : null,
       patch: { ...BASE, var: 'ndvi', show: 'significant' },
@@ -135,10 +160,15 @@ export function guideCases(report: ValidationReport | null, t: Tr = EN): GuideCa
       title: t('La Pampa, Madre de Dios (gold mining)', 'La Pampa, Madre de Dios (minería de oro)'),
       text:
         loss && loss.slopePerDecade !== null
-          ? t(
-              `Forest loss in this square is rising: ${formatTrendSlope(loss.slopePerDecade, 'km² per year, per decade', t)}${loss.significant ? ', a clear trend' : ''}.`,
-              `La pérdida de bosque en este cuadro va en aumento: ${formatTrendSlope(loss.slopePerDecade, 'km² per year, per decade', t)}${loss.significant ? ', una tendencia clara' : ''}.`,
-            )
+          ? loss.significant
+            ? t(
+                `Tree cover loss in this square is ${loss.slopePerDecade < 0 ? 'falling' : 'rising'}: ${formatTrendSlope(loss.slopePerDecade, 'km² per year, per decade', t)} ${ciInline(loss.slopeCi95, t)}, a clear trend.`,
+                `La pérdida de cobertura arbórea en este cuadro ${loss.slopePerDecade < 0 ? 'baja' : 'sube'}: ${formatTrendSlope(loss.slopePerDecade, 'km² per year, per decade', t)} ${ciInline(loss.slopeCi95, t)}, una tendencia clara.`,
+              )
+            : t(
+                `Tree cover loss in this square: ${formatTrendSlope(loss.slopePerDecade, 'km² per year, per decade', t)} ${ciInline(loss.slopeCi95, t)}, not a clear trend.`,
+                `Pérdida de cobertura arbórea en este cuadro: ${formatTrendSlope(loss.slopePerDecade, 'km² per year, per decade', t)} ${ciInline(loss.slopeCi95, t)}, sin tendencia clara.`,
+              )
           : null,
       patch: {
         ...BASE,

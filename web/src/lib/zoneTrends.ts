@@ -1,11 +1,13 @@
 // AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15. Reviewed and owned by team AETHER.
+// 2026-11-15: MODIS tree cover removed from the measures; tree cover loss has ONE tested window (2011-2025: Hansen reprocessed loss
+// from 2011); the years before it are real data, shown greyed and not tested. Every yearly value stays visible.
 //
 // Presentation helpers of the Trends view: which measures there are and how they are named, how numbers and slopes are
 // worded, and which state each yearly point has (used in the test, satellite-drift year, incomplete). It computes no
 // statistics: slopes, p-values, significance and counts come from zones.json as they are. The only derived numbers are
 // differences of two backend values (D11); the Sen line is drawn from the end points the pipeline exports (zoneTrend.line).
 
-import type { Zone, ZoneVariable, ZoneYearValue } from '../../shared/contracts.ts'
+import type { Zone, ZoneTrendResult, ZoneVariable, ZoneYearValue } from '../../shared/contracts.ts'
 import { EN, type Tr } from './i18n.ts'
 
 export interface Measure {
@@ -103,22 +105,10 @@ export const MEASURES: Measure[] = [
     map: { map: 'trend', var: 'precip' },
   },
   {
-    key: 'modisTreeCover',
-    id: 'modis_tree_cover',
-    name: 'Tree cover (MODIS)',
-    nameEs: 'Cobertura arbórea (MODIS)',
-    kind: 'line',
-    source: 'NASA MOD44B (MODIS, 250 m).',
-    drift: false,
-    note: 'MODIS reads lower than Hansen over dense forest; use it for change over time, not for the level.',
-    noteEs: 'MODIS marca menos que Hansen en bosque denso; úsalo para ver el cambio en el tiempo, no el nivel.',
-    map: null,
-  },
-  {
     key: 'hansenTreeCover',
     id: 'hansen_tree_cover',
-    name: 'Tree cover (Hansen)',
-    nameEs: 'Cobertura arbórea (Hansen)',
+    name: 'Tree cover',
+    nameEs: 'Cobertura arbórea',
     kind: 'line',
     source: 'Hansen/UMD/Google/USGS/NASA Global Forest Change (Landsat, 30 m).',
     drift: false,
@@ -128,8 +118,13 @@ export const MEASURES: Measure[] = [
   },
 ]
 
-export const LST_NOTE = "Ends in 2020: later years are biased by the satellite's orbit drift."
-export const LST_NOTE_ES = 'Termina en 2020: los años siguientes están sesgados por la deriva de la órbita del satélite.'
+/** Why the test of a satellite-drift measure (NDVI, EVI, temperature) ends in `end`; the later years are shown, not tested. */
+export function testEndNote(end: number, t: Tr = EN): string {
+  return t(
+    `The test ends in ${end}: from ${end + 1} the satellite's overpass time drifts, so those years are shown but not tested.`,
+    `El test termina en ${end}: desde ${end + 1} la hora de paso del satélite deriva, así que esos años se muestran pero no se prueban.`,
+  )
+}
 
 /** The measure's name and note in the current language. */
 export function measureName(measure: Measure, t: Tr = EN): string {
@@ -140,11 +135,13 @@ export function measureNote(measure: Measure, t: Tr = EN): string | null {
   return measure.note === null ? null : t(measure.note, measure.noteEs ?? measure.note)
 }
 
-/** The measure for a ?var= value: the URL id, the zones.json key, or an old map id. */
+/** The measure for a ?var= value: the URL id or the zones.json key. */
 export function measureFor(param: string | null): Measure | null {
   if (param === null) return null
   return MEASURES.find((m) => m.id === param || m.key === param) ?? null
 }
+
+export const periodOf = (trend: ZoneTrendResult) => `${trend.years[0]}–${trend.years[1]}`
 
 /** The zone's measures that its report holds, in table order. */
 export function measuresOf(zone: Zone): { measure: Measure; variable: ZoneVariable }[] {
@@ -254,7 +251,10 @@ export type Direction = 'rising' | 'falling' | 'flat' | 'untested'
 
 /** "rising" or "falling" only when the zone test says the trend is clear; otherwise "flat" (no clear trend) or "untested". */
 export function directionOf(variable: ZoneVariable): Direction {
-  const trend = variable.zoneTrend
+  return directionOfTrend(variable.zoneTrend)
+}
+
+export function directionOfTrend(trend: ZoneTrendResult | undefined): Direction {
   if (!trend || trend.slopePerDecade === null) return 'untested'
   if (!trend.significant || trend.slopePerDecade === 0) return 'flat' // zero Sen slope: clear order but nothing measurable
   return trend.slopePerDecade < 0 ? 'falling' : 'rising'
@@ -281,7 +281,7 @@ export function directionWord(direction: Direction, t: Tr = EN): string {
 // Yearly points
 
 /** used = in the test; drift = after the tested years of a satellite-drift measure; unused = outside the tested years;
- * incomplete = a flagged or partial year with a value; missing = no value. */
+ * incomplete = a partial year with a value; missing = no value. */
 export type PointState = 'used' | 'drift' | 'unused' | 'incomplete' | 'missing'
 
 export function pointState(point: ZoneYearValue, variable: ZoneVariable, measure: Measure): PointState {
@@ -290,25 +290,40 @@ export function pointState(point: ZoneYearValue, variable: ZoneVariable, measure
   if (!trend) return 'used'
   if (!point.complete) return 'incomplete'
   if (point.year >= trend.years[0] && point.year <= trend.years[1]) return 'used'
-  return measure.drift ? 'drift' : 'unused'
+  return measure.drift && point.year > trend.years[1] ? 'drift' : 'unused'
 }
 
 export function stateReason(state: PointState, variable: ZoneVariable, measure: Measure, t: Tr = EN): string {
-  const end = variable.zoneTrend?.years[1]
-  if (state === 'used') return variable.zoneTrend ? t('used in the test', 'usado en el test') : t('shown as context, not tested', 'se muestra como contexto, sin probar')
+  const trend = variable.zoneTrend
+  const end = trend?.years[1]
+  if (state === 'used') return trend ? t('used in the test', 'usado en el test') : t('shown as context, not tested', 'se muestra como contexto, sin probar')
   if (state === 'drift')
-    return t(`satellite drift year, not used in the test (the test ends in ${end})`, `año con deriva del satélite, no se usa en el test (el test termina en ${end})`)
-  if (state === 'unused')
-    return t(`outside the tested years (${variable.zoneTrend?.years[0]}–${end})`, `fuera de los años probados (${variable.zoneTrend?.years[0]}–${end})`)
-  if (state === 'incomplete') return t('flagged or incomplete year, not used in the test', 'año marcado o incompleto, no se usa en el test')
+    return t(`satellite drift year, shown, not in the test (the test ends in ${end})`, `año con deriva del satélite, se muestra pero no entra en el test (el test termina en ${end})`)
+  if (state === 'unused') {
+    if (measure.key === 'lossKm2')
+      return t(
+        `shown, not in the trend (it starts in ${trend?.years[0]}: Hansen's earlier method)`,
+        `se muestra, pero no entra en la tendencia (empieza en ${trend?.years[0]}: método anterior de Hansen)`,
+      )
+    return t(`outside the tested years (${trend?.years[0]}–${end})`, `fuera de los años probados (${trend?.years[0]}–${end})`)
+  }
+  if (state === 'incomplete') return t('incomplete year, not used in the test', 'año incompleto, no se usa en el test')
   return measure.drift ? t('no value', 'sin valor') : t('no value (incomplete year)', 'sin valor (año incompleto)')
 }
 
-/** The Sen line to draw over the tested years, taken from the pipeline's end points; null when the measure has no line. */
-export function drawnSenLine(variable: ZoneVariable, _measure: Measure): { x0: number; y0: number; x1: number; y1: number } | null {
-  const line = variable.zoneTrend?.line
-  if (!line) return null
-  return { x0: line.start.year, y0: line.start.value, x1: line.end.year, y1: line.end.value }
+export interface DrawnLine {
+  x0: number
+  y0: number
+  x1: number
+  y1: number
+  /** The zone test this line belongs to. */
+  trend: ZoneTrendResult
+}
+
+/** The Sen line to draw over the tested years only (none for a measure that is not tested), from the pipeline's end points. */
+export function drawnSenLines(variable: ZoneVariable): DrawnLine[] {
+  const trend = variable.zoneTrend
+  return trend?.line ? [{ x0: trend.line.start.year, y0: trend.line.start.value, x1: trend.line.end.year, y1: trend.line.end.value, trend }] : []
 }
 
 /** Round ticks covering [min, max] (about `count` of them). */
@@ -354,7 +369,6 @@ export function valueSentence(measure: Measure, value: number, units: string, t:
       return t(`${text} burned`, `${text} quemados`)
     case 'precip':
       return t(`${text} of rain`, `${text} de lluvia`)
-    case 'modisTreeCover':
     case 'hansenTreeCover':
       return t(`tree cover ${text}`, `cobertura arbórea ${text}`)
     default:

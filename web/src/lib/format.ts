@@ -35,11 +35,27 @@ export function formatTrendSlope(slope: number, slopeUnits: string, t: Tr = EN):
 }
 
 /**
- * The pipeline's method text says "in unitless per decade" for NDVI and EVI (P-035). Shown as plain words until the
- * pipeline publishes it so; any other text is returned unchanged.
+ * The pipeline's method text says "in unitless per decade" for NDVI and EVI. Shown as plain words until the pipeline
+ * publishes it so; internal codes are removed too (cleanPipelineText).
  */
 export function plainMethodText(text: string): string {
-  return text.replace(/\bin unitless per decade\b/g, 'per decade (NDVI and EVI have no units)')
+  return cleanPipelineText(text.replace(/\bin unitless per decade\b/g, 'per decade (NDVI and EVI have no units)'))
+}
+
+/**
+ * Pipeline texts (method description, technical wording, notes) are written for the team and may carry internal rule codes. They are
+ * shown to the public without them: "(team rule B1)", "(D1)", "V1 shuffles", "Pre-registered" and "provisional (P-008)" are rewritten.
+ */
+export function cleanPipelineText(text: string): string {
+  return text
+    .replace(/\s*\((?:team )?(?:rule )?[A-Z]\d+\)/g, '')
+    .replace(/\s*\((?:provisional, )?P-\d+\)/g, '')
+    .replace(/\bPre-registered rules\b/g, 'Rules fixed before looking at the results')
+    .replace(/\bV1 shuffles\b/g, 'The shuffling check shuffles')
+    .replace(/\bV2 adds\b/g, 'the detection check adds')
+    .replace(/\bprovisional\b/gi, 'current')
+    .replace(/\bartefact\b/gi, 'effect')
+    .replace(/ {2,}/g, ' ')
 }
 
 /** Slope units for a heading: "unitless per decade" (NDVI, EVI) becomes "no units"; others are localized. */
@@ -72,8 +88,8 @@ export function unitSuffix(units: string): string {
   return units === 'unitless' ? '' : ` ${units}`
 }
 
-export function formatPValue(p: number | null): string {
-  if (p === null) return 'not tested'
+export function formatPValue(p: number | null, t: Tr = EN): string {
+  if (p === null) return t('not tested', 'sin probar')
   return p < 0.001 ? '< 0.001' : p.toFixed(3)
 }
 
@@ -148,9 +164,14 @@ export function formatShare(share: number): string {
   return `${Math.round(share * 100)} %`
 }
 
-export function formatKm2(value: number | null): string {
-  if (value === null) return 'no data'
-  return `${value >= 100 ? Math.round(value).toLocaleString('en-US') : value.toFixed(1)} km²`
+export function formatKm2(value: number | null, t: Tr = EN): string {
+  if (value === null) return t('no data', 'sin datos')
+  return `${value >= 100 ? Math.round(value).toLocaleString(numberLocale(t)) : value.toFixed(1)} km²`
+}
+
+/** Locale of grouped numbers: Peruvian Spanish in Spanish, US English otherwise (both write 1,234.5; see lib/i18n.ts). */
+export function numberLocale(t: Tr = EN): string {
+  return t('en-US', 'es-PE')
 }
 
 /** Points of percent (a difference between two percents): "−22.5 points". */

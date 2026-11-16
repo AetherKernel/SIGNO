@@ -42,12 +42,14 @@ Keep the original file names: the pipeline finds the zips by name anywhere under
    Approximate volume: about 80 GB transferred in total, about 1.9 GB kept in `data/interim/`. The run order is in
    `pipeline/README.md` (step 8, `python -m pipeline.trends`, runs last).
 
+   After the two manual items above, `python -m pipeline.run_all` runs everything in order: downloads, exports, trend test and the check in item 5.
+
 4. **Git ignores these** (already in `.gitignore`, nothing to add): `/data/raw/`, `/data/interim/` and every `*.zip`.
    Only `data/README.md` is versioned in this folder. The results the web app reads are versioned elsewhere:
    `web/server/data/` and `web/public/data/`.
 
 5. To check a fresh run against the committed results, compare the regenerated files in `web/server/data/` and
-   `web/public/data/` with the repository versions. An automatic verify script is planned, not yet available.
+   `web/public/data/` with the repository versions. Run `python -m pipeline.verify` to do this comparison (see `pipeline/README.md`, *Reproduce and verify*).
 
 ## Before you start
 
@@ -114,7 +116,7 @@ Reading notes:
   layers; MOD11C3 has `QC_Day`/`QC_Night` and clear-sky coverage layers.
 - **Terra orbit drift.** Terra's overpass has drifted earlier: measured on the full series, 10.54 h local solar time
   through 2020 and 8.94 h in 2026 (see `pipeline/README.md`, *Validation*). NASA says the effect on products is still
-  being assessed. Team decision (2026-11-15): daytime and night LST are used only to 2020-12. An earlier overpass reads cooler daytime LST. Layer
+  being assessed. Team decision (2026-11-15): daytime LST is published to 2026-10 (real NASA data), but its trend uses 2001–2020 only; the drift years from 2021 are shown with a "?" mark and not tested. Night LST is still cut at 2020-12; it is not in the web API (it is in `amazon_monthly.json`). An earlier overpass reads cooler daytime LST. Amazon yearly daytime LST: 2020 28.0 °C; 2021–2025 27.4, 27.4, 27.7, 27.6 and 26.1 °C. The 2025 drop of about 2 °C goes the wrong way for a drought (2023–2024 were record drought and heat years), which points to the overpass-time effect rather than real cooling; it is not proof. Layer
   `Day_view_time` records the observation time. Aqua twin `MYD11C3` v061 ([10.5067/MODIS/MYD11C3.061](https://doi.org/10.5067/MODIS/MYD11C3.061))
   starts 2002-07. Terra and Aqua are expected to stop in late 2026 or early 2027
   ([NASA notice](https://www.earthdata.nasa.gov/data/alerts-outages/transition-from-modis-viirs)).
@@ -138,7 +140,12 @@ Reading notes:
 - **Hansen tree cover and loss.** The Hansen tiles start at 10° N, so the strip from 10.0° N to the box edge (10.5° N)
   has no Hansen data. The Amazon biome itself reaches only 10.02° N.
 - **Hansen loss is stand-replacing loss,** not only deforestation: fire, logging, mining and clearing all count. Loss
-  years before and after about 2013 are not strictly comparable (Global Forest Watch caution). Hansen-derived tree
+  years before and after 2011 are not comparable. Hansen reprocessed its loss from 2011 onward, not for 2001–2010, and its
+  user notes say that "users will notice inconsistencies as a result". Landsat 8 is used from 2013 and Landsat 9 from 2022.
+  "Care must be taken when comparing change across any interval"; the data are "a relative indicator of spatiotemporal
+  trends", and "definitive area estimation should not be made using pixel counts" (Hansen/UMD, GFC v1.13 user notes:
+  <https://storage.googleapis.com/earthenginepartners-hansen/GFC-2025-v1.13/download.html>). The loss is tested as one trend
+  from 2011 to 2025 (ADR-009; 2001–2010 is shown, not tested). Hansen-derived tree
   cover has no regrowth, so it can only fall.
 - **MOD44B 2025 is anomalous.** The Amazon mean falls from 62.2 % to 59.2 % in one year, while Hansen falls by 0.4
   points. The cover file flags it. MOD44B shows where loss happens, not how much: its year-to-year noise is 1–2 points.
@@ -196,6 +203,7 @@ Guyana, which drain straight to the Atlantic; the RAISG biome includes all nine 
 | MapBiomas Amazonía Collection 6 (1985–2023), 30 m | 9 countries | [amazonia.mapbiomas.org](https://amazonia.mapbiomas.org/) | CC BY 4.0 | MapBiomas Amazonía ATBD 6.0 |
 | NASA FIRMS active fires (MODIS since 2000-11, VIIRS since 2012) | Global | [archive download](https://firms.modaps.eosdis.nasa.gov/download/), Earthdata Login or email code | NASA open data | doi:10.5067/FIRMS/MODIS/MCD14ML |
 | INPE PRODES / DETER (TerraBrasilis) | Brazil only | [download](https://terrabrasilis.dpi.inpe.br/en/download-2/) | CC BY-SA 4.0 (portal) | TerraBrasilis citation page |
+| INPE PRODES, Brazilian Legal Amazon, yearly clear-cut (`PRODES_AMAZON_KM2` in `pipeline/config.py`); PRODES year = August to July; clear-cut of primary forest of at least 6.25 ha. Used for the Hansen check only | Brazilian Amazon | [INPE press release, 16 Oct 2026](https://www.gov.br/inpe/pt-br/assuntos/ultimas-noticias/brasil-alcanca-menores-taxas-de-desmatamento-da-serie-historica-na-amazonia-e-no-cerrado) | Not checked yet: check INPE's terms before redistributing | INPE, "Série Histórica Taxas Prodes Amazônia", Apresentação Coletiva Prodes 2026, 16 Oct 2026, p. 4 |
 | MINAM Geobosques forest loss (2001–2025) | Peru only | [geobosques.minam.gob.pe](https://geobosques.minam.gob.pe/) | not verified | MINAM annual reports |
 | MAAP reports on La Pampa, Madre de Dios (e.g. MAAP #233, Sep 2025) | Case studies | [maapprogram.org](https://www.maapprogram.org/?p=26475) | not verified (cite only) | by report number |
 

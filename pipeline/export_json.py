@@ -1,4 +1,5 @@
 # AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-14/15. Reviewed by team AETHER.
+# AI-generated change, 2026-11-15 (team decision of Alexis): daytime LST is published through the last month available; only nighttime LST is still cut at config.LST_LAST_MONTH. Adds driftFromYear per variable and lst_trend_last_year / drift_from_year to meta.
 """Step 3 · Zone time series for the web: monthly, six-monthly and yearly JSON files.
 
     python -m pipeline.export_json
@@ -9,7 +10,8 @@ Reads data/interim/ and writes, in web/public/data/:
   amazon_annual.json     yearly tree cover (MOD44B), Hansen tree cover loss, burned area
 
 Zone values are area-weighted (cos latitude) over the zone cells that have a value. Team rules applied here:
-analysis from config.ANALYSIS_START, LST only until config.LST_LAST_MONTH, MOD13C2 reliability filter.
+analysis from config.ANALYSIS_START, night LST only until config.LST_LAST_MONTH (daytime LST to the end of the series, years from
+config.DRIFT_FROM_YEAR flagged by driftFromYear), MOD13C2 reliability filter.
 Descriptive only: no trend or significance test is applied (the method is the team's, see tab 01).
 """
 import json
@@ -18,8 +20,8 @@ from datetime import datetime, timezone
 import numpy as np
 import xarray as xr
 
-from .config import (AI_DISCLOSURE, AMAZON_BOUNDARY, ANALYSIS_START, BBOX, EXTRA_SOURCES, INTERIM, LST_LAST_MONTH,
-                     MOD13C2_ACCEPTED_RELIABILITY, OUTPUT, PRODUCTS, SEMESTERS, ZONES)
+from .config import (AI_DISCLOSURE, AMAZON_BOUNDARY, ANALYSIS_START, BBOX, DRIFT_FROM_YEAR, EXTRA_SOURCES, INTERIM,
+                     LST_LAST_MONTH, LST_TREND_LAST_YEAR, MOD13C2_ACCEPTED_RELIABILITY, OUTPUT, PRODUCTS, SEMESTERS, ZONES)
 from .zones import zone_masks
 
 DOI = {**{p: v["doi"] for p, v in PRODUCTS.items()}, **{p: v["doi"] for p, v in EXTRA_SOURCES.items()}}
@@ -31,7 +33,7 @@ VARIABLES = {
     "ndvi": ("MOD13C2", "ndvi", "1", "Normalized Difference Vegetation Index", "data", "mean", "mean"),
     "evi": ("MOD13C2", "evi", "1", "Enhanced Vegetation Index", "data", "mean", "mean"),
     "ndvi_good_share": ("MOD13C2", None, "fraction", "Share of zone cells with pixel reliability 0 (good)", "diag", "mean", "mean"),
-    "lst_day": ("MOD11C3", "lst_day", "degC", "Daytime land surface temperature (to 2020, orbit drift after)", "data", "mean", "mean"),
+    "lst_day": ("MOD11C3", "lst_day", "degC", "Daytime land surface temperature", "data", "mean", "mean"),
     "lst_night": ("MOD11C3", "lst_night", "degC", "Nighttime land surface temperature (to 2020, orbit drift after)", "data", "mean", "mean"),
     "lst_clear_days": ("MOD11C3", "clear_days", "days", "Mean clear-sky days behind the monthly daytime LST", "diag", "mean", "mean"),
     "lst_day_local_time": ("MOD11C3", "day_local_time", "h", "Mean daytime overpass time (local solar)", "diag", "mean", "mean"),
@@ -43,6 +45,8 @@ VARIABLES = {
     "water_storage": ("GRACE", "tws", "cm", "Terrestrial water storage anomaly (GRACE/GRACE-FO)", "context", "mean", "mean"),
 }
 LST_VARS = {"lst_day", "lst_night"}
+LST_CUT_VARS = {"lst_night"}   # still published only to config.LST_LAST_MONTH (rule D4); daytime LST goes to the end of the series
+DRIFT_VARS = {"ndvi", "evi", "lst_day"}   # Terra orbit drift from config.DRIFT_FROM_YEAR (r = 0.85 for NDVI/EVI, B1 for LST)
 
 
 def iter_months(source):
@@ -108,7 +112,7 @@ def monthly():
             if grid is None:
                 grid = Grid(ds.lat.values, ds.lon.values)
             for k, (_, src, *_r, how, _sem) in vids.items():
-                if k in LST_VARS and month > LST_LAST_MONTH:
+                if k in LST_CUT_VARS and month > LST_LAST_MONTH:
                     continue
                 v = field(ds, k, src)
                 for z in ZONES:
@@ -196,6 +200,8 @@ def main():
         "clip_box": BBOX,
         "analysis_start": ANALYSIS_START,
         "lst_last_month": LST_LAST_MONTH,
+        "lst_trend_last_year": LST_TREND_LAST_YEAR,
+        "drift_from_year": DRIFT_FROM_YEAR,
         "mod13c2_accepted_reliability": list(MOD13C2_ACCEPTED_RELIABILITY),
         "semesters": {k: list(v) for k, v in SEMESTERS.items()},
         "method": "Area-weighted (cos latitude) zone statistics over cells with a value. Descriptive only: "
@@ -204,7 +210,8 @@ def main():
         "ai_disclosure": AI_DISCLOSURE,
     }
     variables = {k: {"source": v[0], "doi": DOI.get(v[0]), "units": v[2], "description": v[3], "kind": v[4],
-                     "zone_statistic": v[5], "semester_aggregation": v[6]} for k, v in VARIABLES.items()}
+                     "zone_statistic": v[5], "semester_aggregation": v[6],
+                     **({"driftFromYear": DRIFT_FROM_YEAR} if k in DRIFT_VARS else {})} for k, v in VARIABLES.items()}
     zones = {}
     mods = sorted((INTERIM / "MOD13C2").glob("*.nc"))
     if mods:

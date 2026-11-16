@@ -1,11 +1,15 @@
 // AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15. Reviewed and owned by team AETHER.
+// 2026-11-15: the reasons (incomplete year, satellite drift, no value) moved from badges and notes into InfoTips; no "suspect" badge.
+// A value the trend does not use (satellite-drift year, loss before 2011) is greyed, and a change that involves one is followed by a
+// "?" tip (the number is real, but part of the change may come from how it was measured).
 //
 // "What changed from A to B" of the cell viewer: one row per measure with its value in year A, in year B, the difference
-// (B minus A, the only arithmetic the browser does) and a small yearly line. A year that is incomplete, suspect or missing
-// is shown as such, with the reason, and is never part of a difference. On a phone each row becomes a small card.
+// (B minus A, the only arithmetic the browser does) and a small yearly line. A year that is incomplete or missing
+// is shown as such, with the reason in an InfoTip, and is never part of a difference. On a phone each row becomes a small card.
 
 import { formatChange, formatValue, sparkValues, type MeasureRow, type YearReading } from '../lib/cellView.ts'
 import { useLang } from '../lib/i18n.ts'
+import { InfoTip } from './InfoTip.tsx'
 import { Sparkline } from './YearChart.tsx'
 
 interface Props {
@@ -17,15 +21,12 @@ interface Props {
 }
 
 function Reading({ row, reading }: { row: MeasureRow; reading: YearReading }) {
-  const { t } = useLang()
   const shown = reading.value !== null && reading.status !== 'none'
   return (
-    <>
-      <span className={`cv-value mono${reading.status === 'ok' ? '' : ' faded'}`}>{shown ? formatValue(row, reading.value as number) : '—'}</span>
-      {reading.status === 'suspect' && <span className="cv-tag">{t('suspect', 'dudoso')}</span>}
-      {reading.drift && <span className="cv-tag">{t('drift year', 'año con deriva')}</span>}
-      {reading.note && <span className="cv-note">{reading.note}</span>}
-    </>
+    <span className="cv-reading">
+      <span className={`cv-value mono${reading.status === 'ok' && !reading.muted ? '' : ' faded'}`}>{shown ? formatValue(row, reading.value as number) : '—'}</span>
+      {reading.note && <InfoTip mark={reading.muted ? 'question' : 'info'}>{reading.note}</InfoTip>}
+    </span>
   )
 }
 
@@ -85,6 +86,7 @@ export function CellChanges({ rows, years, from, to, onRetry }: Props) {
           const a = row.reading(from)
           const b = row.reading(to)
           const change = formatChange(row, a, b, t)
+          const changeNote = change === null ? null : (row.changeNote?.(from, to) ?? null)
           return (
             <tr key={row.id}>
               <th scope="row">{row.label}</th>
@@ -96,6 +98,7 @@ export function CellChanges({ rows, years, from, to, onRetry }: Props) {
               </td>
               <td data-label={t('Change', 'Cambio')}>
                 <span className={`cv-value mono${change === null ? ' faded' : ''}`}>{change ?? '—'}</span>
+                {changeNote && <InfoTip mark="question">{changeNote}</InfoTip>}
               </td>
               <td className="cv-spark-col">
                 <Sparkline years={years} values={sparkValues(row, years)} from={from} to={to} />

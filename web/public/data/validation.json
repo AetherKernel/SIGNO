@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_utc": "2026-11-15T06:53:49+00:00",
+  "generated_utc": "2026-11-15T21:34:05+00:00",
   "sources": {
    "MOD44B": "10.5067/MODIS/MOD44B.061",
    "HANSEN": "10.1126/science.1244693",
@@ -74,68 +74,68 @@
     ]
    },
    "change_vs_hansen_loss": {
-    "r": -0.719,
+    "r": -0.729,
     "cells": 226909,
-    "definition": "MOD44B mean(2024,2025) - mean(2001,2002), percentage points",
+    "definition": "MOD44B mean(2023,2024) - mean(2001,2002), percentage points; Hansen loss share 2001-2024 (MOD44B 2025 is flagged and not used)",
     "by_hansen_loss_decile": [
      {
       "decile": 1,
       "hansen_loss_share_mean": 0.0,
-      "mod44b_change_pp_mean": 1.19,
-      "cells": 21554
+      "mod44b_change_pp_mean": 2.09,
+      "cells": 22281
      },
      {
       "decile": 2,
       "hansen_loss_share_mean": 0.0001,
-      "mod44b_change_pp_mean": 0.74,
-      "cells": 23778
+      "mod44b_change_pp_mean": 2.08,
+      "cells": 22890
      },
      {
       "decile": 3,
       "hansen_loss_share_mean": 0.0004,
-      "mod44b_change_pp_mean": 0.16,
-      "cells": 22740
+      "mod44b_change_pp_mean": 1.72,
+      "cells": 22896
      },
      {
       "decile": 4,
-      "hansen_loss_share_mean": 0.001,
-      "mod44b_change_pp_mean": -0.03,
-      "cells": 22688
+      "hansen_loss_share_mean": 0.0009,
+      "mod44b_change_pp_mean": 1.44,
+      "cells": 22696
      },
      {
       "decile": 5,
-      "hansen_loss_share_mean": 0.003,
-      "mod44b_change_pp_mean": 0.56,
-      "cells": 22694
+      "hansen_loss_share_mean": 0.0027,
+      "mod44b_change_pp_mean": 1.66,
+      "cells": 22691
      },
      {
       "decile": 6,
-      "hansen_loss_share_mean": 0.0101,
-      "mod44b_change_pp_mean": 0.48,
+      "hansen_loss_share_mean": 0.0092,
+      "mod44b_change_pp_mean": 1.57,
       "cells": 22691
      },
      {
       "decile": 7,
-      "hansen_loss_share_mean": 0.0348,
-      "mod44b_change_pp_mean": -0.01,
+      "hansen_loss_share_mean": 0.0317,
+      "mod44b_change_pp_mean": 1.21,
       "cells": 22691
      },
      {
       "decile": 8,
-      "hansen_loss_share_mean": 0.105,
-      "mod44b_change_pp_mean": -1.41,
+      "hansen_loss_share_mean": 0.097,
+      "mod44b_change_pp_mean": -0.03,
       "cells": 22691
      },
      {
       "decile": 9,
-      "hansen_loss_share_mean": 0.2499,
-      "mod44b_change_pp_mean": -6.41,
+      "hansen_loss_share_mean": 0.2355,
+      "mod44b_change_pp_mean": -4.58,
       "cells": 22691
      },
      {
       "decile": 10,
-      "hansen_loss_share_mean": 0.5405,
-      "mod44b_change_pp_mean": -22.64,
+      "hansen_loss_share_mean": 0.5225,
+      "mod44b_change_pp_mean": -20.5,
       "cells": 22691
      }
     ]
@@ -329,7 +329,7 @@
      "peak_loss_year": 2020,
      "peak_loss_share": 0.271,
      "hansen_treecover2000": 99.6,
-     "mod44b_change_pp": -48.9,
+     "mod44b_change_pp": -46.1,
      "burned_years": [
       2018,
       2020,
@@ -347,7 +347,7 @@
      "peak_loss_year": 2017,
      "peak_loss_share": 0.766,
      "hansen_treecover2000": 99.0,
-     "mod44b_change_pp": -60.3,
+     "mod44b_change_pp": -60.8,
      "burned_years": [
       2004,
       2017,
@@ -366,7 +366,7 @@
      "peak_loss_year": 2018,
      "peak_loss_share": 0.487,
      "hansen_treecover2000": 99.5,
-     "mod44b_change_pp": -48.9,
+     "mod44b_change_pp": -45.5,
      "burned_years": [
       2017,
       2018,
@@ -385,7 +385,7 @@
      "peak_loss_year": 2006,
      "peak_loss_share": 0.454,
      "hansen_treecover2000": 99.2,
-     "mod44b_change_pp": -65.3,
+     "mod44b_change_pp": -63.0,
      "burned_years": [
       2005,
       2006,
@@ -407,7 +407,7 @@
      "peak_loss_year": 2022,
      "peak_loss_share": 0.568,
      "hansen_treecover2000": 99.7,
-     "mod44b_change_pp": -55.3,
+     "mod44b_change_pp": -41.5,
      "burned_years": [
       2022,
       2024
@@ -421,7 +421,7 @@
      "peak_loss_year": 2014,
      "peak_loss_share": 0.324,
      "hansen_treecover2000": 99.6,
-     "mod44b_change_pp": -57.0,
+     "mod44b_change_pp": -54.7,
      "burned_years": [
       2014,
       2015,
@@ -443,7 +443,7 @@
      "peak_loss_year": 2024,
      "peak_loss_share": 0.701,
      "hansen_treecover2000": 99.6,
-     "mod44b_change_pp": -29.3,
+     "mod44b_change_pp": -13.6,
      "burned_years": [
       2008,
       2024
@@ -457,7 +457,7 @@
      "peak_loss_year": 2020,
      "peak_loss_share": 0.457,
      "hansen_treecover2000": 99.7,
-     "mod44b_change_pp": -58.2,
+     "mod44b_change_pp": -54.2,
      "burned_years": [
       2019,
       2020,
@@ -475,7 +475,7 @@
      "peak_loss_year": 2020,
      "peak_loss_share": 0.752,
      "hansen_treecover2000": 99.7,
-     "mod44b_change_pp": -56.3,
+     "mod44b_change_pp": -52.3,
      "burned_years": [
       2020,
       2021,
@@ -492,7 +492,7 @@
      "peak_loss_year": 2020,
      "peak_loss_share": 0.485,
      "hansen_treecover2000": 99.3,
-     "mod44b_change_pp": -50.8,
+     "mod44b_change_pp": -43.3,
      "burned_years": [
       2020,
       2021,
@@ -695,68 +695,68 @@
     ]
    },
    "change_vs_hansen_loss": {
-    "r": -0.781,
+    "r": -0.786,
     "cells": 136799,
-    "definition": "MOD44B mean(2024,2025) - mean(2001,2002), percentage points",
+    "definition": "MOD44B mean(2023,2024) - mean(2001,2002), percentage points; Hansen loss share 2001-2024 (MOD44B 2025 is flagged and not used)",
     "by_hansen_loss_decile": [
      {
       "decile": 1,
       "hansen_loss_share_mean": 0.0,
-      "mod44b_change_pp_mean": 1.63,
-      "cells": 11363
+      "mod44b_change_pp_mean": 2.53,
+      "cells": 11711
      },
      {
       "decile": 2,
       "hansen_loss_share_mean": 0.0001,
-      "mod44b_change_pp_mean": 1.28,
-      "cells": 15987
+      "mod44b_change_pp_mean": 2.5,
+      "cells": 15369
      },
      {
       "decile": 3,
-      "hansen_loss_share_mean": 0.0004,
-      "mod44b_change_pp_mean": 0.65,
-      "cells": 13649
+      "hansen_loss_share_mean": 0.0003,
+      "mod44b_change_pp_mean": 1.88,
+      "cells": 13909
      },
      {
       "decile": 4,
-      "hansen_loss_share_mean": 0.001,
-      "mod44b_change_pp_mean": 0.26,
-      "cells": 13720
+      "hansen_loss_share_mean": 0.0009,
+      "mod44b_change_pp_mean": 1.49,
+      "cells": 13731
      },
      {
       "decile": 5,
-      "hansen_loss_share_mean": 0.0035,
-      "mod44b_change_pp_mean": 0.66,
+      "hansen_loss_share_mean": 0.0032,
+      "mod44b_change_pp_mean": 1.6,
       "cells": 13679
      },
      {
       "decile": 6,
-      "hansen_loss_share_mean": 0.0173,
-      "mod44b_change_pp_mean": 0.47,
-      "cells": 13681
+      "hansen_loss_share_mean": 0.0156,
+      "mod44b_change_pp_mean": 1.3,
+      "cells": 13680
      },
      {
       "decile": 7,
-      "hansen_loss_share_mean": 0.0706,
-      "mod44b_change_pp_mean": -0.15,
+      "hansen_loss_share_mean": 0.0645,
+      "mod44b_change_pp_mean": 0.73,
       "cells": 13680
      },
      {
       "decile": 8,
-      "hansen_loss_share_mean": 0.1781,
-      "mod44b_change_pp_mean": -3.27,
+      "hansen_loss_share_mean": 0.1673,
+      "mod44b_change_pp_mean": -2.0,
       "cells": 13680
      },
      {
       "decile": 9,
-      "hansen_loss_share_mean": 0.3329,
-      "mod44b_change_pp_mean": -10.27,
+      "hansen_loss_share_mean": 0.3182,
+      "mod44b_change_pp_mean": -8.7,
       "cells": 13680
      },
      {
       "decile": 10,
-      "hansen_loss_share_mean": 0.604,
-      "mod44b_change_pp_mean": -26.95,
+      "hansen_loss_share_mean": 0.5885,
+      "mod44b_change_pp_mean": -25.12,
       "cells": 13680
      }
     ]
@@ -950,7 +950,7 @@
      "peak_loss_year": 2020,
      "peak_loss_share": 0.271,
      "hansen_treecover2000": 99.6,
-     "mod44b_change_pp": -48.9,
+     "mod44b_change_pp": -46.1,
      "burned_years": [
       2018,
       2020,
@@ -968,7 +968,7 @@
      "peak_loss_year": 2017,
      "peak_loss_share": 0.766,
      "hansen_treecover2000": 99.0,
-     "mod44b_change_pp": -60.3,
+     "mod44b_change_pp": -60.8,
      "burned_years": [
       2004,
       2017,
@@ -987,7 +987,7 @@
      "peak_loss_year": 2018,
      "peak_loss_share": 0.487,
      "hansen_treecover2000": 99.5,
-     "mod44b_change_pp": -48.9,
+     "mod44b_change_pp": -45.5,
      "burned_years": [
       2017,
       2018,
@@ -1006,7 +1006,7 @@
      "peak_loss_year": 2006,
      "peak_loss_share": 0.454,
      "hansen_treecover2000": 99.2,
-     "mod44b_change_pp": -65.3,
+     "mod44b_change_pp": -63.0,
      "burned_years": [
       2005,
       2006,
@@ -1028,7 +1028,7 @@
      "peak_loss_year": 2022,
      "peak_loss_share": 0.568,
      "hansen_treecover2000": 99.7,
-     "mod44b_change_pp": -55.3,
+     "mod44b_change_pp": -41.5,
      "burned_years": [
       2022,
       2024
@@ -1042,7 +1042,7 @@
      "peak_loss_year": 2014,
      "peak_loss_share": 0.324,
      "hansen_treecover2000": 99.6,
-     "mod44b_change_pp": -57.0,
+     "mod44b_change_pp": -54.7,
      "burned_years": [
       2014,
       2015,
@@ -1064,7 +1064,7 @@
      "peak_loss_year": 2024,
      "peak_loss_share": 0.701,
      "hansen_treecover2000": 99.6,
-     "mod44b_change_pp": -29.3,
+     "mod44b_change_pp": -13.6,
      "burned_years": [
       2008,
       2024
@@ -1078,7 +1078,7 @@
      "peak_loss_year": 2020,
      "peak_loss_share": 0.457,
      "hansen_treecover2000": 99.7,
-     "mod44b_change_pp": -58.2,
+     "mod44b_change_pp": -54.2,
      "burned_years": [
       2019,
       2020,
@@ -1096,7 +1096,7 @@
      "peak_loss_year": 2020,
      "peak_loss_share": 0.752,
      "hansen_treecover2000": 99.7,
-     "mod44b_change_pp": -56.3,
+     "mod44b_change_pp": -52.3,
      "burned_years": [
       2020,
       2021,
@@ -1113,7 +1113,7 @@
      "peak_loss_year": 2020,
      "peak_loss_share": 0.485,
      "hansen_treecover2000": 99.3,
-     "mod44b_change_pp": -50.8,
+     "mod44b_change_pp": -43.3,
      "burned_years": [
       2020,
       2021,
@@ -1316,68 +1316,68 @@
     ]
    },
    "change_vs_hansen_loss": {
-    "r": -0.603,
+    "r": -0.578,
     "cells": 25648,
-    "definition": "MOD44B mean(2024,2025) - mean(2001,2002), percentage points",
+    "definition": "MOD44B mean(2023,2024) - mean(2001,2002), percentage points; Hansen loss share 2001-2024 (MOD44B 2025 is flagged and not used)",
     "by_hansen_loss_decile": [
      {
       "decile": 1,
       "hansen_loss_share_mean": 0.0,
-      "mod44b_change_pp_mean": 2.01,
-      "cells": 2288
+      "mod44b_change_pp_mean": 2.07,
+      "cells": 2343
      },
      {
       "decile": 2,
       "hansen_loss_share_mean": 0.0002,
-      "mod44b_change_pp_mean": 2.06,
-      "cells": 2837
+      "mod44b_change_pp_mean": 2.2,
+      "cells": 2774
      },
      {
       "decile": 3,
       "hansen_loss_share_mean": 0.0005,
-      "mod44b_change_pp_mean": 2.43,
-      "cells": 2570
+      "mod44b_change_pp_mean": 2.46,
+      "cells": 2577
      },
      {
       "decile": 4,
-      "hansen_loss_share_mean": 0.0012,
-      "mod44b_change_pp_mean": 2.54,
+      "hansen_loss_share_mean": 0.0011,
+      "mod44b_change_pp_mean": 2.61,
       "cells": 2564
      },
      {
       "decile": 5,
-      "hansen_loss_share_mean": 0.0029,
-      "mod44b_change_pp_mean": 2.99,
-      "cells": 2565
+      "hansen_loss_share_mean": 0.0027,
+      "mod44b_change_pp_mean": 3.24,
+      "cells": 2566
      },
      {
       "decile": 6,
-      "hansen_loss_share_mean": 0.007,
-      "mod44b_change_pp_mean": 3.01,
+      "hansen_loss_share_mean": 0.0065,
+      "mod44b_change_pp_mean": 3.33,
       "cells": 2565
      },
      {
       "decile": 7,
-      "hansen_loss_share_mean": 0.0181,
-      "mod44b_change_pp_mean": 2.21,
+      "hansen_loss_share_mean": 0.0167,
+      "mod44b_change_pp_mean": 2.82,
       "cells": 2564
      },
      {
       "decile": 8,
-      "hansen_loss_share_mean": 0.0486,
-      "mod44b_change_pp_mean": 1.05,
+      "hansen_loss_share_mean": 0.0451,
+      "mod44b_change_pp_mean": 2.38,
       "cells": 2565
      },
      {
       "decile": 9,
-      "hansen_loss_share_mean": 0.1323,
-      "mod44b_change_pp_mean": -2.26,
+      "hansen_loss_share_mean": 0.1237,
+      "mod44b_change_pp_mean": -0.18,
       "cells": 2565
      },
      {
       "decile": 10,
-      "hansen_loss_share_mean": 0.3785,
-      "mod44b_change_pp_mean": -11.82,
+      "hansen_loss_share_mean": 0.3601,
+      "mod44b_change_pp_mean": -9.5,
       "cells": 2565
      }
     ]
@@ -1571,7 +1571,7 @@
      "peak_loss_year": 2024,
      "peak_loss_share": 0.536,
      "hansen_treecover2000": 97.7,
-     "mod44b_change_pp": -51.9,
+     "mod44b_change_pp": -26.3,
      "burned_years": [
       2005,
       2007,
@@ -1594,7 +1594,7 @@
      "peak_loss_year": 2007,
      "peak_loss_share": 0.514,
      "hansen_treecover2000": 99.5,
-     "mod44b_change_pp": -11.0,
+     "mod44b_change_pp": -6.7,
      "burned_years": [
       2006,
       2007,
@@ -1609,7 +1609,7 @@
      "peak_loss_year": 2013,
      "peak_loss_share": 0.331,
      "hansen_treecover2000": 98.2,
-     "mod44b_change_pp": -22.7,
+     "mod44b_change_pp": -14.5,
      "burned_years": [
       2013,
       2014,
@@ -1626,7 +1626,7 @@
      "peak_loss_year": 2022,
      "peak_loss_share": 0.197,
      "hansen_treecover2000": 98.8,
-     "mod44b_change_pp": -45.6,
+     "mod44b_change_pp": -36.9,
      "burned_years": [
       2005,
       2007,
@@ -1650,7 +1650,7 @@
      "peak_loss_year": 2007,
      "peak_loss_share": 0.361,
      "hansen_treecover2000": 99.9,
-     "mod44b_change_pp": -15.1,
+     "mod44b_change_pp": -12.9,
      "burned_years": [
       2006,
       2007,
@@ -1665,7 +1665,7 @@
      "peak_loss_year": 2019,
      "peak_loss_share": 0.146,
      "hansen_treecover2000": 97.9,
-     "mod44b_change_pp": -39.6,
+     "mod44b_change_pp": -38.6,
      "burned_years": [
       2004,
       2008,
@@ -1692,7 +1692,7 @@
      "peak_loss_year": 2008,
      "peak_loss_share": 0.142,
      "hansen_treecover2000": 96.3,
-     "mod44b_change_pp": -26.7,
+     "mod44b_change_pp": -22.1,
      "burned_years": [
       2007,
       2008,
@@ -1712,7 +1712,7 @@
      "peak_loss_year": 2022,
      "peak_loss_share": 0.408,
      "hansen_treecover2000": 99.3,
-     "mod44b_change_pp": -47.5,
+     "mod44b_change_pp": -42.5,
      "burned_years": [
       2005,
       2010,
@@ -1730,7 +1730,7 @@
      "peak_loss_year": 2012,
      "peak_loss_share": 0.422,
      "hansen_treecover2000": 99.5,
-     "mod44b_change_pp": -18.8,
+     "mod44b_change_pp": -10.9,
      "burned_years": [
       2012,
       2013,
@@ -1745,7 +1745,7 @@
      "peak_loss_year": 2010,
      "peak_loss_share": 0.196,
      "hansen_treecover2000": 99.3,
-     "mod44b_change_pp": -41.2,
+     "mod44b_change_pp": -41.3,
      "burned_years": [
       2011
      ]

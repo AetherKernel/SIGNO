@@ -1,5 +1,8 @@
 // AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-14 (CellBundle added 2026-11-15). Reviewed and
 // owned by team AETHER.
+// 2026-11-15: optional fields for hansenConsistency (Hansen loss vs INPE PRODES); written with Claude Code, reviewed by team
+// AETHER. Later the same day: one Hansen loss trend over `lossTrendYears` (2011-2025; 2001-2010 are shown but not tested, so the
+// two-segment fields were removed), `slopeCi95` (95 % confidence interval of every Sen slope) and `driftFromYear`.
 //
 // SIGNO data contract (API v1). This file is the single source of truth shared by the backend (`server/`) and the
 // frontend (`src/`). It holds types and constants only: no logic, no imports.
@@ -69,12 +72,17 @@ export interface Variable {
   slopeUnits?: string
   /** First and last year that enter the trend test of this variable (e.g. 2001 to 2020 for LST). Optional like `slopeUnits`. */
   trendYears?: { start: number; end: number }
+  /**
+   * NDVI, EVI and daytime temperature only: the first year whose values are shown but not tested because the Terra overpass time
+   * drifts (2021). Absent in older exports: the UI then treats the years after `trendYears.end` as drift years.
+   */
+  driftFromYear?: number
 }
 
 export interface Region {
   id: string
   name: string
-  /** Cited source of the region boundary, or null while it is undecided (P-008). */
+  /** Cited source of the region boundary, or null while it is undecided. */
   boundarySource: string | null
   bbox: BoundingBox
 }
@@ -130,6 +138,8 @@ export interface CellTrend {
   validMonths: number
   /** Sen line over the tested years (optional, only for tested cells). */
   line?: SenLine
+  /** 95 % confidence interval of `slopePerDecade`, [low, high], in the same units (optional; null when not tested). */
+  slopeCi95?: [number, number] | null
 }
 
 /** Computed by the backend from `cells`; never sent by the pipeline. */
@@ -259,6 +269,7 @@ export interface CoverCell {
    * (it cannot rise by construction). Optional: exports from before the team chose the trend method lack it.
    */
   trends?: {
+    /** Loss over `CoverLayer.lossTrendYears` (2011-2025); the earlier years are shown but not tested. */
     lossKm2: CoverCellTrend | null
     modisTreeCover: CoverCellTrend | null
   }
@@ -271,6 +282,10 @@ export interface CoverCellTrend {
   significant: boolean
   /** Sen line over the tested years (optional). */
   line?: SenLine
+  /** 95 % confidence interval of `slopePerDecade`, [low, high] (optional). */
+  slopeCi95?: [number, number] | null
+  /** First and last year tested (loss: 2011-2025). */
+  period?: [number, number]
 }
 
 export interface CoverFlag {
@@ -297,6 +312,12 @@ export interface CoverLayer {
   flags: CoverFlag[]
   /** Plain-language method of the cover trends (tested years, test, FDR, AI disclosure). Optional like CoverCell.trends. */
   trendMethod?: string
+  /** First year of the reprocessed Hansen loss (2011): the loss trend starts there; earlier years are shown, not tested. */
+  methodChangeYear?: number
+  /** First and last year of the one Hansen loss trend (2011-2025). */
+  lossTrendYears?: [number, number]
+  /** English note of the pipeline about the Hansen method change. */
+  hansenNote?: string
   cells: CoverCell[]
 }
 
@@ -415,6 +436,8 @@ export interface TrendResultSummary {
   significant: boolean
   /** Sen line over the tested years (optional). */
   line?: SenLine
+  /** 95 % confidence interval of `slopePerDecade`, [low, high] (optional). */
+  slopeCi95?: [number, number] | null
 }
 
 /** Zone-level test (one test per zone and variable, no multiple-testing correction). */
@@ -431,7 +454,7 @@ export interface TrendCheckVariable {
   /** Monthly variable id, or "lossKm2" / "modisTreeCover" for the cover measures. */
   variableId: string
   testUsed: string
-  /** Share of tested cells whose residuals show lag-1 autocorrelation (pre-registered rule). */
+  /** Share of tested cells whose residuals show lag-1 autocorrelation (rule fixed before the results). */
   autocorrelationShare: number
   /** First and last year tested. */
   period: [number, number]
@@ -446,7 +469,7 @@ export interface TrendCheckVariable {
   cellsWithMissingYear: number
 }
 
-/** Satellite drift check (rule D1): correlation of the overpass time with the NDVI/EVI anomaly. */
+/** Satellite drift check: correlation of the overpass time with the NDVI/EVI anomaly. */
 export interface DriftCheck {
   years: [number, number]
   overpassHoursFirstYear: number
@@ -455,14 +478,14 @@ export interface DriftCheck {
   rule: string
 }
 
-/** V1: share of cells flagged significant after shuffling the years (expected near zero). */
+/** Share of cells flagged significant after shuffling the years (expected near zero). */
 export interface FalsePositiveCheck {
   permutations: number
   meanShareSignificant: number
   maxShareSignificant: number
 }
 
-/** V2: share of cells where an injected trend (the median significant slope) is found again. */
+/** Share of cells where an injected trend (the median significant slope) is found again. */
 export interface DetectionCheck {
   injectedSlopePerDecade: number | null
   meanShareDetected: number
@@ -470,7 +493,7 @@ export interface DetectionCheck {
   meanShareDetectedIncreasing: number
 }
 
-/** V3: one measure in a known place. `direction` is what the test found, `expectedDirection` what the references report. */
+/** One measure in a known place. `direction` is what the test found, `expectedDirection` what the references report. */
 export interface KnownPlaceResult extends TrendResultSummary {
   /** Benjamini-Hochberg adjusted p. */
   qValue: number | null
@@ -488,14 +511,44 @@ export interface KnownPlaceCheck {
   /** Only for kind "case": matches ValidationCase.id. */
   caseId?: string
   label?: string
+  /** Loss 2011-2025. */
   lossKm2: KnownPlaceResult | null
   modisTreeCover: KnownPlaceResult | null
+}
+
+/** One period (2001-2010 or 2011-2025) of Hansen loss compared with the official INPE PRODES deforestation. Evidence only: just 2011-2025 is tested. */
+export interface HansenConsistencySegment {
+  years: [number, number]
+  hansenBrazilVsProdes: { r: number | null; ratio: number | null }
+  /** Zone trend of Hansen loss (amazon, amazon_brazil, amazon_peru) and of PRODES, in this segment. */
+  zoneTrends: Record<string, { slopePerDecade: number | null; pValue: number | null; significant: boolean; n: number; trend: 'increasing' | 'decreasing' | 'none' }>
+  /** MODIS check: a negative r means MODIS tree cover falls where Hansen sees more loss. */
+  modisCheck: { r: number | null; definition: string }
+  cells: ZoneCellSummary
+}
+
+/** Hansen loss against the official deforestation of Brazil (INPE PRODES), per period. */
+export interface HansenConsistency {
+  methodChangeYear: number
+  hansenNotes: { title: string; url: string; quotes: string[] }
+  prodes: { title: string; url: string; scope: string; note: string; years: number[]; km2: number[] }
+  segments: HansenConsistencySegment[]
+  /** What one test across the method change would say (not used; the evidence for starting the trend in 2011). */
+  acrossBreak: {
+    years: [number, number]
+    zoneTrends: HansenConsistencySegment['zoneTrends']
+    note: string
+  }
+  text: string
 }
 
 export interface TrendChecks {
   generatedUtc: string
   design: {
     alpha: number
+    /** Level of the confidence intervals (0.95) and how they are computed, in words. */
+    ciLevel?: number
+    ciMethod?: string
     minCompleteShare: number
     autocorrelationRuleThreshold: number
     permutations: number
@@ -503,13 +556,15 @@ export interface TrendChecks {
     text: string
   }
   variables: TrendCheckVariable[]
+  /** Hansen loss against PRODES in 2001-2010 and 2011-2025. Optional: older exports lack it. */
+  hansenConsistency?: HansenConsistency
   d1Drift: DriftCheck
-  /** Keyed by variable id (V1). */
+  /** Keyed by variable id. */
   v1FalsePositives: Record<string, FalsePositiveCheck>
-  /** Keyed by variable id (V2). */
+  /** Keyed by variable id. */
   v2Detection: Record<string, DetectionCheck>
   v3KnownPlaces: KnownPlaceCheck[]
-  /** Zone id, then variable id (V4). */
+  /** Zone id, then variable id. */
   v4ZoneTrends: Record<string, Record<string, ZoneTrendResult>>
 }
 
@@ -594,10 +649,11 @@ export interface ZoneVariable {
   annual: ZoneYearValue[]
   /** Monthly variables only: lowest and highest month of each complete year. */
   monthlyRange?: ZoneMonthlyRange[]
-  /** Absent for hansenTreeCover (never tested). */
+  /** Absent for hansenTreeCover (never tested). For lossKm2 the test covers 2011-2025 only. */
   zoneTrend?: ZoneTrendResult
   /** Absent for hansenTreeCover. */
   cellSummary?: ZoneCellSummary
+  methodChangeYear?: number
 }
 
 export interface Zone {

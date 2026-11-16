@@ -41,15 +41,54 @@ those three scripts prints this reminder. Re-run `trends` after them. Step 9 (`e
 
 ## Run it
 
+Python 3.12 or later is required. The pinned versions in `pipeline/requirements.txt` have no wheels for Python 3.10 or
+3.11 (numpy 2.5.4 does not install on them). Run every command from the repository root, with the virtual environment active.
+
+### One command (recommended)
+
+```bash
+python -m pipeline.run_all
+```
+
+It runs the whole pipeline in five stages:
+
+1. **Checks before anything is downloaded:** Python 3.12 or later; Earthdata credentials (it only checks that they exist: the environment variables `EARTHDATA_TOKEN` or `EARTHDATA_USERNAME` and `EARTHDATA_PASSWORD`, or a netrc file; it never reads or prints them); the RAISG zip `Biomas_2025.zip` under `data/raw/`; free disk space (warns under 20 GB). If something is missing, it stops before downloading.
+2. **Downloads** the 8 sources in parallel, at most four at a time, longest first: MOD13C2, MCD64A1, Hansen, MOD11C3, MOD44B, GLDAS_NOAH025_M, GPM_3IMERGM, GRACE. One log per source in `data/interim/logs/<SOURCE>.log`; progress is printed every 2 minutes.
+3. **Checks the logs:** if a month or tile failed, it stops before the exports. Run the same command again to resume: finished months and tiles are skipped.
+4. **Runs the steps in order:** `export_json`, `export_maps`, `export_api`, `export_cover`, `validate`, `test_trends`, `trends`, `export_borders`.
+5. **Verifies the results** with `pipeline.verify` (report: `data/interim/logs/verify_report.json`), and prints the time of every step (also saved to `data/interim/logs/run_summary.json`).
+
+| Option | What it does |
+|---|---|
+| `--only downloads` | runs the downloads only (stages 2 and 3) |
+| `--only exports` | runs stage 4 and the verify step from an existing `data/interim/` (exports, trend test and verify) |
+| `--dry-run` | checks and plan only; nothing is downloaded |
+| `--latest` | downloads up to the last complete month instead of the published dates; `verify` then shows longer monthly lists |
+| `--jobs N` | the most sources downloaded at the same time (the measured runs used 4) |
+| `--every` | how often progress is printed (default: every 2 minutes) |
+
+**Default end dates** are those of the published run of 15 Nov 2026: MOD13C2 and MOD11C3 to 2026-10, GLDAS to 2026-07,
+IMERG to 2025-09, MCD64A1 to 2026-09, MOD44B to 2025. Hansen and GRACE have no dates: GRACE always fetches NASA's current
+file (on 15 Nov 2026 it held 259 months, 2002-04 to 2026-09).
+
+On Colab (free tier) the same command took 1 h 22 min on 15 Nov 2026; see *Reproduce and verify*.
+
+### Step by step
+
+The same steps one at a time:
+
 ```bash
 py -m venv .venv
+source .venv/Scripts/activate                                        # Windows (Git Bash). Linux/macOS/Colab: source .venv/bin/activate
 .venv/Scripts/python -m pip install -r pipeline/requirements.txt   # Linux/Colab: .venv/bin/python
 
 python -m pipeline.download --dry-run                       # what NASA has, nothing downloaded
-python -m pipeline.download --start 2000-01 --end 2026-10   # four monthly products (needs Earthdata Login)
+python -m pipeline.download --products MOD13C2 MOD11C3 --start 2000-01 --end 2026-10   # monthly MODIS (needs Earthdata Login)
+python -m pipeline.download --products GLDAS_NOAH025_M --start 2000-01 --end 2026-07    # end dates = the published run (run_all uses the same)
+python -m pipeline.download --products GPM_3IMERGM --start 2000-01 --end 2025-09
 python -m pipeline.clip_clean                               # only for files you downloaded by hand
 python -m pipeline.tiles --product MOD44B --start 2000 --end 2025         # tree cover (Earthdata Login)
-python -m pipeline.tiles --product MCD64A1 --start 2000-11 --end 2026-10  # burned area (Earthdata Login)
+python -m pipeline.tiles --product MCD64A1 --start 2000-11 --end 2026-09  # burned area (Earthdata Login)
 python -m pipeline.hansen                                   # Hansen tree cover and loss (no login)
 python -m pipeline.grace                                    # GRACE water storage (Earthdata Login)
 python -m pipeline.export_json                              # web/public/data/*.json
@@ -59,7 +98,7 @@ python -m pipeline.export_cover                             # web/server/data/co
 python -m pipeline.validate                                 # validation.json in web/public/data/ and web/server/data/
 python -m pipeline.trends                                   # step 8: trend test (run last; writes trends/, cover.json, zones.json, validation.json trendChecks)
 python -m pipeline.export_borders                           # step 9: web/public/data/borders.json
-python -m pipeline.test_trends                              # 7 checks of the trend test on synthetic series
+python -m pipeline.test_trends                              # 13 checks of the trend test on synthetic series
 ```
 
 Run commands from the repository root. Boundary zips (RAISG, HydroBASINS) go by hand into `data/raw/boundaries/`,
@@ -80,7 +119,7 @@ on 2026-11-15). The sources added on 2026-11-15: MOD44B about 33 GB (one year, ~
 16 GB (one month, ~51 MB at a time), Hansen about 8.6 GB (16 tiles, two layers, each tile's files deleted after
 aggregating), and GRACE one 44 MB file. On 2026-11-15 these took about 1 h 10 min in parallel; `data/interim/` grew
 to 1.9 GB. The export steps `export_json` + `export_maps` + `validate` take about 15 minutes. The run time of `export_api` and
-`export_cover` is not recorded yet.
+`export_cover` times of 15 Nov 2026 are in *Reproduce and verify*.
 An interrupted run resumes: months already in `data/interim/` are skipped (see *Full run* below).
 
 ## Full run (2000–2026): retries, parallel runs, logs
@@ -133,7 +172,8 @@ products. Clip sizes: MOD13C2 2.6 MB, MOD11C3 1.4 MB, GLDAS 0.2 MB, IMERG 0.6 MB
 
 | File | Does |
 |---|---|
-| `config.py` | Every setting: paths, clip box, Amazon boundary, zones, quality rule, products, extra sources, periods and semesters, API cells and variables, documented cases. **Team decisions are here** (C1, B1, D1, semesters: see *Team rules applied at export*), and the trend test settings (`TREND_*`, ADR-006) |
+| `__init__.py` | Sets `HDF5_PLUGIN_PRELOAD="::"` before any netCDF or HDF5 file is opened, so HDF5 stops searching for compression plugins for every variable. On Windows this cut the exports from 44 min to 10 min (15 Nov 2026), with all 150 output files identical. A variable set beforehand is kept |
+| `config.py` | Every setting: paths, clip box, Amazon boundary, zones, quality rule, products, extra sources, periods and semesters, API cells and variables, documented cases. **Team decisions are here** (C1, B1, D1, semesters: see *Team rules applied at export*), the trend test settings (`TREND_*`, ADR-006), the Hansen 2011 change (`HANSEN_LOSS_TREND_YEARS = (2011, 2025)`, `HANSEN_METHOD_CHANGE_YEAR = 2011`) and the PRODES series (`HANSEN_*`, `PRODES_*`, ADR-009), and the LST trend years (`LST_TREND_LAST_YEAR = 2020`, `DRIFT_FROM_YEAR = 2021`) |
 | `readers.py` | One reader per monthly product: global file → clipped, cleaned `xarray.Dataset` |
 | `zones.py` | Zone polygons → cell masks per grid, cached in `data/interim/masks/` |
 | `tiles.py` | MOD44B and MCD64A1: sinusoidal tiles over the box → 0.05° cells. Each fine pixel goes to the cell that contains its centre; nothing is thresholded. Writes `data/interim/MOD44B/<YYYY>.nc` and `data/interim/MCD64A1/<YYYY-MM>.nc`; resumable |
@@ -145,10 +185,12 @@ products. Clip sizes: MOD13C2 2.6 MB, MOD11C3 1.4 MB, GLDAS 0.2 MB, IMERG 0.6 MB
 | `export_maps.py` | Step 4: PNG map layers and `maps/index.json` |
 | `export_api.py` | Step 5: API source in `web/server/data/`: `region.json`, `variables.json`, `trends/<id>.json`, `series/<id>.json`, for 1° cells (`API_CELL_DEG`). Rewrites only these files |
 | `export_cover.py` | Step 6: `web/server/data/cover.json`: tree cover (Hansen, MOD44B), Hansen loss and burned area per 1° cell. Needs `export_api` first |
-| `validate.py` | Step 7: `validation.json` in `web/public/data/` (snake_case) and `web/server/data/` (camelCase, for the API): agreement with Hansen, change against loss, fire co-location, hotspots, one documented case |
-| `trends.py` | Step 8: the trend test of ADR-006 per 1° cell and per zone, with its checks V1–V4. Writes `web/server/data/trends/<id>.json`, the trend fields of `cover.json`, `zones.json` and `trendChecks` in `validation.json`. Settings in `config.py` (`TREND_*`). Run it last |
-| `test_trends.py` | 7 checks of the test on synthetic series: a linear trend is found with its sign, white noise is mostly not significant after the correction, Hamed–Rao runs, annual sums and means, the 80 % rule, and the Sen slope with missing years |
+| `validate.py` | Step 7: `validation.json` in `web/public/data/` (snake_case) and `web/server/data/` (camelCase, for the API): agreement with Hansen, change against loss (MODIS change 2023–2024 vs 2001–2002, against Hansen loss 2001–2024), fire co-location, hotspots, one documented case |
+| `trends.py` | Step 8: the trend test of ADR-006 per 1° cell and per zone, with its checks V1–V4. Writes `web/server/data/trends/<id>.json`, the trend fields of `cover.json`, `zones.json` and `trendChecks` in `validation.json`. Settings in `config.py` (`TREND_*`). Each slope has a 95 % confidence interval (`slopeCi95`). Run it last |
+| `test_trends.py` | 13 checks of the test on synthetic series: a linear trend is found with its sign, white noise is mostly not significant after the correction, Hamed–Rao runs, annual sums and means, the 80 % rule, the Sen slope with missing years, the Hansen loss trend starting at the method-change year, the confidence interval containing the Sen slope and the true slope, the interval of noise containing 0, the Sen slope against `scipy.stats.theilslopes`, and the LST trend ending at `LST_TREND_LAST_YEAR` |
 | `export_borders.py` | Step 9: `web/public/data/borders.json`, Natural Earth countries clipped to the box and simplified (about 0.02°). Public domain |
+| `verify.py` | Reproducibility check, not a pipeline step: compares every JSON and PNG file in `web/server/data/` and `web/public/data/` with the version committed in git HEAD. See *Reproduce and verify* |
+| `run_all.py` | One command, `python -m pipeline.run_all`: checks, downloads (four sources at a time, resumable), exports, trend test, verify, and the time of each step. See *Run it* |
 
 ## What "cleaning" does, per product
 
@@ -184,7 +226,7 @@ Decisions of the team, recorded in `pipeline/config.py` (see `.ai-context/05-tec
 | Rule | Decision | Setting | Effect in the outputs |
 |---|---|---|---|
 | C1 | Analyse full years from January 2001 | `ANALYSIS_START = "2001-01"` | Every series starts in 2001-01. February 2000 is dropped: it is a partial first month of Terra (see *Validation*, problem 2) |
-| B1 | Daytime and night LST only up to 2020-12 | `LST_LAST_MONTH = "2020-12"` | `lst_day` and `lst_night` end in 2020-12. After that Terra's overpass drifts (10:32 → 08:56 local time by 2026) and night LST is biased warm. Aqua is not used. The diagnostics `lst_clear_days` and `lst_day_local_time` are still exported for all months |
+| B1 | Daytime LST is published to 2026-10; its trend ends in 2020 | `LST_TREND_LAST_YEAR = 2020`, `DRIFT_FROM_YEAR = 2021` | `lst_day` is published to 2026-10 (real NASA data). The trend uses 2001–2020. After 2020 Terra's overpass drifts (10:32 → 08:56 local time by 2026), so 2021 onward is shown with a "?" mark and is not tested. Night LST is still cut at 2020-12 and not exported (`LST_LAST_MONTH`, rule D4). Aqua is not used. The diagnostics `lst_clear_days` and `lst_day_local_time` are still exported for all months |
 | D1 | GLDAS evapotranspiration is climate context only | `kind: "context"` | `et` is marked as context, not as a forest indicator. GLDAS keeps static land cover, so it cannot show deforestation |
 | — | Six-month periods: H1 = January–June (mostly wet season), H2 = July–December (dry and fire season) | `SEMESTERS` | `amazon_semester.json` and the burned-area maps use `YYYY-H1` and `YYYY-H2` |
 
@@ -226,6 +268,9 @@ Full description of each file and of the map encodings: [`web/README.md`](../web
 }
 ```
 
+`lst_last_month` (2020-12) applies only to night LST: night LST is in this file up to 2020-12. Day LST is published to
+2026-10 and its meta carries `lst_trend_last_year: 2020` and `drift_from_year: 2021` instead.
+
 The variables and their `kind`:
 
 | Kind | Variables |
@@ -240,7 +285,7 @@ not null.
 
 **Size and series length.** After the 15 Nov extension: `amazon_monthly.json` 242 KB, `amazon_semester.json` 44 KB,
 `amazon_annual.json` 9 KB, `validation.json` 42 KB, `maps/` 129 PNG layers, 17.4 MB (Vercel serves JSON compressed).
-Each series has its own `t` array, because the series end at different months: LST day and night 2020-12, IMERG
+Each series has its own `t` array, because the series end at different months: LST day 2026-10 and night 2020-12, IMERG
 2025-09, GLDAS 2026-07, MODIS NDVI and EVI 2026-10, and water storage 2026-09 with 35 months missing. A front end must
 not assume that all variables share the same months. `mean` (or `total`) is null when no zone cell had a valid value.
 
@@ -271,7 +316,7 @@ diagnostics) are in `amazon_monthly.json` only.
 |---|---|---|---|---|
 | `ndvi` | MOD13C2 | 2001-01 → 2026-10 | mean | Only reliability values 0 and 1 are used |
 | `evi` | MOD13C2 | 2001-01 → 2026-10 | mean | Same reliability rule |
-| `lst_day` | MOD11C3 | 2001-01 → 2020-12 | mean | Stops in 2020-12 (team rule B1) |
+| `lst_day` | MOD11C3 | 2001-01 → 2026-10 | mean | Published to 2026-10; the trend uses 2001–2020 (team rule B1) |
 | `precip` | GPM_3IMERGM | 2001-01 → 2025-09 | sum | mm per month |
 | `burned_area` | MCD64A1 | 2001-01 → 2026-09 | sum | % of the cell burned in the month |
 
@@ -298,10 +343,11 @@ same 566 cells. Per cell:
 | `lossKm2` | 2001–2025 | Hansen stand-replacing loss area per year (km²) |
 | `burnedKm2` | 2001–2025 | Burned area per calendar year (km²), summed over its 12 months |
 
-`definitions` explains each field in plain language. `flags` records the suspect MOD44B 2025 year (see *Known limits*).
-The file is about 361 KB before the trend results. Step 8 adds `trends` to each cell (`lossKm2` and `modisTreeCover`:
-slope per decade, raw p-value, significance after the correction, Sen line) and the layer's `trendMethod` text. With them
-the file is about 540 KB.
+`definitions` explains each field in plain language. `flags` records the MOD44B 2025 anomaly (see *Known limits*). `methodChangeYear` (2011), `lossTrendYears` (2011–2025) and `hansenNote`
+explain the Hansen method change.
+The file is about 361 KB before the trend results. Step 8 adds `trends` to each cell: `lossKm2` (2011–2025),
+and `modisTreeCover`, each with its `period`, slope per decade, its 95 % CI (`slopeCi95`), raw p-value, significance after
+the correction, and Sen line. It also adds the layer's `trendMethod` text. With them the file is about 540 KB.
 
 **`validation.json`** (`validate.py`): the camelCase copy for the API has the zone sections (agreement, change against
 loss, loss with fire, hotspots with `apiCellId`) and `cases`. Outside `trendChecks` it holds no p-values and no
@@ -309,8 +355,8 @@ significance fields; the server rejects them (`web/server/validate.ts`). `trendC
 
 **`zones.json`** (`trends.py`): for `amazon`, `amazon_brazil` and `amazon_peru`, every variable with its `units`, its
 complete years (`annual`, value null when a year is incomplete), the lowest and highest month of each complete year
-(`monthlyRange`, monthly variables only, information only), the zone test (`zoneTrend`: Sen slope per decade, raw p, the
-test used, years, and `line`), and the counts of the squares that the cell tests found (`cellSummary`). Hansen tree cover
+(`monthlyRange`, monthly variables only, information only), the zone test (`zoneTrend`: Sen slope per decade, its 95 % CI (`slopeCi95`), raw p, the
+test used, years, and `line`), and the counts of the squares that the cell tests found (`cellSummary`). For Hansen loss, `zoneTrend` covers 2011–2025 only, with its counts in `cellSummary`; `methodChangeYear` is 2011. Hansen tree cover
 is shown but never tested. Served at `/api/v1/zones.json`.
 
 **`borders.json`** (`export_borders.py`): the country borders as GeoJSON (Natural Earth 10m admin-0, public domain). Static
@@ -422,11 +468,12 @@ soil moisture is at its lowest in 2023–2024.
 
 **Problems found (for the team).**
 
-1. **Terra orbit drift biases daytime LST (and maybe NDVI/EVI) after 2021.** Mean overpass time, local solar:
+1. **Terra orbit drift may bias daytime LST (and maybe NDVI/EVI) after 2021.** Mean overpass time, local solar:
    10.54 h through 2020, 10.49 (2021), 10.34 (2022), 10.12 (2023), 9.82 (2024), 9.41 (2025), 8.94 (2026):
    about 1 h 40 min earlier. Daytime LST in 2026 averages 25.3 °C vs 27.2 °C in 2001–2005, and from 2015 on the
    overpass time and the day-LST anomaly correlate at r = 0.81. In 2024, a record drought year, day LST ranks
-   only 14th hottest. Recent daytime LST cannot be compared with earlier years as it is (P-019).
+   only 14th hottest. This is most likely the overpass-time effect: Terra passes earlier from 2021, when the surface is
+   cooler. It is also why 2021 onward is shown with a "?" and not tested. Recent daytime LST cannot be compared with earlier years as it is (P-019). Amazon yearly daytime LST: 2020 28.0 °C; 2021–2025 27.4, 27.4, 27.7, 27.6 and 26.1 °C. The 2025 drop of about 2 °C goes the wrong way for a drought (2023–2024 were record drought and heat years), which points to the overpass-time effect rather than real cooling; it is not proof. The drift years are shown but not tested.
 2. **February 2000 is partial.** Terra data start at the end of that month: only 70% of cells have NDVI and 58%
    have day LST (26% night LST), against more than 87% in any other month.
 3. **Nighttime LST coverage** falls to about 52% of the zone in some wet-season months (e.g. 2022-03, 2011-02).
@@ -456,10 +503,20 @@ significance field in the report outside `trendChecks`. Results of the 2026-11-1
 MOD44B saturates over dense forest: where Hansen sees 98 % canopy, MOD44B reports 72.5 %. Below 30 % cover the two
 agree within a few points. So MOD44B tracks *where* and *how much it changes*, Hansen gives the more exact level.
 
-**2. They agree on where trees were lost.** Correlation between MOD44B change (2024–25 vs 2001–02) and Hansen loss
-2001–2025: r = −0.72 (Amazon), −0.78 (Brazil), −0.60 (Peru). In the 10 % of cells with the most Hansen loss
-(54 % of the cell lost on average) MOD44B drops 22.6 points; where Hansen sees no loss MOD44B stays within ±1–3
-points. In Peru, MOD44B rises 2–3 points in cells without loss: noise of the product, not new forest.
+**2. They agree on where trees were lost.** Correlation between MOD44B change (mean of 2023–2024 minus mean of
+2001–2002) and Hansen loss 2001–2024. 2025 is left out of both, because the MOD44B 2025 drop is anomalous (15 Nov change):
+r = −0.73 (Amazon), −0.79 (Brazil), −0.58 (Peru). The decile values, recomputed with this definition, are in
+`validation.json` (`by_hansen_loss_decile`).
+
+MODIS change against Hansen loss, by decile of Hansen loss (percentage points; mean(2023, 2024) − mean(2001, 2002); decile 1 = least loss, 10 = most loss):
+
+| Zone | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Amazon | 2.09 | 2.08 | 1.72 | 1.44 | 1.66 | 1.57 | 1.21 | −0.03 | −4.58 | −20.50 |
+| Brazilian Amazon | 2.53 | 2.50 | 1.88 | 1.49 | 1.60 | 1.30 | 0.73 | −2.00 | −8.70 | −25.12 |
+| Peruvian Amazon | 2.07 | 2.20 | 2.46 | 2.61 | 3.24 | 3.33 | 2.82 | 2.38 | −0.18 | −9.50 |
+
+In plain words: cells with little or no Hansen loss gain about 1 to 2.5 MODIS points in the Amazon and Brazil, and about 2 to 3.3 points in Peru. The decile with the most loss drops about 20.5 points (Amazon), 25 (Brazil) and 9.5 (Peru).
 
 **3. Tree cover per year (zone means, %).**
 
@@ -503,8 +560,9 @@ Full lists (10 per zone, with coordinates, peak year and burned years) are in `v
 ## Trend test (step 8)
 
 Decided by the team on 15 Nov 2026 (ADR-006; the decision and its parameters are in `.ai-context/01-logic.md`,
-*Method*) and applied by `pipeline/trends.py`. It writes the trend results in four places: `web/server/data/trends/<id>.json`
-(per cell: `slopePerDecade`, `pValue`, `significant`, `line`, `method`), `cover.json` (per cell `trends` for Hansen loss and
+*Method*) and applied by `pipeline/trends.py`. Hansen loss is tested as one trend, 2011–2025, with all years shown
+(ADR-009; see *Hansen loss: one trend from 2011* below). It writes the trend results in four places: `web/server/data/trends/<id>.json`
+(per cell: `slopePerDecade`, `pValue`, `significant`, `line`, `method`), `cover.json` (per cell `trends` for Hansen loss (`lossKm2`, 2011–2025) and
 MODIS tree cover, and `trendMethod`), `zones.json` (per zone), and `validation.json` (`trendChecks`: the drift check D1 and
 the checks V1–V4).
 
@@ -514,27 +572,75 @@ the checks V1–V4).
    Only years with all 12 months count, so the seasonal cycle does not enter the test.
 2. A cell is tested with at least 80 % of its years complete. Otherwise its slope and p-value are null.
 3. Mann–Kendall test (`pymannkendall`, the original test) on the yearly values. The change per decade is Sen's slope
-   (median of all pairwise slopes, using the real year gaps) × 10, in the measure's yearly units.
+   (median of all pairwise slopes, using the real year gaps) × 10, in the measure's yearly units. The test uses only the order of the yearly values, so a missing year does not bias it (it has one value less). Seven burned-area cells lack 2001 or 2002.
 4. Autocorrelation rule (pre-registered): lag-1 autocorrelation of the residuals around the Sen line, beyond
    1.96/√n, in more than 20 % of the tested cells of a measure would switch that measure to the Hamed–Rao test. It did not
    happen in any measure (shares below).
 5. Benjamini–Hochberg false discovery rate (`statsmodels`, `fdr_bh`) across all tested cells of one measure (the two cover
-   measures separately). A cell is significant when its q-value is below α = 0.05. The `pValue` in the file is the raw p.
+   measures separately, and the Hansen loss trend is its own family). A cell is significant when its q-value is below α = 0.05. The `pValue` in the file is the raw p.
+
+**Confidence intervals (published 15 Nov 2026).** Each slope has a 95 % confidence interval (`slopeCi95`), by the method of Gilbert (1987). Its variance comes from the same Mann–Kendall test (the Hamed–Rao variance when that test is used), and the pairwise slopes use the real year gaps. The intervals are published for the cells (`trends/*.json`, `cover.json`), the zones (`zones.json`), the known places and the zone checks. `trendChecks.design` records `ciMethod` and `ciLevel` = 0.95. Checks: the interval contains the Sen slope in every tested cell. For the significant cells, the interval excludes 0 in all but 2 burned-area cells (tie-heavy series). A cell that is not significant can have an interval that excludes 0, because the intervals are not corrected for the many cells. Example: the Amazon's daytime temperature rises +0.33 °C per decade, 95 % CI +0.17 to +0.55. Cross-check against SciPy 1.18.1 (`scipy.stats.theilslopes`; pinned in `requirements.txt`; unit test in `test_trends.py`): the slopes are identical. The bounds differ by a median of 0.3 % of the interval width in the 21 zone tests (largest 2.3 %), because SciPy rounds the ranks and this code interpolates (Gilbert 1987). The interval excludes 0 in exactly the 12 clear zone tests (21 computed; 18 shown). At cell level, 496 cells that are not clear after the correction have an interval that excludes 0; the cell intervals are not corrected.
+
+### Hansen loss: one trend from 2011 (2011 method change)
+
+Hansen's team reprocessed its loss data from 2011 onward, not for 2001–2010. The Hansen/UMD GFC v1.13 user notes say
+that "users will notice inconsistencies as a result"; that Landsat 8 is used from 2013 and Landsat 9 from 2022; that
+"care must be taken when comparing change across any interval"; that the data are "a relative indicator of
+spatiotemporal trends"; and that "definitive area estimation should not be made using pixel counts"
+(<https://storage.googleapis.com/earthenginepartners-hansen/GFC-2025-v1.13/download.html>).
+
+So the loss trend is one trend, 2011–2025, and is never tested across 2011 (ADR-009). It has its own Benjamini–Hochberg
+family, with the same test as the other measures. The yearly values of all 25 years stay published and visible. The years
+2001–2010 are real Hansen data from the earlier method: they are greyed in the charts, with an info tooltip, and are not used in the trend.
+
+**Check against the official INPE PRODES series.** Brazilian Legal Amazon; the PRODES year runs August to July, and it
+counts clear-cut of primary forest of at least 6.25 ha. Source: INPE, "Série Histórica Taxas Prodes Amazônia",
+Apresentação Coletiva Prodes 2026, 16 Oct 2026, p. 4
+(<https://www.gov.br/inpe/pt-br/assuntos/ultimas-noticias/brasil-alcanca-menores-taxas-de-desmatamento-da-serie-historica-na-amazonia-e-no-cerrado>).
+In the Brazilian Amazon zone of this study:
+
+| Segment | Correlation with PRODES (yearly) | Hansen / PRODES ratio |
+|---|---|---|
+| 2001–2010 | r = 0.85 | 1.15 |
+| 2011–2025 | r = 0.20 | 2.70 |
+
+From 2011 Hansen also counts fire-killed and degraded canopy (its peaks in 2016–2017 and 2024), and it uses the
+reprocessed method. One Mann–Kendall test over 2001–2025 gives a rising Amazon trend (p = 0.047) while PRODES falls
+(p = 0.014). That is an artefact of the 2011 change, so it is not used. MODIS, an independent sensor, confirms *where*
+Hansen sees loss: across the 566 cells, r = −0.79 (2001–2010) and −0.47 (2011–2025) between Hansen loss and MODIS
+cover change.
+
+**Results of the Hansen loss trend (15 Nov 2026).**
+
+- Cells 2011–2025 (the trend): 566 tested, 45 rising, 2 falling. The first run's 2001–2025 test (318 rising, 20 falling) is
+  superseded. The years 2001–2010 are not tested.
+- Zone tests (not corrected; slope per decade, raw p):
+
+| Zone | Hansen loss 2011–2025 (the trend) |
+|---|---|
+| Whole Amazon | clear rise (p 0.0075; +12,040 km² per year; 95 % CI +5,145 to +19,582) |
+| Brazilian Amazon | clear rise (p 0.029; +8,709 km² per year) |
+| Peruvian Amazon | clear rise (p 0.048; +456 km² per year) |
+| PRODES, Brazilian Legal Amazon | clear rise (p 0.048) |
+
+- Known places: La Pampa (r08c09) is still clearly rising in 2011–2025 (+43.5 km² per year per decade, 95 % CI +27.8 to +53.3, p 0.00025, q 0.019; its loss starts in 2012). None of the
+  14 cross-check hotspots is clear after the correction (before: 5). The hotspots were chosen for their loss *peaks*
+  (single events such as fire years), not for steady trends.
 
 **Periods and data rules** (first run):
 
 | Measure | Years tested | Why |
 |---|---|---|
-| NDVI, EVI | 2001–2020 | Satellite drift (rule D1): the yearly anomaly correlates with the Terra overpass time, r = 0.85 (2015–2025, n = 11, p = 0.0009), above the rule's 0.5 |
-| Daytime LST | 2001–2020 | Team rule B1 (orbit drift) |
+| NDVI, EVI | 2001–2020 | Satellite drift (rule D1): the yearly anomaly correlates with the Terra overpass time, r = 0.85 (2015–2025, n = 11, p = 0.0009), above the rule's 0.5. It rests on the five years 2021–2025, which include the 2023–2024 drought: a coincidence in time, not proof of cause |
+| Daytime LST | 2001–2020 | Team rule B1 (orbit drift); published to 2026-10, and 2021 onward is shown with a "?" mark and not tested |
 | Rainfall | 2001–2024 | 2025 ends in September |
 | Burned area | 2001–2025 | Complete years |
-| Hansen tree cover loss (km²) | 2001–2025 | Hansen tree cover itself is not tested (it cannot rise) |
-| MODIS tree cover | 2000–2024 | 2025 flagged suspect (rule D2) |
+| Hansen tree cover loss (km²) | 2011–2025 | Reprocessed method from 2011 (ADR-009); 2001–2010 is shown, not tested. Hansen tree cover itself is not tested (it cannot rise) |
+| MODIS tree cover (computed, not shown in the interface) | 2000–2024 | 2025 excluded (rule D2) |
 
 Overpass time (Amazon, yearly mean): 10.54 h in 2015 and 9.41 h in 2025. Share of tested cells with residual
-autocorrelation: NDVI 17 %, EVI 3 %, daytime LST 5 %, rainfall 9 %, burned area 7 %, Hansen loss 16 %, MODIS 10 %. None
-above 20 %, so the original test is used for every measure.
+autocorrelation: NDVI 17.0 %, EVI 3.0 %, daytime LST 4.6 %, rainfall 9.0 %, burned area 6.9 %, Hansen loss 2011–2025 7.1 %, MODIS 10.1 % (final, 15 Nov). None
+above 20 %, so the original test is used for every measure. As a check, the Hamed–Rao variant was run for every measure: no direction or zone verdict changes. It flags more cells than the original test in every measure except NDVI, so the original test stays the more cautious choice.
 
 **Results of the first run (15 Nov 2026).** Cells with a clear rise and fall after the correction (566 cells tested for
 every measure):
@@ -546,49 +652,129 @@ every measure):
 | EVI | 2001–2020 | 68 | 3 |
 | Rainfall | 2001–2024 | 0 | 69 |
 | Burned area | 2001–2025 | 27 | 20 |
-| Hansen tree cover loss | 2001–2025 | 318 | 20 |
+| Hansen tree cover loss | 2011–2025 | 45 | 2 |
 | MODIS tree cover | 2000–2024 | 27 | 135 |
+
+Burned area has 48 clear cells in all: the 27 rising and 20 falling above, plus one cell (r24c13) that is clear with a zero slope (CI [0, 0]; 20 of its 25 years are zero).
+
+Hansen loss: the first run's 2001–2025 test (318 rising, 20 falling) is replaced by the 2011–2025 trend above (ADR-009).
 
 Zone tests (one test per zone and measure, **not corrected** for multiple tests; slope per decade, raw p; "clear" = p below 0.05):
 
-| Zone | NDVI | EVI | Daytime LST (°C) | Rainfall (mm per year) | Hansen loss (km² per year) | MODIS tree cover (%) |
+| Zone | NDVI | EVI | Daytime LST (°C) | Rainfall (mm per year) | Hansen loss 2011–2025 (km² per year) | MODIS tree cover (%) |
 |---|---|---|---|---|---|---|
-| Whole Amazon | +0.0010, p 0.50 | +0.0054, p < 0.001 (clear) | +0.33, p < 0.001 (clear) | −37, p 0.33 | +4,768, p 0.047 (clear) | −0.86, p 0.003 (clear) |
-| Brazilian Amazon | −0.0003, p 0.92 | +0.0050, p < 0.001 (clear) | +0.38, p < 0.001 (clear) | −78, p 0.13 | +1,619, p 0.41 | −1.25, p < 0.001 (clear) |
-| Peruvian Amazon | +0.0039, p 0.005 (clear) | +0.0075, p 0.006 (clear) | +0.31, p < 0.001 (clear) | −114, p 0.10 | +831, p < 0.001 (clear) | +0.58, p 0.06 |
+| Whole Amazon | +0.0010, p 0.50 | +0.0054, p < 0.001 (clear) | +0.33, p < 0.001 (clear) | −37, p 0.33 | +12,040, p 0.0075 (clear) | −0.86, p 0.003 (clear) |
+| Brazilian Amazon | −0.0003, p 0.92 | +0.0050, p < 0.001 (clear) | +0.38, p < 0.001 (clear) | −78, p 0.13 | +8,709, p 0.029 (clear) | −1.25, p < 0.001 (clear) |
+| Peruvian Amazon | +0.0039, p 0.005 (clear) | +0.0075, p 0.006 (clear) | +0.31, p < 0.001 (clear) | −114, p 0.10 | +456, p 0.048 (clear) | +0.58, p 0.06 |
+
+95 % confidence intervals of two zone slopes: whole Amazon daytime LST +0.17 to +0.55 °C per decade; whole Amazon Hansen loss 2011–2025 +5,145 to +19,582 km² per year.
+
+Multiple tests (not applied; a team decision for after the deadline). Zone results are not corrected for multiple tests: 18 are shown (3 zones × 6 measures; Brazil and Peru are parts of the whole Amazon). With a Benjamini–Hochberg correction over the 18, 8 of the 10 clear results stay clear; Hansen loss in Brazil (p 0.029, q 0.059) and in Peru (p 0.048, q 0.086) would not. Both are borderline and not robust to leaving one year out. Whole-Amazon loss stays clear (p 0.0075, q 0.017), and it stays clear when any year is left out (worst p 0.0215).
 
 Burned area: no zone is clear (p 0.3 or more). Across the 566 cells, the median slope of daytime LST is +0.33 °C per decade.
+
+The 2011–2025 values are in the table of the subsection *Hansen loss: one trend from 2011*. The years 2001–2010 are not tested.
 
 **Checks V1–V4** (`validation.json`, `trendChecks`; own code, a fixed random seed):
 
 | Check | What it does | First-run result |
 |---|---|---|
-| V1 false positives | Shuffles the years of every cell, 20 times, and runs the whole procedure | Mean share of cells flagged: 0 for every measure, except burned area (0.009 %). Worst run: 0.18 % (burned area) |
-| V2 detection | Adds to the shuffled series a linear trend of the median size of the significant cells, and counts how many are found | Mean (weakest run): NDVI 57 % (54 %), EVI 73 % (67 %), daytime LST 53 % (46 %), rainfall 92 % (89 %), burned area 77 % (75 %), Hansen loss 55 % (52 %), MODIS tree cover 85 % (81 %) |
-| V3 known places | The 14 cross-check hotspots and the La Pampa cell (r08c09): loss expected to rise, MODIS cover to fall | Loss clearly rising in 5 of the 14 hotspots (and in La Pampa, +37 km² per year per decade, p < 0.001). MODIS cover clearly falling in 9 of the 14 (and in La Pampa, −2.0 % per decade, p < 0.001). The other hotspots are not clear |
-| V4 zones | The zone tests above | Descriptive: three zones, no correction |
+| V1 false positives | Shuffles the years of every cell, 20 times, and runs the whole procedure | Mean share of cells flagged: 0 % for every measure, except burned area (0.009 %) and MODIS tree cover (0.009 %; the share is 0.00009 in `validation.json`). Largest single run: 0.18 % for burned area and for MODIS tree cover (one cell in one round). Every other variable is 0. V1 and V2 share one random stream since the 15 Nov change; the MODIS test itself is identical |
+| V2 detection | Adds to the shuffled series a linear trend of the median size of the significant cells, and counts how many are found | Mean (weakest run): NDVI 57 % (54 %), EVI 73 % (67 %), daytime LST 53 % (46 %), rainfall 92 % (89 %), burned area 77 % (75 %), Hansen loss 2011–2025: 74 % (72 %); MODIS tree cover 85 % (83 %) |
+| V3 known places | The 14 cross-check hotspots and the La Pampa cell (r08c09): loss expected to rise, MODIS cover to fall | Loss (2011–2025) clearly rising in none of the 14 hotspots after the correction (before: 5). La Pampa is still clearly rising (p 0.00025; loss from 2012). MODIS cover clearly falling in 9 of the 14 (and in La Pampa, −2.0 % per decade, p < 0.001). The other hotspots are not clear |
+| V4 zones | The zone tests above | Descriptive: 18 zone tests (three zones × six measures), no correction; see the multiple-tests note above |
 
-How to read them. V1 says the procedure does not invent trends from noise. V2 says it finds a typical real trend only in
-about half to nine tenths of the cells, so a cell that is not clear is not proof that nothing changed. V3 says that the
-known place agrees with the expected direction, but the 1° cell averages a much larger area, so a documented change looks
+How to read them. V1 says the procedure does not report trends in shuffled data (noise). V2 says it finds a typical simulated trend only in
+about half to nine tenths of the cells, so a cell that is not clear is not proof that nothing changed. V3 says that La Pampa
+agrees with the expected direction. The 14 hotspots are not clear after the 2011 correction: they were picked for single loss peaks, not steady trends. The 1° cell averages a much larger area, so a documented change looks
 smaller than at 0.05°. Neither V3 nor V4 is a causal test.
 
-Not done yet: the comparison with NASA Giovanni (P-007, C3) and a confidence interval for the slope (P-029).
+Not done yet: the comparison with NASA Giovanni (P-007, C3). The confidence intervals are published and cross-checked against SciPy (P-029, done 15 Nov).
+
+## Reproduce and verify
+
+`python -m pipeline.verify` compares every JSON and PNG file in `web/server/data/` and `web/public/data/` (150 files)
+with the version committed in git HEAD. It reads HEAD with `git archive`, so the working tree is not touched.
+
+| Option | What it does |
+|---|---|
+| `--ref <path>` | compares with another copy of the repository instead of HEAD |
+| `--report file.json` | saves the result of every file |
+| `--rtol <value>` | relative tolerance for numbers (default 0.001 = 0.1 %) |
+
+Run timestamps (`generatedUtc`, `generated_utc`, `generatedAt`) are ignored.
+
+Each file gets one of four results:
+
+- **IDENTICAL:** the same content.
+- **ROUNDING:** only numbers differ, within the tolerance. Expected between Windows and Linux.
+- **TEXT:** numbers and yes/no values match; only texts differ.
+- **DIFFERENT:** a number beyond the tolerance, a yes/no value that flips (for example a cell that becomes significant), a missing value, a list of another length, or a missing file.
+
+The command exits with code 1 if any file is DIFFERENT.
+
+Tested on 15 Nov 2026: an unchanged tree gives 150 IDENTICAL. A copy with planted changes is caught: a flipped significance,
+a changed slope, an edited text, one changed PNG pixel and a missing file.
+
+**Three levels of reproducibility:**
+
+| Level | What you re-run | What you need | Time and size |
+|---|---|---|---|
+| 1. Trend test only | `python -m pipeline.trends`, then `python -m pipeline.verify` | the repository | minutes; no download |
+| 2. Exports from the intermediate data | steps `export_json` → `export_maps` → `export_api` → `export_cover` → `validate` → `trends` → `export_borders`, then `verify` | `data/interim/` from a previous run | `data/interim/` about 1.9 GB; 44 min 10 s on the team's PC (Windows, 15 Nov 2026, before the HDF5 fix; about 10 min after it; per step below) |
+| 3. Full run from NASA | the whole pipeline or the Colab notebook, then `verify` | an Earthdata Login | 1 h 22 min in Colab (15 Nov 2026). About 80 GB transferred; about 1.9 GB kept in `data/interim/`. The four sources added on 15 Nov took about 1 h 10 min in parallel on the team's PC |
+
+**Level 1 result (15 Nov 2026, Windows).** `python -m pipeline.trends` re-run from the committed files gave the same
+results: all 11,738 numbers of the changed files and every significance flag were identical. Only the expected texts
+changed: 147 files IDENTICAL and 3 TEXT. No download was needed.
+
+**Level 2 result (15 Nov 2026, Windows).** `python -m pipeline.run_all --only exports`, run from the existing `data/interim/`,
+took 44 min 10 s: export_json 13:42, export_maps 2:23, export_api 14:51, export_cover 2:27, validate 3:23, test_trends 0:06,
+trends 7:06, export_borders 0:03, verify 0:10 (minutes:seconds). Of the 150 files, 147 are IDENTICAL, 3 are TEXT (the P-035
+wording) and 0 are DIFFERENT: the exports reproduce the published results (level 2).
+
+**HDF5 fix (`pipeline/__init__.py`, 15 Nov 2026).** On Windows, the exports took 44 min. The file sets
+`HDF5_PLUGIN_PRELOAD="::"`, so HDF5 stops searching for compression plugins each time it opens a variable. With the fix the
+exports took 10 min, and all 150 output files were identical. In Colab (Linux) the exports were already fast without it.
+
+**Level 3 result (Colab, 15 Nov 2026).** The notebook's section 4b ran `python -m pipeline.run_all` on the free Colab tier
+(Python 3.13.18, 115 GB free disk), starting from an empty disk; the data was downloaded again from NASA. Total: 1 h 22 min
+10 s. The downloads took 1 h 13 min 56 s with four sources at a time (one after another, about 3 h 50 min). The slowest
+source was MCD64A1 (1 h 13 min 51 s). Each source downloaded the same number of files as the published run. The steps
+after the downloads took: export_json 1:32, export_maps 0:26, export_api 1:08, export_cover 0:12, validate 0:12,
+test_trends 0:04, trends 4:31, export_borders 0:03, verify 0:06 (minutes:seconds). Result of `pipeline.verify`: 147 IDENTICAL,
+3 TEXT (`trends/ndvi.json`, `trends/evi.json`, `validation.json`: only the P-035 wording), 0 ROUNDING, 0 DIFFERENT, of 150.
+All 11,738 numbers and every significance flag of the 3 TEXT files are identical, and the 129 PNG map layers are identical
+pixel by pixel. The results reproduce exactly with data downloaded again from NASA. Per-step times are also in
+`notebooks/README.md`.
+
+These results are from before the Hansen loss change and the confidence intervals of 15 Nov (ADR-009). The 15 Nov Colab run reproduced the results published before that change. Only the `trends` step (and validate's change check) changed after it, with the same inputs, so a new Colab run reproduces the new results.
+
+**Expected differences (not errors):**
+
+- If NASA published a month after 15 Nov 2026 inside the requested date range (for example burned area for 2026-10),
+  the monthly lists get one more item. The monthly files are then DIFFERENT by list length.
+- Trend results use complete years only, so their numbers should still match.
+- Platform rounding shows as ROUNDING.
 
 ## Known limits (review of 15 Nov 2026)
 
 Found while reviewing the outputs. Each item limits what the data can say. The team decides how to show them.
 
 - **MOD44B 2025 is anomalous.** The Amazon mean falls from 62.2 % to 59.2 % in one year, while Hansen falls by 0.4
-  points in the same year. In cells without Hansen loss, MOD44B falls by 2.6 points. The flag is in `cover.json`:
-  treat 2025 as suspect.
+  points in the same year. In 127 cells with almost no Hansen loss, MOD44B falls by 3.94 points, 2.5 standard deviations
+  below its 2001–2024 yearly changes. The flag is in `cover.json`. MODIS 2025 is left out of the change check and is
+  not shown in the interface.
 - **MOD44B cannot give the amount of loss.** From 2001 to 2024 the Amazon mean falls 0.9 points in MOD44B and 7.9 points
   in Hansen. Its year-to-year noise is 1–2 points. MOD44B confirms *where* loss happened, not *how much*.
 - **Hansen loss is stand-replacing loss,** not only deforestation: fire, logging, mining and clearing all count. For
-  Brazil it may be about 1.5–2 times the INPE PRODES clear-cut figure. This is an order of magnitude only; check it
-  against PRODES before quoting it.
-- **Loss years before and after about 2013 are not strictly comparable.** Global Forest Watch cautions about this for
-  Hansen data; check its documentation before quoting.
+  Brazil, the Hansen/PRODES ratio is 1.15 in 2001–2010 and 2.70 in 2011–2025 (Brazilian Amazon zone; see *Trend test*,
+  *Hansen loss: one trend from 2011*). From 2011 Hansen also counts fire-killed and degraded canopy, so do not quote its loss as
+  deforestation.
+- **Loss years before and after 2011 are not comparable.** Hansen reprocessed its loss from 2011 onward and not for
+  2001–2010; its user notes say "users will notice inconsistencies as a result"
+  (<https://storage.googleapis.com/earthenginepartners-hansen/GFC-2025-v1.13/download.html>). Only 2011–2025 is
+  tested (ADR-009).
 - **Fire co-location is partly circular.** Canopy killed by fire counts as loss, so part of the overlap is built in.
   Co-location is not causation.
 - **Hansen-derived cover has no regrowth.** It can only fall, so it understates recovery.
@@ -596,11 +782,19 @@ Found while reviewing the outputs. Each item limits what the data can say. The t
   marked incomplete by the backend and must not be compared with a full one.
 - **Agreement and change r values are descriptive.** They carry no p-value, and neighbouring cells are not independent
   (spatial autocorrelation), so they cannot be read as tests.
-- **The trend results are first-run numbers.** They come from the run of 15 Nov 2026 (validation file written 10:36 UTC).
+- **The trend results are first-run numbers (Hansen loss: the one trend from 2011, of 15 Nov).** They come from the run of 15 Nov 2026 (validation file written 10:36 UTC).
   `trends.py` was changed afterwards (rounding of tied values), so a re-run can change the numbers slightly. The
   `trendChecks` in `validation.json` are the source.
-- **Missing years.** The Mann–Kendall test uses the years that exist, in order, and ignores a gap. Sen's slope uses the real
-  years. Only 7 burned-area cells have a missing year in the first run.
-- **Missing checks.** No confidence interval is published for the slope, although the team kit asks to show uncertainty.
-  The comparison with NASA Giovanni (P-007, C3) is not done. Both are open (`.ai-context/05-tech-debt.md`, P-029).
-- **Zone tests are not corrected** for multiple tests (three zones); the square counts are.
+- **Hansen loss rises as a level shift, not a steady climb.** From 2016 on the level is higher: about 17,900 km² per year in
+  2011–2015 against 34,000 in 2016–2025. Inside 2016–2025 there is no trend (p 0.86). There is no jump at the Landsat 8
+  (2013) or Landsat 9 (2022) dates, and PRODES rises in the same years. Starting the test in 2013 would not be robust. 2011
+  stays because it is the documented reprocessing year, not a year chosen after seeing the data.
+- **Cells are not independent.** Neighbouring cells share weather years (mean pairwise correlation of the LST residuals
+  +0.42), so the 566 cells behave like about 5 independent patterns for LST and NDVI. A spatially coherent shuffle (the same
+  permutation for all cells, 10,000 runs) rarely reaches the real counts (field p ≤ 0.0006): the counts are not chance,
+  but the headline is the zone result with its interval, and the counts show where.
+- **Missing checks.** The 95 % confidence intervals of the slopes are published and cross-checked against SciPy, but they
+  are not corrected for the many cells: 496 cells that are not clear after the correction have an interval that excludes 0.
+  The comparison with NASA Giovanni (P-007, C3) is not done (`.ai-context/05-tech-debt.md`).
+- **Zone tests are not corrected** for multiple tests: 18 are shown (three zones × six measures; Brazil and Peru are parts
+  of the whole Amazon). The cell counts are corrected. Applying the correction to the zones is a team decision for after the deadline.

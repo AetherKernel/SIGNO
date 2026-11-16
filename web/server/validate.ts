@@ -2,6 +2,8 @@
 //
 // Runtime checks of the data contract. Pipeline output that breaks the contract fails the build with a clear
 // message instead of reaching users. Each function throws ContractError on the first problem it finds.
+// 2026-11-15: slopeCi95 (95 % confidence interval of a slope) is checked wherever a trend result carries it: low <= slope <= high;
+// driftFromYear is checked as a year. Written with Claude Code, reviewed by team AETHER.
 
 import { closeSync, existsSync, openSync, readSync, statSync } from 'node:fs'
 import { join, resolve, sep } from 'node:path'
@@ -63,6 +65,7 @@ export function validateVariables(variables: Variable[]): void {
     check(v.product.kind === 'satellite' || v.product.kind === 'model', at, 'product.kind must be "satellite" or "model"')
     check(v.semesterAggregation === 'mean' || v.semesterAggregation === 'sum', at, 'semesterAggregation must be "mean" or "sum" ("sum" for rain and burned area)')
     check(v.slopeUnits === undefined || (typeof v.slopeUnits === 'string' && /per decade$/.test(v.slopeUnits)), at, 'slopeUnits must be a string ending in "per decade"')
+    check(v.driftFromYear === undefined || (Number.isInteger(v.driftFromYear) && v.driftFromYear >= 2000 && v.driftFromYear <= 2100), at, 'driftFromYear must be a year (integer)')
     if (v.trendYears !== undefined) {
       const years = v.trendYears
       check(!!years && Number.isInteger(years.start) && Number.isInteger(years.end) && years.start <= years.end, at, 'trendYears must be {start, end} (integers, start <= end)')
@@ -84,6 +87,19 @@ function validateCell(cell: CellTrend, alpha: number, at: string): void {
   check(!cell.significant || alpha > 0, at, 'method.alpha must be set')
   check(Number.isInteger(cell.validMonths) && cell.validMonths >= 0, at, 'validMonths must be a non-negative integer')
   checkLine(cell.line, at)
+  checkCi(cell.slopeCi95, cell.slopePerDecade, at)
+}
+
+/**
+ * The optional 95 % confidence interval of a slope: null or [low, high] with low <= slope <= high (equality allowed). A slope
+ * that is null has no interval to compare with, so only the shape is checked then. Added 2026-11-15.
+ */
+export function checkCi(ci: unknown, slope: number | null | undefined, at: string): void {
+  if (ci === undefined || ci === null) return
+  check(Array.isArray(ci) && ci.length === 2 && ci.every(isFiniteNumber), at, 'slopeCi95 must be null or [low, high] with finite numbers')
+  const [low, high] = ci as [number, number]
+  check(low <= high, at, `slopeCi95 must have low <= high (got ${low}, ${high})`)
+  check(slope === null || slope === undefined || (low <= slope && slope <= high), at, `slopePerDecade ${slope} must lie inside slopeCi95 [${low}, ${high}]`)
 }
 
 /** The optional Sen line: two end points {year, value}, loosely checked. */
@@ -214,6 +230,7 @@ export function validateCover(cover: SourceCover, layer: SourceTrendLayer): void
         check(typeof t.significant === 'boolean', at, `trends.${name}.significant must be true or false`)
         check(!t.significant || (t.pValue !== null && t.slopePerDecade !== null), at, `a significant trends.${name} needs a slope and a p-value`)
         checkLine(t.line, at)
+        checkCi(t.slopeCi95, t.slopePerDecade, at)
       }
     }
     let previous: number | null = null
@@ -368,9 +385,14 @@ function validateTrendChecks(checks: NonNullable<SourceValidation['trendChecks']
       const r = place[name]
       if (r === null) continue
       check(isRecord(r) && isNullableNumber(r.slopePerDecade) && isNullableNumber(r.pValue) && typeof r.significant === 'boolean', at, `${name} needs slopePerDecade, pValue and significant`)
+      checkCi(r.slopeCi95, r.slopePerDecade, `${at} ${name}`)
     }
   }
   check(isRecord(checks.v4ZoneTrends), where, 'v4ZoneTrends must be an object keyed by zone id')
+  for (const [zoneId, byVariable] of Object.entries(checks.v4ZoneTrends)) {
+    check(isRecord(byVariable), where, `v4ZoneTrends ${zoneId} must be an object keyed by variable id`)
+    for (const [variableId, r] of Object.entries(byVariable)) checkCi(r?.slopeCi95, r?.slopePerDecade, `${where} v4ZoneTrends ${zoneId} ${variableId}`)
+  }
 }
 
 /** Last year the team lets the land surface temperature test use (Terra orbit drift, rule B1). */
@@ -421,6 +443,7 @@ export function validateZones(report: SourceZones, gridCells: number): void {
         check(Array.isArray(t.years) && t.years.length === 2 && t.years.every(Number.isInteger) && t.years[0] <= t.years[1], at, 'zoneTrend.years must be [first, last]')
         check(Number.isInteger(t.n) && t.n >= 0 && t.n <= t.years[1] - t.years[0] + 1, at, 'zoneTrend.n must be an integer within the tested years')
         check(typeof t.test === 'string' && t.test.length > 0, at, 'zoneTrend.test is required')
+        checkCi(t.slopeCi95, t.slopePerDecade, at)
         check(variableId !== 'lst_day' || t.years[1] <= LST_LAST_YEAR, at, `lst_day must not be tested after ${LST_LAST_YEAR} (satellite orbit drift)`)
       }
       if (v.cellSummary !== undefined) {

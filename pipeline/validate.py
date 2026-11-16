@@ -11,8 +11,8 @@ Burned area uses ONE rule everywhere: a cell counts as burned in a year when its
 least one month of that calendar year. Only complete calendar years 2001..2025 are used (2000 and 2026 are partial).
 
 1. agreement      MOD44B tree cover (2000) vs Hansen canopy cover (2000): r, bias, RMSE, by Hansen class
-2. change         MOD44B tree cover change (mean 2024-2025 minus mean 2001-2002) vs Hansen loss share
-                  2001-2025, by Hansen loss decile
+2. change         MOD44B tree cover change (mean 2023-2024 minus mean 2001-2002) vs Hansen loss share
+                  2001-2024 (MOD44B 2025 is flagged and not used), by Hansen loss decile
 3. fire           share of Hansen loss area located in cells that burned (MCD64A1) the same year or the
                   year before, per year (2001: only 2001 itself, as 2000 is a partial year)
 4. hotspots       cells with the largest Hansen loss share 2001-2025 per zone, with the year of peak loss,
@@ -83,8 +83,9 @@ def main():
     tc2000 = h.treecover2000.values.astype("float64")
     loss = h.loss_share.values.astype("float64")              # (year, lat, lon)
     loss_total = loss.sum(axis=0)
+    loss_window = loss[[i for i, y in enumerate(years) if y <= 2024]].sum(axis=0)   # 2001-2024, same window as the MODIS change
     m2000 = mod44b(2000)
-    change = (mod44b(2024) + mod44b(2025)) / 2 - (mod44b(2001) + mod44b(2002)) / 2
+    change = (mod44b(2023) + mod44b(2024)) / 2 - (mod44b(2001) + mod44b(2002)) / 2
     cases = case_cells()
     burned, case_months = load_burned(cases)
     masks = {z: m.values for z, m in zone_masks(LAT, LON).items()}
@@ -100,7 +101,7 @@ def main():
                                                "aiDisclosure": AI_DISCLOSURE}}
     burn_def = ("Hansen loss area in cells with MCD64A1 burned area (share > 0) in the same or the previous calendar "
                 "year; for 2001 only 2001 itself (2000 is a partial year)")
-    change_def = "MOD44B mean(2024,2025) - mean(2001,2002), percentage points"
+    change_def = "MOD44B mean(2023,2024) - mean(2001,2002), percentage points; Hansen loss share 2001-2024 (MOD44B 2025 is flagged and not used)"
     for z, m in masks.items():
         zr = {}
         # 1. agreement in 2000
@@ -117,7 +118,7 @@ def main():
         zr["agreement_2000"] = {"r": round(rr, 3), "cells": n, "bias_mod44b_minus_hansen": round(float((a - b)[ok].mean()), 2),
                                 "rmse": round(float(np.sqrt(((a - b)[ok] ** 2).mean())), 2), "by_hansen_class": by_class}
         # 2. change vs Hansen loss
-        c, lt = change[m], loss_total[m]
+        c, lt = change[m], loss_window[m]
         rr, n = r(c, lt)
         okc = np.isfinite(c) & np.isfinite(lt)
         edges = np.quantile(lt[okc], np.linspace(0, 1, 11))

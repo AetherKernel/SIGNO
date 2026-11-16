@@ -6,6 +6,12 @@
 // significance flags and counts as they are: nothing is tested, averaged or counted here. Zone tests are one test per zone and
 // measure and are NOT corrected for multiple tests; the counts of squares are (false discovery rate). It never claims a cause.
 // Lazy-loaded by App and mounted inside <main>; keep the named export and the props.
+// 2026-11-15: no MODIS measure; tree cover loss has one trend (2011-2025: Hansen reprocessed loss from 2011; 2001-2010 are shown,
+// greyed, not tested); caveats (satellite drift, test end, method change, zone vs squares) are InfoTips next to the short fact.
+// "Clear or not" rule: a clear trend shows direction, slope and 95 % CI (p in the tag's tip); one that is not clear shows its slope
+// and a "?" tip; a measure that is not tested shows "—".
+// 2026-11-15 (review): the tips of one card/row are merged into ONE InfoTip (CardTip); loss in the Brazilian/Peruvian parts gets the
+// borderline tip and the whole-Amazon loss the "higher level from 2016" tip (by zone id); the squares tip adds the independence caveat.
 
 import { useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import type { Manifest, Zone, ZonesReport, ZoneVariable } from '../../shared/contracts.ts'
@@ -13,30 +19,34 @@ import { useZones } from '../hooks/useZones.ts'
 import { useMediaQuery } from '../hooks/useMediaQuery.ts'
 import { useValidation } from '../hooks/useSignoData.ts'
 import { useUrlParams } from '../hooks/useUrlParam.ts'
-import { formatPValue, localizeUnits } from '../lib/format.ts'
-import { useLang } from '../lib/i18n.ts'
+import { localizeUnits } from '../lib/format.ts'
+import { methodChangeText, useHansenInfo, type HansenInfo } from '../lib/hansen.ts'
+import { useLang, type Tr } from '../lib/i18n.ts'
+import { borderlineLossTip, ciInline, clearTip, lossLevelTip, pPhrase, unclearTip } from '../lib/trendWords.ts'
 import {
   defaultYear,
-  directionOf,
+  directionOfTrend,
   directionWord,
   formatSignedNumber,
   formatValue,
-  LST_NOTE,
-  LST_NOTE_ES,
+  MEASURES,
   measureFor,
   measureName,
   measureNote,
   measuresOf,
   orderedZoneIds,
+  periodOf,
   rangeSentence,
   slopeParts,
   slopeSentence,
+  testEndNote,
   unitParts,
   zoneHeading,
   zoneSelectorLabel,
   type Direction,
   type Measure,
 } from '../lib/zoneTrends.ts'
+import { InfoTip } from './InfoTip.tsx'
 import { Sparkline, ZoneChart } from './ZoneChart.tsx'
 import { TrendMethod } from './TrendMethod.tsx'
 import { ViewLink } from './ViewLink.tsx'
@@ -119,10 +129,8 @@ function TrendsDashboard({ report, validation }: { report: ZonesReport; validati
   const selected =
     rows.find((r) => asked !== null && r.measure.key === asked.key) ?? rows.find((r) => r.variable.zoneTrend) ?? rows[0]
   const heading = zoneHeading(zoneId, zone.label, t)
-  const missing = rows.length < 8
-  const notAvailable = ['lossKm2', 'burned_area', 'ndvi', 'evi', 'lst_day', 'precip', 'modisTreeCover', 'hansenTreeCover'].filter(
-    (key) => !zone.variables[key],
-  )
+  const notAvailable = MEASURES.map((m) => m.key).filter((key) => !zone.variables[key])
+  const missing = notAvailable.length > 0
 
   const select = (measure: Measure) => {
     setParams({ var: measure.id })
@@ -166,16 +174,19 @@ function TrendsDashboard({ report, validation }: { report: ZonesReport; validati
             const row = rows.find((r) => r.measure.key === key)
             return row ? (
               <li key={key}>
-                <Kpi measure={row.measure} variable={row.variable} selected={selected?.measure.key === key} onSelect={() => select(row.measure)} />
+                <Kpi zoneId={zoneId} measure={row.measure} variable={row.variable} selected={selected?.measure.key === key} onSelect={() => select(row.measure)} />
               </li>
             ) : null
           })}
         </ul>
         <p className="tr-small muted">
-          {t(
-            `“Clear trend” is a zone-level test: one test for this zone and measure, not corrected for multiple tests. Counts of squares are corrected (false discovery rate ${Math.round(report.alpha * 100)} %).`,
-            `“Tendencia clara” es un test a nivel de zona: un test para esta zona y medida, sin corregir por pruebas múltiples. Los conteos de cuadros sí se corrigen (tasa de falsos descubrimientos del ${Math.round(report.alpha * 100)} %).`,
-          )}
+          {t('“Clear trend” here is one test for the whole zone.', '“Tendencia clara” aquí es un test para toda la zona.')}
+          <InfoTip>
+            {t(
+              `One test for this zone and measure. Zone results are not corrected for multiple tests. 18 are shown (3 zones × 6 measures; Brazil and Peru are parts of the whole Amazon). With a Benjamini–Hochberg correction over the 18, 8 of the 10 clear results stay clear; Hansen loss in Brazil and in Peru would not. The counts of squares are corrected (false discovery rate ${Math.round(report.alpha * 100)} %).`,
+              `Un test para esta zona y medida. Los resultados por zona no se corrigen por pruebas múltiples. Se muestran 18 (3 zonas × 6 medidas; Brasil y Perú son partes de la Amazonía entera). Con una corrección de Benjamini-Hochberg sobre las 18, 8 de los 10 resultados claros siguen siéndolo; la pérdida de Hansen en Brasil y en Perú, no. Los conteos de cuadros sí se corrigen (tasa de falsos descubrimientos del ${Math.round(report.alpha * 100)} %).`,
+            )}
+          </InfoTip>
         </p>
       </section>
 
@@ -198,7 +209,10 @@ function TrendsDashboard({ report, validation }: { report: ZonesReport; validati
                 <th scope="col">
                   {t('Clear trend?', '¿Tendencia clara?')} <span className="tr-colnote">{t('zone-level test', 'test por zona')}</span>
                 </th>
-                <th scope="col">{t('Squares falling | rising', 'Cuadros que bajan | suben')}</th>
+                <th scope="col">
+                  {t('Squares falling | rising', 'Cuadros que bajan | suben')}
+                  <InfoTip>{squaresScaleTip(t)}</InfoTip>
+                </th>
                 <th scope="col">{t('Yearly values', 'Valores anuales')}</th>
               </tr>
             </thead>
@@ -206,6 +220,7 @@ function TrendsDashboard({ report, validation }: { report: ZonesReport; validati
               {rows.map(({ measure, variable }) => (
                 <MeasureRow
                   key={measure.key}
+                  zoneId={zoneId}
                   measure={measure}
                   variable={variable}
                   selected={selected?.measure.key === measure.key}
@@ -217,8 +232,8 @@ function TrendsDashboard({ report, validation }: { report: ZonesReport; validati
         </div>
         <p className="tr-small muted">
           {t(
-            'Squares: 1° squares of the zone with a clear fall or rise (after correcting for testing many squares), out of the squares tested. Hansen tree cover is shown as context and is not tested.',
-            'Cuadros: cuadros de 1° de la zona con una bajada o subida clara (tras corregir por probar muchos cuadros), del total de cuadros probados. La cobertura de Hansen se muestra como contexto y no se prueba.',
+            'Squares: 1° squares with a clear fall or rise (corrected for testing many), out of those tested.',
+            'Cuadros: cuadros de 1° con una bajada o subida clara (corregido por probar muchos), del total probado.',
           )}
           {missing &&
             notAvailable.length > 0 &&
@@ -242,6 +257,7 @@ function TrendsDashboard({ report, validation }: { report: ZonesReport; validati
             </p>
             <ZoneChart
               key={yearKey}
+              zoneId={zoneId}
               variable={selected.variable}
               measure={selected.measure}
               year={year}
@@ -253,7 +269,7 @@ function TrendsDashboard({ report, validation }: { report: ZonesReport; validati
           </div>
           <aside className="tr-detail-text" aria-labelledby="tr-means-title">
             <h3 id="tr-means-title">{t('What this means', 'Qué significa')}</h3>
-            <Meaning report={report} heading={heading} measure={selected.measure} variable={selected.variable} year={year} />
+            <Meaning zoneId={zoneId} report={report} heading={heading} measure={selected.measure} variable={selected.variable} year={year} />
             {selected.measure.map && (
               <p>
                 <ViewLink view="map" params={selected.measure.map} className="btn primary">
@@ -270,8 +286,8 @@ function TrendsDashboard({ report, validation }: { report: ZonesReport; validati
       <footer className="tr-foot tr-small muted">
         <p>
           {t(
-            'Sources: NASA MODIS MOD13C2, MOD11C3, MCD64A1 and MOD44B (LP DAAC), NASA GPM IMERG (GES DISC) and Hansen/UMD/Google/USGS/NASA Global Forest Change. Zone values are area-weighted means of the 1° squares. The Brazilian and Peruvian parts hold the squares that lie mostly inside each country.',
-            'Fuentes: NASA MODIS MOD13C2, MOD11C3, MCD64A1 y MOD44B (LP DAAC), NASA GPM IMERG (GES DISC) y Hansen/UMD/Google/USGS/NASA Global Forest Change. Los valores por zona son medias ponderadas por área de los cuadros de 1°. Las partes brasileña y peruana reúnen los cuadros que quedan mayormente dentro de cada país.',
+            'Sources: NASA MODIS MOD13C2, MOD11C3 and MCD64A1 (LP DAAC), NASA GPM IMERG (GES DISC) and Hansen/UMD/Google/USGS/NASA Global Forest Change. Zone values are area-weighted means of the 1° squares. The Brazilian and Peruvian parts hold the squares that lie mostly inside each country.',
+            'Fuentes: NASA MODIS MOD13C2, MOD11C3 y MCD64A1 (LP DAAC), NASA GPM IMERG (GES DISC) y Hansen/UMD/Google/USGS/NASA Global Forest Change. Los valores por zona son medias ponderadas por área de los cuadros de 1°. Las partes brasileña y peruana reúnen los cuadros que quedan mayormente dentro de cada país.',
           )}
         </p>
         <p>{report.aiDisclosure}</p>
@@ -347,23 +363,82 @@ function SquareBar({ tested, down, up }: { tested: number; down: number; up: num
   )
 }
 
-function squaresText(variable: ZoneVariable, t: (en: string, es: string) => string): string | null {
+/** Why a zone answer and the count of squares can differ: each is true at its own scale. */
+function squaresScaleTip(t: Tr): string {
+  return t(
+    "The zone test uses the zone's yearly average. Rises in some squares and falls in others can cancel out, and a change in part of the zone may not move the average. Both answers are true, each at its own scale. Squares are not independent: neighbours share the same weather years, so the count is not that many separate proofs. Read the zone result and its interval first; the count shows where the change is.",
+    'El test de la zona usa el promedio anual de la zona. Subidas en unos cuadros y bajadas en otros pueden compensarse, y un cambio en una parte puede no mover el promedio. Ambas respuestas son ciertas, cada una a su escala. Los cuadros no son independientes: los vecinos comparten los mismos años de clima, así que el conteo no equivale a tantas pruebas separadas. Lee primero el resultado de la zona y su intervalo; el conteo muestra dónde está el cambio.',
+  )
+}
+
+function squaresText(variable: ZoneVariable, t: Tr): string | null {
   const c = variable.cellSummary
-  return c
-    ? t(
-        `${c.significantDecreasing} falling and ${c.significantIncreasing} rising, of ${c.tested} squares tested`,
-        `${c.significantDecreasing} bajan y ${c.significantIncreasing} suben, de ${c.tested} cuadros probados`,
-      )
-    : null
+  if (!c) return null
+  return t(
+    `${c.significantDecreasing} falling and ${c.significantIncreasing} rising, of ${c.tested} squares tested`,
+    `${c.significantDecreasing} bajan y ${c.significantIncreasing} suben, de ${c.tested} cuadros probados`,
+  )
+}
+
+/** The slope with its units, and what the rule adds: "(95 % CI a to b)" for a clear trend, a "?" tip for one that is not clear. */
+function SlopeWithRule({ trend, units, block = false }: { trend: NonNullable<ZoneVariable['zoneTrend']>; units: string; block?: boolean }) {
+  const { t } = useLang()
+  if (trend.slopePerDecade === null) return <>—</>
+  const { value, unit } = slopeParts(trend.slopePerDecade, units, t)
+  const ci = ciInline(trend.slopeCi95, t)
+  return (
+    <>
+      <span className="mono">
+        {value}
+        {unit ? ` ${unit}` : ''}
+      </span>
+      {!trend.significant && <InfoTip mark="question">{unclearTip({ p: trend.pValue, ci: trend.slopeCi95 }, t)}</InfoTip>}
+      {block && <span className="tr-small muted tr-block">{t('per decade', 'por década')}</span>}
+      {trend.significant && ci && <span className="tr-small muted tr-block">{ci}</span>}
+    </>
+  )
+}
+
+/** One InfoTip for several short notes (the notes that are null are left out); nothing is shown when there are none. */
+function CardTip({ notes, label }: { notes: (string | null | undefined | false)[]; label?: string }) {
+  const shown = notes.filter((n): n is string => typeof n === 'string' && n !== '')
+  return shown.length > 0 ? <InfoTip label={label}>{shown.join(' ')}</InfoTip> : null
+}
+
+/** The notes of a measure's zone result, in one list: the p-value, the borderline and level notes of loss, why the test ends or starts there. */
+function resultNotes(zoneId: string, measure: Measure, trend: NonNullable<ZoneVariable['zoneTrend']>, hansenInfo: HansenInfo, t: Tr): (string | null)[] {
+  const hansen = measure.key === 'lossKm2' ? methodChangeText(hansenInfo, t) : null
+  return [
+    trend.significant ? clearTip({ p: trend.pValue, ci: trend.slopeCi95 }, t) : null,
+    borderlineLossTip(zoneId, measure.key, trend.significant, t),
+    lossLevelTip(zoneId, measure.key, t),
+    measure.drift ? testEndNote(trend.years[1], t) : null,
+    hansen,
+  ]
+}
+
+/** The tag "Clear trend" or "Not clear"; the notes of the result (p-value, caveats) go in ONE tip after it. */
+function ClearTag({ zoneId, measure, trend, withNotes = true }: { zoneId: string; measure: Measure; trend: NonNullable<ZoneVariable['zoneTrend']>; withNotes?: boolean }) {
+  const { t } = useLang()
+  const hansen = useHansenInfo()
+  return (
+    <>
+      <span className={trend.significant ? 'tr-tag is-clear' : 'tr-tag'}>
+        {trend.significant ? t('Clear trend', 'Tendencia clara') : t('Not clear', 'No es clara')}
+      </span>
+      {withNotes && <CardTip notes={resultNotes(zoneId, measure, trend, hansen, t)} />}
+    </>
+  )
 }
 
 // Table row
 
-function MeasureRow({ measure, variable, selected, onSelect }: { measure: Measure; variable: ZoneVariable; selected: boolean; onSelect: () => void }) {
+function MeasureRow({ zoneId, measure, variable, selected, onSelect }: { zoneId: string; measure: Measure; variable: ZoneVariable; selected: boolean; onSelect: () => void }) {
   const { t } = useLang()
   const trend = variable.zoneTrend
-  const direction = directionOf(variable)
   const cells = variable.cellSummary
+  const direction = directionOfTrend(trend)
+  const hansen = useHansenInfo()
   return (
     <tr className={selected ? 'is-selected' : undefined}>
       <th scope="row" data-label={t('Measure', 'Medida')}>
@@ -373,12 +448,12 @@ function MeasureRow({ measure, variable, selected, onSelect }: { measure: Measur
         <span className="tr-small muted tr-units">{variable.units === 'unitless' ? t('no units', 'sin unidades') : localizeUnits(variable.units, t)}</span>
       </th>
       <td data-label={t('Years tested', 'Años probados')}>
-        {trend ? `${trend.years[0]}–${trend.years[1]}` : '—'}
-        {measure.key === 'lst_day' && (
-          <span className="tr-small muted tr-block">{t(LST_NOTE, LST_NOTE_ES)}</span>
-        )}
-        {(measure.key === 'ndvi' || measure.key === 'evi') && trend && (
-          <span className="tr-small muted tr-block">{t('Ends in 2020: satellite drift after that.', 'Termina en 2020: después hay deriva del satélite.')}</span>
+        {trend ? periodOf(trend) : '—'}
+        {trend && (measure.drift || measure.key === 'lossKm2') && (
+          <CardTip
+            label={measure.drift ? t('Why the test ends there', 'Por qué el test termina ahí') : undefined}
+            notes={[measure.drift ? testEndNote(trend.years[1], t) : null, measure.key === 'lossKm2' ? methodChangeText(hansen, t) : null]}
+          />
         )}
       </td>
       <td data-label={t('Direction', 'Dirección')}>
@@ -388,16 +463,11 @@ function MeasureRow({ measure, variable, selected, onSelect }: { measure: Measur
         </span>
       </td>
       <td data-label={t('Change per decade', 'Cambio por década')} className="tr-num">
-        {trend && trend.slopePerDecade !== null ? <SlopeText slope={trend.slopePerDecade} units={variable.units} /> : '—'}
+        {trend ? <SlopeWithRule trend={trend} units={variable.units} block /> : '—'}
       </td>
       <td data-label={t('Clear trend?', '¿Tendencia clara?')}>
-        {trend ? (
-          <span className={trend.significant ? 'tr-tag is-clear' : 'tr-tag'}>
-            {trend.significant ? t('Clear trend', 'Tendencia clara') : t('Not clear', 'No es clara')}
-          </span>
-        ) : (
-          <span className="muted">{t('Not tested', 'Sin probar')}</span>
-        )}
+        {trend ? <ClearTag zoneId={zoneId} measure={measure} trend={trend} withNotes={false} /> : <span className="muted">{t('Not tested', 'Sin probar')}</span>}
+        {trend && <CardTip notes={[trend.significant ? clearTip({ p: trend.pValue, ci: trend.slopeCi95 }, t) : null, borderlineLossTip(zoneId, measure.key, trend.significant, t), lossLevelTip(zoneId, measure.key, t)]} />}
       </td>
       <td data-label={t('Squares falling | rising', 'Cuadros que bajan | suben')}>
         {cells ? (
@@ -407,10 +477,10 @@ function MeasureRow({ measure, variable, selected, onSelect }: { measure: Measur
               <SquareBar tested={cells.tested} down={cells.significantDecreasing} up={cells.significantIncreasing} />
               <span className="tr-sq-n">{cells.significantIncreasing}</span>
             </span>
-            <span className="sr-only">{squaresText(variable, t)}</span>
             <span className="tr-small muted tr-block" aria-hidden="true">
               {t(`of ${cells.tested} tested`, `de ${cells.tested} probados`)}
             </span>
+            <span className="sr-only">{squaresText(variable, t)}</span>
           </>
         ) : (
           <span className="muted">—</span>
@@ -423,29 +493,16 @@ function MeasureRow({ measure, variable, selected, onSelect }: { measure: Measur
   )
 }
 
-function SlopeText({ slope, units }: { slope: number; units: string }) {
-  const { t } = useLang()
-  const { value, unit } = slopeParts(slope, units, t)
-  return (
-    <span className="mono">
-      {value}
-      {unit ? ` ${unit}` : ''}
-      <span className="tr-small muted tr-block">{t('per decade', 'por década')}</span>
-    </span>
-  )
-}
-
 // Headline cards
 
-function Kpi({ measure, variable, selected, onSelect }: { measure: Measure; variable: ZoneVariable; selected: boolean; onSelect: () => void }) {
+function Kpi({ zoneId, measure, variable, selected, onSelect }: { zoneId: string; measure: Measure; variable: ZoneVariable; selected: boolean; onSelect: () => void }) {
   const { t } = useLang()
   const trend = variable.zoneTrend
-  const direction = directionOf(variable)
   const cells = variable.cellSummary
   let body: ReactNode
 
   if (!trend) {
-    // Hansen tree cover: first and last year with a value, and their difference (B minus A)
+    // Tree cover: first and last year with a value, and their difference (B minus A)
     const known = variable.annual.filter((p) => p.value !== null)
     const first = known[0]
     const last = known[known.length - 1]
@@ -459,14 +516,19 @@ function Kpi({ measure, variable, selected, onSelect }: { measure: Measure; vari
             {first.year} → {last.year}: {formatSignedNumber((last.value as number) - (first.value as number))} {t('points', 'puntos')}.
           </p>
           <p className="tr-small muted">
-            {t('Not tested: it can only go down, because regrowth is not counted.', 'Sin probar: solo puede bajar, porque no cuenta el rebrote.')}
+            {t('— Not tested.', '— Sin probar.')}
+            <InfoTip label={t('Why it is not tested', 'Por qué no se prueba')}>
+              {t('It can only go down, because regrowth is not counted.', 'Solo puede bajar, porque no cuenta el rebrote.')}
+            </InfoTip>
           </p>
         </>
       ) : (
         <p className="muted">{t('No values.', 'Sin valores.')}</p>
       )
   } else {
+    const direction = directionOfTrend(trend)
     const { value, unit } = trend.slopePerDecade === null ? { value: '—', unit: '' } : slopeParts(trend.slopePerDecade, variable.units, t)
+    const ci = ciInline(trend.slopeCi95, t)
     body = (
       <>
         <p className="tr-kpi-dir">
@@ -476,22 +538,22 @@ function Kpi({ measure, variable, selected, onSelect }: { measure: Measure; vari
         <p className="tr-kpi-value mono">
           {value}
           {unit && <small> {unit}</small>}
+          {!trend.significant && trend.slopePerDecade !== null && <InfoTip mark="question">{unclearTip({ p: trend.pValue, ci: trend.slopeCi95 }, t)}</InfoTip>}
         </p>
         <p className="tr-small">
-          {t('per decade', 'por década')}, {trend.years[0]}–{trend.years[1]}.{' '}
-          <span className={trend.significant ? 'tr-tag is-clear' : 'tr-tag'}>
-            {trend.significant ? t('Clear trend', 'Tendencia clara') : t('Not a clear trend', 'No es una tendencia clara')}
-          </span>
+          {t('per decade', 'por década')}, {periodOf(trend)}.{' '}
+          <ClearTag zoneId={zoneId} measure={measure} trend={trend} />
         </p>
+        {trend.significant && ci && <p className="tr-small muted">{ci}</p>}
         {cells && (
           <p className="tr-small muted">
             {t(
               `${cells.significantDecreasing} squares falling, ${cells.significantIncreasing} rising, of ${cells.tested} tested.`,
               `${cells.significantDecreasing} cuadros bajan, ${cells.significantIncreasing} suben, de ${cells.tested} probados.`,
             )}
+            <InfoTip>{squaresScaleTip(t)}</InfoTip>
           </p>
         )}
-        {measure.key === 'lst_day' && <p className="tr-small muted">{t(LST_NOTE, LST_NOTE_ES)}</p>}
       </>
     )
   }
@@ -509,59 +571,77 @@ function Kpi({ measure, variable, selected, onSelect }: { measure: Measure; vari
 
 // Plain-language reading
 
-function Meaning({ report, heading, measure, variable, year }: { report: ZonesReport; heading: string; measure: Measure; variable: ZoneVariable; year: number | null }) {
+function Meaning({ zoneId, report, heading, measure, variable, year }: { zoneId: string; report: ZonesReport; heading: string; measure: Measure; variable: ZoneVariable; year: number | null }) {
   const { t } = useLang()
+  const hansen = useHansenInfo()
   const trend = variable.zoneTrend
+  const cells = variable.cellSummary
   const zone = t(`the ${heading}`, `la ${heading}`)
   const name = measureName(measure, t)
-  const cells = variable.cellSummary
   const range = year === null ? null : rangeSentence(variable, year, t)
   const known = variable.annual.filter((p) => p.value !== null)
   const first = known[0]
   const last = known[known.length - 1]
-  let headline: string
-  if (!trend || trend.slopePerDecade === null) {
-    headline =
-      first && last
-        ? t(
-            `${name} in ${zone} went from ${formatValue(first.value as number, variable.units)} in ${first.year} to ${formatValue(last.value as number, variable.units)} in ${last.year}. It is not tested: it can only go down, because regrowth is not counted.`,
-            `${name} en ${zone} pasó de ${formatValue(first.value as number, variable.units)} en ${first.year} a ${formatValue(last.value as number, variable.units)} en ${last.year}. No se prueba: solo puede bajar, porque no cuenta el rebrote.`,
-          )
-        : t(`${name} has no values for ${zone}.`, `${name} no tiene valores para ${zone}.`)
-  } else {
+
+  const sentence = (): string => {
+    if (!trend || trend.slopePerDecade === null) return ''
     const size = slopeSentence(Math.abs(trend.slopePerDecade), variable.units, t).replace(/^\+/, '')
-    const pText = formatPValue(trend.pValue)
-    const p = `p ${pText.startsWith('<') ? pText : `= ${pText}`}, α = ${report.alpha}`
-    headline = trend.significant && trend.slopePerDecade === 0
-      ? t(
-          `${name} in ${zone} shows a clear order from ${trend.years[0]} to ${trend.years[1]} (${p}) but no measurable slope, so we do not call it a trend.`,
-          `${name} en ${zone} muestra un orden claro de ${trend.years[0]} a ${trend.years[1]} (${p}), pero sin pendiente medible, así que no lo llamamos tendencia.`,
-        )
-      : trend.significant
-      ? t(
-          `${name} in ${zone} ${trend.slopePerDecade < 0 ? 'fell' : 'rose'} by about ${size} from ${trend.years[0]} to ${trend.years[1]}. The test says this is more than year-to-year variation (${p}).`,
-          `${name} en ${zone} ${trend.slopePerDecade < 0 ? 'bajó' : 'subió'} unos ${size} de ${trend.years[0]} a ${trend.years[1]}. El test indica que es más que la variación de un año a otro (${p}).`,
-        )
-      : t(
-          `${name} in ${zone} moved by about ${size} (${trend.slopePerDecade < 0 ? 'down' : 'up'}) from ${trend.years[0]} to ${trend.years[1]}, but that is within year-to-year variation (${p}), so we do not call it a trend.`,
-          `${name} en ${zone} se movió unos ${size} (${trend.slopePerDecade < 0 ? 'a la baja' : 'al alza'}) de ${trend.years[0]} a ${trend.years[1]}, pero eso está dentro de la variación de un año a otro (${p}), así que no lo llamamos tendencia.`,
-        )
+    const [y0, y1] = trend.years
+    const falling = trend.slopePerDecade < 0
+    if (trend.significant && trend.slopePerDecade === 0)
+      return t(
+        `${name} in ${zone} shows a clear order from ${y0} to ${y1} but no measurable slope, so we do not call it a trend.`,
+        `${name} en ${zone} muestra un orden claro de ${y0} a ${y1}, pero sin pendiente medible, así que no lo llamamos tendencia.`,
+      )
+    if (trend.significant) {
+      const p = pPhrase(trend.pValue)
+      const ci = ciInline(trend.slopeCi95, t)
+      return t(
+        `${name} in ${zone} ${falling ? 'fell' : 'rose'} by about ${size} from ${y0} to ${y1} ${ci}${p ? ` (${p}, α = ${report.alpha})` : ''}.`,
+        `${name} en ${zone} ${falling ? 'bajó' : 'subió'} unos ${size} de ${y0} a ${y1} ${ci}${p ? ` (${p}, α = ${report.alpha})` : ''}.`,
+      ).replace(/\s+\./, '.')
+    }
+    return t(
+      `${name} in ${zone}: ${falling ? 'down' : 'up'} by about ${size} from ${y0} to ${y1}, not a clear trend.`,
+      `${name} en ${zone}: ${falling ? 'a la baja' : 'al alza'} unos ${size} de ${y0} a ${y1}, sin tendencia clara.`,
+    )
   }
+
   return (
     <div className="tr-meaning">
-      <p>{headline}</p>
-      {trend && (
-        <p className="tr-small muted">
-          {t('This is one test for this zone and measure, not corrected for multiple tests.', 'Es un solo test para esta zona y medida, sin corregir por pruebas múltiples.')}
+      {!trend ? (
+        <p>
+          {first && last
+            ? t(
+                `${name} in ${zone} went from ${formatValue(first.value as number, variable.units)} in ${first.year} to ${formatValue(last.value as number, variable.units)} in ${last.year}. Not tested.`,
+                `${name} en ${zone} pasó de ${formatValue(first.value as number, variable.units)} en ${first.year} a ${formatValue(last.value as number, variable.units)} en ${last.year}. Sin probar.`,
+              )
+            : t(`${name} has no values for ${zone}.`, `${name} no tiene valores para ${zone}.`)}
+          <InfoTip label={t('Why it is not tested', 'Por qué no se prueba')}>
+            {t('It can only go down, because regrowth is not counted.', 'Solo puede bajar, porque no cuenta el rebrote.')}
+          </InfoTip>
+        </p>
+      ) : (
+        <p>
+          <span>{sentence()}</span>
+          {!trend.significant && trend.slopePerDecade !== null && <InfoTip mark="question">{unclearTip({ p: trend.pValue, ci: trend.slopeCi95 }, t)}</InfoTip>}
+          <CardTip
+            notes={[
+              borderlineLossTip(zoneId, measure.key, trend.significant, t),
+              lossLevelTip(zoneId, measure.key, t),
+              measure.key === 'lossKm2' ? methodChangeText(hansen, t) : null,
+            ]}
+          />
         </p>
       )}
       {range && <p>{range}</p>}
       {cells && (
         <p>
           {t(
-            `Of the ${cells.tested} squares tested, ${cells.significantDecreasing} fell and ${cells.significantIncreasing} rose clearly (after correcting for testing many squares).`,
-            `De los ${cells.tested} cuadros probados, ${cells.significantDecreasing} bajaron y ${cells.significantIncreasing} subieron con claridad (tras corregir por probar muchos cuadros).`,
+            `Of the ${cells.tested} squares tested, ${cells.significantDecreasing} fell and ${cells.significantIncreasing} rose clearly.`,
+            `De los ${cells.tested} cuadros probados, ${cells.significantDecreasing} bajaron y ${cells.significantIncreasing} subieron con claridad.`,
           )}
+          <InfoTip>{squaresScaleTip(t)}</InfoTip>
         </p>
       )}
       {measure.note && <p className="tr-small muted">{measureNote(measure, t)}</p>}

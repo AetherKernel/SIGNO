@@ -834,3 +834,18 @@
     min-height: 44px;
   }
 }
+
+/* 2026-11-15: marker of the Hansen method change (2011), loss segments in the table and the cards */
+.tr-method {
+  stroke: var(--muted);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}
+
+.tr-method-label {
+  fill: var(--muted);
+  font-family: var(--f-data);
+  font-size: 10px;
+}
+
+/* One trend per measure (2026-11-15): no per-segment rows. */

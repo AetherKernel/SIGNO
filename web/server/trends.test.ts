@@ -70,6 +70,14 @@ describe('cover.json trends (P-002 exemption)', () => {
     assert.throws(() => validateCover(cover([cellWithP]), grid), /no p-values/)
   })
 
+  it('checks the 95 % interval of a cover trend: low <= slope <= high', () => {
+    const t = (slopeCi95: unknown): CoverCell =>
+      coverCell({ trends: { lossKm2: { slopePerDecade: 8.2, pValue: 0.003, significant: true, slopeCi95 } as never, modisTreeCover: null } })
+    assert.doesNotThrow(() => validateCover(cover([t([2, 15])]), grid))
+    assert.doesNotThrow(() => validateCover(cover([t([8.2, 8.2])]), grid), 'equality is allowed')
+    assert.throws(() => validateCover(cover([t([9, 15])]), grid), /must lie inside slopeCi95/)
+  })
+
   it('requires trendMethod when cells carry trends', () =>
     assert.throws(() => validateCover(cover([coverCell()], { trendMethod: undefined }), grid), /trendMethod/))
 
@@ -177,6 +185,19 @@ describe('validation.json trendChecks (P-002 exemption)', () => {
     assert.throws(() => validateValidationReport(share, cellIds), /meanShareSignificant/)
   })
 
+  it('checks the 95 % interval of the known places and of the zone trends (v4)', () => {
+    const place = report()
+    place.trendChecks!.v3KnownPlaces[0].lossKm2!.slopeCi95 = [20, 60]
+    assert.doesNotThrow(() => validateValidationReport(place, cellIds))
+    place.trendChecks!.v3KnownPlaces[0].lossKm2!.slopeCi95 = [40, 60]
+    assert.throws(() => validateValidationReport(place, cellIds), /must lie inside slopeCi95/)
+    const zone = report()
+    zone.trendChecks!.v4ZoneTrends.amazon.ndvi.slopeCi95 = [-0.002, 0.004]
+    assert.doesNotThrow(() => validateValidationReport(zone, cellIds))
+    zone.trendChecks!.v4ZoneTrends.amazon.ndvi.slopeCi95 = [0.002, 0.004]
+    assert.throws(() => validateValidationReport(zone, cellIds), /must lie inside slopeCi95/)
+  })
+
   it('accepts a report without trendChecks', () => {
     const plain = report()
     delete plain.trendChecks
@@ -248,6 +269,14 @@ describe('validateZones', () => {
     const p = zones()
     p.zones.amazon.variables.ndvi.zoneTrend!.pValue = 2
     assert.throws(() => validateZones(p, 2), /pValue/)
+  })
+
+  it('checks the 95 % interval of a zone trend', () => {
+    const ok = zones()
+    ok.zones.amazon.variables.ndvi.zoneTrend!.slopeCi95 = [-0.002, 0.004]
+    assert.doesNotThrow(() => validateZones(ok, 2))
+    ok.zones.amazon.variables.ndvi.zoneTrend!.slopeCi95 = [0.002, 0.004]
+    assert.throws(() => validateZones(ok, 2), /must lie inside slopeCi95/)
   })
 
   it('rejects cell counts above the grid, or significant counts above the tested cells', () => {

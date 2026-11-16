@@ -30,6 +30,7 @@ import { formatCoordinates } from '../lib/format.ts'
 import { useLang } from '../lib/i18n.ts'
 import type { MapView } from '../lib/viewState.ts'
 import type { Borders } from '../services/staticData.ts'
+import { InfoTip } from './InfoTip.tsx'
 
 interface Props {
   cells: MapCell[]
@@ -266,7 +267,11 @@ export function TrendMap(props: Props) {
   const focusedCell = focused ? (cells.find((c) => c.cellId === rovingId) ?? null) : null
   const hoverCell = cursor ? (grid.get(rowColKey(cursor.lat, cursor.lon)) ?? null) : null
   const touchCell = touchId ? (cells.find((c) => c.cellId === touchId) ?? null) : null
-  const readoutCell = focusedCell ?? hoverCell ?? touchCell ?? (cursor ? null : selected)
+  // The readout holds the last square the pointer was over while the pointer is on the readout itself, so its "?" tip can be read.
+  const [lastHover, setLastHover] = useState<MapCell | null>(null)
+  const [overReadout, setOverReadout] = useState(false)
+  if (hoverCell && hoverCell !== lastHover) setLastHover(hoverCell)
+  const readoutCell = focusedCell ?? hoverCell ?? touchCell ?? (overReadout ? lastHover : null) ?? (cursor ? null : selected)
   const atMaxZoom = zoom >= basemap.maxZoom
   const pxPerUnit = (256 * 2 ** zoom) / 360
   const dot = { gap: 9 / pxPerUnit, r: 1.7 / pxPerUnit }
@@ -405,7 +410,7 @@ export function TrendMap(props: Props) {
       {svg && createPortal(overlay, svg)}
       {selectionSvg && selectionOutline && createPortal(selectionOutline, selectionSvg)}
 
-      <div className="map-overlay readout" aria-live="polite">
+      <div className="map-overlay readout" aria-live="polite" onPointerEnter={() => setOverReadout(true)} onPointerLeave={() => setOverReadout(false)}>
         <span>
           {readoutCell
             ? formatCoordinates(readoutCell.lat, readoutCell.lon)
@@ -415,7 +420,12 @@ export function TrendMap(props: Props) {
                 ? t('Tap a square to see its value', 'Toca un cuadro para ver su valor')
                 : t('Move over a square to see its value', 'Pasa sobre un cuadro para ver su valor')}
         </span>
-        {readoutCell && <span>{paint.readout(readoutCell)}</span>}
+        {readoutCell && (
+          <span>
+            {paint.readout(readoutCell)}
+            {paint.readoutTip?.(readoutCell) && <InfoTip mark="question">{paint.readoutTip(readoutCell)}</InfoTip>}
+          </span>
+        )}
         {readoutCell && (
           <span className="muted">
             {touchCell && readoutCell === touchCell

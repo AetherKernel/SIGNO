@@ -1,4 +1,6 @@
 // AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15. Reviewed and owned by team AETHER.
+// 2026-11-15: Sen lines are solid only for a clear trend (dashed and muted otherwise), as in the Trends view.
+// 2026-11-15: optional dashed marker at 2011 (the Hansen method change) with its InfoTip; years before it are greyed ("outside").
 //
 // Small yearly charts of the cell viewer. YearChart draws one or two yearly series as a line (states: tree cover, NDVI)
 // or as bars (amounts: loss, burned area, rain), marks the two years A and B, and can shade the years the trend test used.
@@ -8,7 +10,9 @@
 
 import type { SenLine } from '../../shared/contracts.ts'
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
+import { useHansenInfo } from '../lib/hansen.ts'
 import { useLang } from '../lib/i18n.ts'
+import { MethodChangeNote } from './MethodChangeNote.tsx'
 
 /** ok = a normal point; hollow = incomplete or suspect (not joined to the line); outside = complete but not used by the test. */
 export type PointKind = 'ok' | 'hollow' | 'outside'
@@ -66,14 +70,20 @@ interface Props {
   tested?: [number, number] | null
   /** The cell's Sen line over the tested years, when the pipeline gives it. */
   sen?: SenLine | null
+  /** Whether the test calls the trend clear: a Sen line is solid then, dashed and muted otherwise. */
+  significant?: boolean
+  /** Hansen series: mark the year Hansen reprocessed its loss data with a dashed line, a label and an InfoTip. */
+  methodMarker?: boolean
   /** Accessible name. */
   label: string
   caption?: string
   height?: number
 }
 
-export function YearChart({ years, type, series, format, tick, domain, tone = 'plain', from, to, tested = null, sen = null, label, caption, height = 170 }: Props) {
+export function YearChart({ years, type, series, format, tick, domain, tone = 'plain', from, to, tested = null, sen = null, significant = false, methodMarker = false, label, caption, height = 170 }: Props) {
   const { t } = useLang()
+  const hansen = useHansenInfo()
+  const segs = tested ? [{ tested, sen, significant }] : []
   const { ref, width } = useWidth()
   const readoutId = useId()
   const [active, setActive] = useState<number | null>(null)
@@ -84,7 +94,7 @@ export function YearChart({ years, type, series, format, tick, domain, tone = 'p
   const plotBottom = height - PAD.bottom
 
   const present = series.flatMap((s) => s.values).filter((v): v is number => v !== null)
-  if (sen && !domain) present.push(sen.start.value, sen.end.value)
+  if (!domain) for (const g of segs) if (g.sen) present.push(g.sen.start.value, g.sen.end.value)
   let lo = 0
   let hi = 1
   if (domain) [lo, hi] = domain
@@ -150,9 +160,10 @@ export function YearChart({ years, type, series, format, tick, domain, tone = 'p
     return out
   }
 
-  const testedFrom = tested ? indexOf(tested[0]) : -1
-  const testedTo = tested ? indexOf(tested[1]) : -1
   const half = bars ? step / 2 : 0
+  // The method change starts in a year: the line sits on the edge between the year before and that year.
+  const methodAt = methodMarker ? indexOf(hansen.year) : -1
+  const methodX = methodAt > 0 ? (bars ? PAD.left + step * methodAt : x(methodAt) - step / 2) : null
   const marks = [
     { year: from, name: 'A' },
     { year: to, name: 'B' },
@@ -177,9 +188,13 @@ export function YearChart({ years, type, series, format, tick, domain, tone = 'p
           onKeyDown={key}
           onBlur={() => setActive(null)}
         >
-          {testedFrom >= 0 && testedTo >= testedFrom && (
-            <rect className="cv-tested" x={x(testedFrom) - half} y={PAD.top} width={x(testedTo) - x(testedFrom) + half * 2} height={plotBottom - PAD.top} />
-          )}
+          {segs.map((g) => {
+            const from0 = indexOf(g.tested[0])
+            const to0 = indexOf(g.tested[1])
+            return from0 >= 0 && to0 >= from0 ? (
+              <rect key={g.tested.join('-')} className="cv-tested" x={x(from0) - half} y={PAD.top} width={x(to0) - x(from0) + half * 2} height={plotBottom - PAD.top} />
+            ) : null
+          })}
           {yTicks.map((t) => (
             <g key={t}>
               <line className="cv-grid" x1={PAD.left} x2={width - PAD.right} y1={y(t)} y2={y(t)} />
@@ -203,6 +218,14 @@ export function YearChart({ years, type, series, format, tick, domain, tone = 'p
               </text>
             </g>
           ))}
+          {methodX !== null && (
+            <g>
+              <line className="cv-method" x1={methodX} x2={methodX} y1={PAD.top} y2={plotBottom} />
+              <text className="cv-method-label" x={methodX + 3} y={PAD.top + 9}>
+                {hansen.year}
+              </text>
+            </g>
+          )}
           {shown >= 0 && shown < n && <line className="cv-cursor" x1={x(shown)} x2={x(shown)} y1={PAD.top} y2={plotBottom} />}
           {bars
             ? series[0]?.values.map((v, i) =>
@@ -235,18 +258,22 @@ export function YearChart({ years, type, series, format, tick, domain, tone = 'p
                   )}
                 </g>
               ))}
-          {sen && indexOf(sen.start.year) >= 0 && indexOf(sen.end.year) >= 0 && (
-            <line
-              className="cv-sen"
-              x1={x(indexOf(sen.start.year))}
-              x2={x(indexOf(sen.end.year))}
-              y1={y(sen.start.value)}
-              y2={y(sen.end.value)}
-            />
+          {segs.map((g) =>
+            g.sen && indexOf(g.sen.start.year) >= 0 && indexOf(g.sen.end.year) >= 0 ? (
+              <line
+                key={`sen-${g.tested.join('-')}`}
+                className={`cv-sen${g.significant ? '' : ' not-clear'}`}
+                x1={x(indexOf(g.sen.start.year))}
+                x2={x(indexOf(g.sen.end.year))}
+                y1={y(g.sen.start.value)}
+                y2={y(g.sen.end.value)}
+              />
+            ) : null,
           )}
         </svg>
       </div>
       {caption && <figcaption className="cv-caption">{caption}</figcaption>}
+      {methodX !== null && <MethodChangeNote className="cv-caption" greyed={series.some((s) => s.kinds?.includes('outside'))} />}
     </figure>
   )
 }

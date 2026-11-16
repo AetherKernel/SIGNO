@@ -3,19 +3,28 @@
 // "Cross-checks" tab of the drawer: how far the independent tree cover datasets agree, and where loss and fire
 // coincide. Everything is descriptive and comes from the validation report: r values carry no p-value, there is no
 // significance wording, and co-location with fire is never presented as a cause.
+// 2026-11-15: MODIS end years are read from the API definition (not hard-coded); "points" is localized.
+// 2026-11-15: MODIS stays here as the independent check; new card Hansen loss vs PRODES; the MODIS 2025 note is an InfoTip.
+// 2026-11-15 (later): the intro and the "MODIS reads lower" paragraph are one short line each, with the detail in an InfoTip; the
+// year the API flags in MODIS is called "not used" (with its reason) in the case charts.
 
 import { useState } from 'react'
-import type { Hotspot, ValidationCase, ValidationReport, ValidationZone } from '../../shared/contracts.ts'
+import type { Hotspot, TrendChecks, ValidationCase, ValidationReport, ValidationZone, ZonesReport } from '../../shared/contracts.ts'
 import { formatCoordinates, formatPercent, formatPoints, formatShare } from '../lib/format.ts'
+import { knownPlacesSentence } from '../lib/hansen.ts'
 import { useLang } from '../lib/i18n.ts'
 import { ViewLink } from './ViewLink.tsx'
 import { BarChart, CoverChart } from './CoverCharts.tsx'
+import { HansenConsistencyCard } from './HansenConsistencyCard.tsx'
+import { InfoTip } from './InfoTip.tsx'
 
 export interface ValidationPanelProps {
   report: ValidationReport | null
+  /** zones.json, for the yearly chart of the Hansen vs PRODES card; null when not published or still loading. */
+  zones: ZonesReport | null
   loading: boolean
   error: string | null
-  /** Years of the MODIS series the API flags as suspect, drawn hollow in the case charts. */
+  /** Years of the MODIS series the API flags, drawn hollow in the case charts. */
   flaggedModisYears: number[]
   onShowHotspot: (hotspot: Hotspot) => void
   onShowCase: (place: ValidationCase, peakYear: number) => void
@@ -46,6 +55,34 @@ function peakYear(years: number[], values: (number | null)[]): number {
   return best
 }
 
+/** End years of the MODIS change ("mean(2024, 2025)" in the definition: the first match), or null if the text differs. */
+function modisEndYears(definition: string): [string, string] | null {
+  const m = /mean\((\d{4}),\s*(\d{4})\)/.exec(definition)
+  return m ? [m[1], m[2]] : null
+}
+
+/** The InfoTip caveat of the MODIS change, built from the definition string (flagged year, end years, Hansen loss years). */
+function modisNote(definition: string, t: (en: string, es: string) => string): string {
+  const end = modisEndYears(definition)
+  const flagged = /MOD44B (\d{4}) is flagged/.exec(definition)?.[1]
+  const loss = /Hansen loss share (\d{4})\D+(\d{4})/.exec(definition)
+  const first = flagged
+    ? t(
+        `MODIS ${flagged} is not used: it drops about 3 points even where Hansen sees no loss, so the end of the period is the mean of ${end ? `${end[0]}–${end[1]}` : 'the last years'}. `,
+        `MODIS ${flagged} no se usa: baja unos 3 puntos incluso donde Hansen no ve pérdida, así que el final del periodo es la media de ${end ? `${end[0]}–${end[1]}` : 'los últimos años'}. `,
+      )
+    : ''
+  const second = loss
+    ? t(`The loss compared is Hansen's over ${loss[1]}–${loss[2]}, the same years.`, `La pérdida que se compara es la de Hansen en ${loss[1]}–${loss[2]}, los mismos años.`)
+    : ''
+  return (first + second).trim()
+}
+
+/** "-5.2 points" in English, "-5.2 puntos" in Spanish. */
+function pointsText(value: number, lang: string): string {
+  return lang === 'es' ? formatPoints(value).replace(/ points$/, ' puntos') : formatPoints(value)
+}
+
 function AgreementCard({ zone }: { zone: ValidationZone }) {
   const { t } = useLang()
   const a = zone.agreement2000
@@ -54,9 +91,15 @@ function AgreementCard({ zone }: { zone: ValidationZone }) {
       <h3 id="v-agree">{t('Do the two tree cover datasets agree? (year 2000)', '¿Coinciden los dos datos de cobertura arbórea? (año 2000)')}</h3>
       <p className="small">
         {t(
-          `Across ${a.cells.toLocaleString('en-US')} small cells, MODIS and Hansen agree on where tree cover is dense and where it is sparse${a.r !== null ? ` (r = ${a.r.toFixed(2)}, a descriptive measure with no p-value)` : ''}. But MODIS reads ${Math.abs(a.biasPp).toFixed(1)} points ${a.biasPp < 0 ? 'lower' : 'higher'} than Hansen on average (typical gap ${a.rmsePp.toFixed(1)} points). That is why SIGNO uses MODIS to confirm where change happened, not how much tree cover there is.`,
-          `En ${a.cells.toLocaleString('en-US')} celdas pequeñas, MODIS y Hansen coinciden en dónde la cobertura es densa y dónde es escasa${a.r !== null ? ` (r = ${a.r.toFixed(2)}, una medida descriptiva sin valor p)` : ''}. Pero MODIS marca ${Math.abs(a.biasPp).toFixed(1)} puntos ${a.biasPp < 0 ? 'menos' : 'más'} que Hansen en promedio (diferencia típica de ${a.rmsePp.toFixed(1)} puntos). Por eso SIGNO usa MODIS para confirmar dónde hubo cambio, no cuánta cobertura hay.`,
+          `MODIS and Hansen agree on where tree cover is dense and where it is sparse${a.r !== null ? ` (r = ${a.r.toFixed(2)})` : ''}. MODIS reads ${Math.abs(a.biasPp).toFixed(1)} points ${a.biasPp < 0 ? 'lower' : 'higher'} on average, so SIGNO uses it to confirm where change happened, not how much there is.`,
+          `MODIS y Hansen coinciden en dónde la cobertura es densa y dónde es escasa${a.r !== null ? ` (r = ${a.r.toFixed(2)})` : ''}. MODIS marca ${Math.abs(a.biasPp).toFixed(1)} puntos ${a.biasPp < 0 ? 'menos' : 'más'} en promedio, así que SIGNO lo usa para confirmar dónde hubo cambio, no cuánta cobertura hay.`,
         )}
+        <InfoTip>
+          {t(
+            `Across ${a.cells.toLocaleString('en-US')} small cells; r is descriptive, with no p-value. The typical gap between the two is ${a.rmsePp.toFixed(1)} points.`,
+            `En ${a.cells.toLocaleString('es-PE')} celdas pequeñas; r es descriptivo, sin valor p. La diferencia típica entre los dos es de ${a.rmsePp.toFixed(1)} puntos.`,
+          )}
+        </InfoTip>
       </p>
       <table className="vtable">
         <caption className="sr-only">{t('Mean tree cover by Hansen class, Hansen and MODIS', 'Cobertura media por clase de Hansen, Hansen y MODIS')}</caption>
@@ -96,22 +139,29 @@ function AgreementCard({ zone }: { zone: ValidationZone }) {
 }
 
 function ChangeCard({ zone }: { zone: ValidationZone }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const c = zone.changeVsLoss
+  const end = modisEndYears(c.definition)
+  const definitionEn = end
+    ? `Change in MODIS tree cover between the start (mean of 2001–2002) and the end of the period (mean of ${end[0]}–${end[1]}), in percentage points`
+    : c.definition
+  const definitionEs = end
+    ? `Cambio de la cobertura MODIS entre el inicio (media de 2001–2002) y el final del periodo (media de ${end[0]}–${end[1]}), en puntos porcentuales`
+    : c.definition
   const maxAbs = Math.max(1, ...c.byLossDecile.map((d) => Math.abs(d.modisChangePpMean)))
   return (
     <section className="vcard" aria-labelledby="v-change">
       <h3 id="v-change">{t('Does MODIS see change where Hansen sees loss?', '¿Ve MODIS cambio donde Hansen ve pérdida?')}</h3>
       <p className="small">
         {t(
-          `Cells are sorted into ten groups by the share of their area Hansen lost since 2001 (group 1 lost the least, group 10 the most). Bars show how much MODIS tree cover changed in each group (${c.definition}).`,
-          `Las celdas se ordenan en diez grupos según la parte de su área que Hansen registró como perdida desde 2001 (el grupo 1 perdió lo menos, el 10 lo más). Las barras muestran cuánto cambió la cobertura MODIS en cada grupo (${c.definition}).`,
+          `Cells are sorted into ten groups by the share of their area Hansen lost since 2001 (group 1 lost the least, group 10 the most). Bars show how much MODIS tree cover changed in each group. ${definitionEn}.`,
+          `Las celdas se ordenan en diez grupos según la parte de su área que Hansen registró como perdida desde 2001 (el grupo 1 perdió lo menos, el 10 lo más). Las barras muestran cuánto cambió la cobertura MODIS en cada grupo. ${definitionEs}.`,
         )}
         {c.r !== null ? t(` Across cells r = ${c.r.toFixed(2)} (descriptive, no p-value).`, ` Entre celdas r = ${c.r.toFixed(2)} (descriptivo, sin valor p).`) : ''}{' '}
-        {t(
-          'This change is the mean 2024–25 minus the mean 2001–02 and includes the MODIS 2025 year flagged as suspect. This confirms where tree cover changed, not by how much.',
-          'Este cambio es la media 2024–25 menos la media 2001–02 e incluye el año 2025 de MODIS marcado como dudoso. Confirma dónde cambió la cobertura, no cuánto.',
-        )}
+        {t('This confirms where tree cover changed, not by how much.', 'Esto confirma dónde cambió la cobertura, no cuánto.')}
+        <InfoTip>
+          {modisNote(c.definition, t)}
+        </InfoTip>
       </p>
       <table className="vtable">
         <caption className="sr-only">{t('MODIS tree cover change by group of Hansen loss', 'Cambio de cobertura MODIS por grupo de pérdida de Hansen')}</caption>
@@ -128,7 +178,7 @@ function ChangeCard({ zone }: { zone: ValidationZone }) {
               <th scope="row">{d.decile}</th>
               <td className="mono">{formatShare(d.hansenLossShareMean)}</td>
               <td>
-                <span className="mono">{formatPoints(d.modisChangePpMean)}</span>
+                <span className="mono">{pointsText(d.modisChangePpMean, lang)}</span>
                 <span className="dbar" aria-hidden="true">
                   <i
                     className={d.modisChangePpMean < 0 ? 'down' : 'up'}
@@ -258,17 +308,21 @@ function FireCard({ zone }: { zone: ValidationZone }) {
 function CasesCard({
   zone,
   cases,
+  checks,
   flaggedModisYears,
   onShowHotspot,
   onShowCase,
 }: {
   zone: ValidationZone
   cases: ValidationCase[]
+  checks: TrendChecks | undefined
   flaggedModisYears: number[]
   onShowHotspot: (hotspot: Hotspot) => void
   onShowCase: (place: ValidationCase, peakYear: number) => void
 }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
+  const modisEnd = modisEndYears(zone.changeVsLoss.definition)
+  const known = checks ? knownPlacesSentence(checks, cases, t) : null
   return (
     <section className="vcard" aria-labelledby="v-places">
       <h3 id="v-places">{t('Hotspots of tree cover loss and documented places', 'Puntos críticos de pérdida y lugares documentados')}</h3>
@@ -276,8 +330,15 @@ function CasesCard({
         {t(
           'Select a place to open it on the tree cover loss map, at its year of largest loss.',
           'Elige un lugar para abrirlo en el mapa de pérdida de cobertura arbórea, en su año de mayor pérdida.',
-        )}
+        )}{' '}
+        {modisEnd
+          ? t(`MODIS change: mean ${modisEnd[0]}–${modisEnd[1]} minus mean 2001–02.`, `Cambio MODIS: media ${modisEnd[0]}–${modisEnd[1]} menos media 2001–02.`)
+          : t('MODIS change: end of the period minus 2001–02.', 'Cambio MODIS: final del periodo menos 2001–02.')}
+        <InfoTip>
+          {modisNote(zone.changeVsLoss.definition, t)}
+        </InfoTip>
       </p>
+      {known && <p className="small">{known}</p>}
       <ol className="hotspots" aria-label={t(`Hotspots in ${zone.label}`, `Puntos críticos en ${zone.label}`)}>
         {zone.hotspots.map((h, i) => (
           <li key={`${h.apiCellId}-${h.lat}-${h.lon}-${i}`}>
@@ -287,8 +348,8 @@ function CasesCard({
               </span>
               <span className="small">
                 {t(
-                  `Largest loss in ${h.peakLossYear} (${formatShare(h.peakLossShare)} of the local area). Lost since 2001: ${formatShare(h.hansenLossShare)}. Tree cover in 2000: ${formatPercent(h.hansenTreeCover2000)}. MODIS change: ${formatPoints(h.modisChangePp)} (mean 2024–25 minus mean 2001–02, includes the MODIS 2025 year flagged as suspect).`,
-                  `Mayor pérdida en ${h.peakLossYear} (${formatShare(h.peakLossShare)} del área local). Perdido desde 2001: ${formatShare(h.hansenLossShare)}. Cobertura en 2000: ${formatPercent(h.hansenTreeCover2000)}. Cambio MODIS: ${formatPoints(h.modisChangePp).replace('points', 'puntos')} (media 2024–25 menos media 2001–02, incluye el año 2025 de MODIS marcado como dudoso).`,
+                  `Largest loss in ${h.peakLossYear} (${formatShare(h.peakLossShare)} of the local area). Lost since 2001: ${formatShare(h.hansenLossShare)}. Tree cover in 2000: ${formatPercent(h.hansenTreeCover2000)}. MODIS change: ${pointsText(h.modisChangePp, lang)}.`,
+                  `Mayor pérdida en ${h.peakLossYear} (${formatShare(h.peakLossShare)} del área local). Perdido desde 2001: ${formatShare(h.hansenLossShare)}. Cobertura en 2000: ${formatPercent(h.hansenTreeCover2000)}. Cambio MODIS: ${pointsText(h.modisChangePp, lang)}.`,
                 )}
               </span>
               <span className="small muted">
@@ -360,6 +421,7 @@ function CasesCard({
               modis={place.modisTreeCover}
               selectedYear={null}
               flaggedModisYears={flaggedModisYears}
+              notUsedReason={modisNote(zone.changeVsLoss.definition, t) || undefined}
               label={t(
                 `Tree cover at ${place.label}, Hansen and MODIS, ${place.years[0]} to ${place.years[place.years.length - 1]}`,
                 `Cobertura en ${place.label}, Hansen y MODIS, ${place.years[0]} a ${place.years[place.years.length - 1]}`,
@@ -372,6 +434,7 @@ function CasesCard({
               selectedYear={null}
               tone="loss"
               unit="percent"
+              methodMarker
               label={t(
                 `Share of the area lost each year at ${place.label}, ${place.lossYears[0]} to ${place.lossYears[place.lossYears.length - 1]}`,
                 `Parte del área perdida cada año en ${place.label}, ${place.lossYears[0]} a ${place.lossYears[place.lossYears.length - 1]}`,
@@ -392,7 +455,7 @@ function CasesCard({
   )
 }
 
-export function ValidationPanel({ report, loading, error, flaggedModisYears, onShowHotspot, onShowCase }: ValidationPanelProps) {
+export function ValidationPanel({ report, zones, loading, error, flaggedModisYears, onShowHotspot, onShowCase }: ValidationPanelProps) {
   const { t } = useLang()
   const [zoneId, setZoneId] = useState<string | null>(null)
   if (loading) return <p className="muted small">{t('Loading the cross-checks…', 'Cargando los contrastes…')}</p>
@@ -405,13 +468,19 @@ export function ValidationPanel({ report, loading, error, flaggedModisYears, onS
     <section id="panel-validation" role="tabpanel" aria-labelledby="tab-validation" className="validation">
       <p className="small">
         {t(
-          'Cross-checks of the tree cover data against an independent dataset and against fire. They are descriptive: they do not test trends, and none of them says why tree cover changed. The trend test and its own checks are in',
-          'Contrastes de los datos de cobertura con un dato independiente y con el fuego. Son descriptivos: no prueban tendencias, y ninguno dice por qué cambió la cobertura. El test de tendencia y sus propias comprobaciones están en',
+          'Cross-checks of the tree cover data against an independent dataset and against fire. The trend test and its own checks are in',
+          'Contrastes de los datos de cobertura con un dato independiente y con el fuego. El test de tendencia y sus propias comprobaciones están en',
         )}{' '}
         <ViewLink view="trends" hash="how-it-works">
           {t('How the test works', 'Cómo funciona el test')}
-        </ViewLink>{' '}
-        ({t('Trends view', 'vista Tendencias')}).
+        </ViewLink>
+        .
+        <InfoTip>
+          {t(
+            'These checks are descriptive: they do not test trends, and none says why tree cover changed. MODIS appears only as an independent satellite check (NASA MODIS) used to confirm where Hansen sees loss.',
+            'Estos contrastes son descriptivos: no prueban tendencias y ninguno dice por qué cambió la cobertura. MODIS aparece solo como un contraste satelital independiente (NASA MODIS) que se usa para confirmar dónde ve pérdida Hansen.',
+          )}
+        </InfoTip>
       </p>
       <div className="zone-pick">
         <label htmlFor="zone-select" className="kicker">
@@ -428,10 +497,12 @@ export function ValidationPanel({ report, loading, error, flaggedModisYears, onS
 
       <AgreementCard zone={zone} />
       <ChangeCard zone={zone} />
+      {report.trendChecks?.hansenConsistency && <HansenConsistencyCard consistency={report.trendChecks.hansenConsistency} zones={zones} />}
       <FireCard zone={zone} />
       <CasesCard
         zone={zone}
         cases={report.cases}
+        checks={report.trendChecks}
         flaggedModisYears={flaggedModisYears}
         onShowHotspot={onShowHotspot}
         onShowCase={onShowCase}

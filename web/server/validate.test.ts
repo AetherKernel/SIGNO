@@ -48,6 +48,10 @@ describe('validateVariables', () => {
   it('rejects duplicate ids', () => assert.throws(() => validateVariables([variable, variable]), /duplicate/))
   it('rejects a bad month format', () =>
     assert.throws(() => validateVariables([{ ...variable, period: { start: '2001-1', end: '2024-12' } }]), /YYYY-MM/))
+  it('accepts driftFromYear as a year and rejects other values', () => {
+    assert.doesNotThrow(() => validateVariables([{ ...variable, driftFromYear: 2021 }]))
+    assert.throws(() => validateVariables([{ ...variable, driftFromYear: 20.5 }]), /driftFromYear/)
+  })
   it('rejects a missing or unknown semesterAggregation', () =>
     assert.throws(() => validateVariables([{ ...variable, semesterAggregation: 'median' as 'mean' }]), /semesterAggregation/))
   it('rejects a period that ends before it starts', () =>
@@ -79,6 +83,25 @@ describe('validateTrendLayer', () => {
     const bad = layer()
     bad.cells[0] = { ...bad.cells[0], line: { start: { year: 2001, value: Number.NaN }, end: { year: 2025, value: 2 } } }
     assert.throws(() => validateTrendLayer(bad, variable, region), /line must be/)
+  })
+  it('accepts a 95 % interval around the slope (equality allowed) and null, and rejects one that does not contain it', () => {
+    const at = (slopeCi95: unknown) => {
+      const layerWithCi = layer()
+      layerWithCi.cells[0] = { ...layerWithCi.cells[0], slopeCi95 } as SourceTrendLayer['cells'][number]
+      return layerWithCi
+    }
+    assert.doesNotThrow(() => validateTrendLayer(at([-0.05, 0.01]), variable, region))
+    assert.doesNotThrow(() => validateTrendLayer(at([-0.02, -0.02]), variable, region), 'low = slope = high is allowed')
+    assert.doesNotThrow(() => validateTrendLayer(at(null), variable, region))
+    assert.throws(() => validateTrendLayer(at([-0.01, 0.05]), variable, region), /must lie inside slopeCi95/)
+    assert.throws(() => validateTrendLayer(at([0.05, -0.05]), variable, region), /low <= high/)
+    assert.throws(() => validateTrendLayer(at([-0.05]), variable, region), /slopeCi95 must be null or/)
+    assert.throws(() => validateTrendLayer(at([Number.NaN, 0.1]), variable, region), /slopeCi95 must be null or/)
+  })
+  it('does not compare the interval with a slope that is null (a cell that was not tested)', () => {
+    const notTested = layer()
+    notTested.cells[1] = { ...notTested.cells[1], slopeCi95: null }
+    assert.doesNotThrow(() => validateTrendLayer(notTested, variable, region))
   })
   it('rejects duplicate cell ids', () => {
     const bad = layer()

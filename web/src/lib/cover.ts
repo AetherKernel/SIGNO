@@ -1,22 +1,17 @@
 // AI-generated: written with Claude (Anthropic) via Claude Code, 2026-11-15. Reviewed and owned by team AETHER.
+// 2026-11-15: tree cover is Hansen only (the MODIS source choice and its flags were removed from the main views).
 //
 // Presentation helpers for the yearly maps (tree cover, tree cover loss, burned area): colour classes, reading a value
 // out of the cover layer, and the "paint" the map uses to colour its cells. No statistics here: values are the
 // backend's, shown as they are.
 
-import type { CoverCell, CoverFlag, CoverLayer } from '../../shared/contracts.ts'
+import type { CoverCell, CoverLayer } from '../../shared/contracts.ts'
 import { formatCoordinates, formatKm2, formatPercent } from './format.ts'
 import { EN, type Tr } from './i18n.ts'
-import type { CoverSource } from './viewState.ts'
 
 /** Colour class edges (percent of the cell). Finer at the top because most Amazon cells are dense forest. */
 export const COVER_BREAKS = [0, 20, 40, 60, 80, 90, 100]
 export const COVER_CLASSES = COVER_BREAKS.length - 1
-
-export const SOURCE_LABEL: Record<CoverSource, string> = {
-  hansen: 'Hansen (Landsat, 30 m)',
-  modis: 'MODIS MOD44B (250 m)',
-}
 
 /** Colour class 0..5 of a tree cover percent, or null when there is no value. */
 export function coverClass(value: number | null): number | null {
@@ -30,22 +25,12 @@ export function coverColor(value: number | null): string {
   return k === null ? 'var(--cell-empty)' : `var(--green-${k})`
 }
 
-/** Tree cover of one cell for a source and a year; null when the year or the cell is missing. */
-export function coverValue(cell: CoverCell | undefined, source: CoverSource, years: number[], year: number): number | null {
+/** Tree cover (Hansen) of one cell in a year; null when the year or the cell is missing. */
+export function coverValue(cell: CoverCell | undefined, years: number[], year: number): number | null {
   if (!cell) return null
   const index = years.indexOf(year)
   if (index < 0) return null
-  return (source === 'hansen' ? cell.hansenTreeCover : cell.modisTreeCover)[index] ?? null
-}
-
-/** The known problem of a source in a year (for example the suspect MODIS 2025), if the API lists one. */
-export function flagFor(cover: CoverLayer | null, source: CoverSource, year: number): CoverFlag | null {
-  return cover?.flags.find((f) => f.source.toLowerCase() === source && f.year === year) ?? null
-}
-
-/** What the source's "year" means, in plain words. */
-export function yearMeaning(source: CoverSource, year: number): string {
-  return source === 'hansen' ? year === 2000 ? 'in 2000 (baseline)' : `end of ${year}` : `March ${year} to March ${year + 1}`
+  return cell.hansenTreeCover[index] ?? null
 }
 
 export function coverByCellId(cover: CoverLayer | null): Map<string, CoverCell> {
@@ -99,6 +84,8 @@ export interface CellPaint {
   describe: (cell: MapCell) => string
   /** The value line of the hover or focus readout. */
   readout: (cell: MapCell) => string
+  /** A note shown as a "?" tip next to the readout (a trend that is not clear), or null. */
+  readoutTip?: (cell: MapCell) => string | null
 }
 
 function yearAt(years: number[], values: (number | null)[] | undefined, year: number): number | null {
@@ -114,7 +101,7 @@ const hint = (t: Tr) =>
 
 export function makeCoverPaint(cover: CoverLayer, year: number, t: Tr = EN): CellPaint {
   const cells = coverByCellId(cover)
-  const valueOf = (cell: MapCell) => coverValue(cells.get(cell.cellId), 'hansen', cover.years, year)
+  const valueOf = (cell: MapCell) => coverValue(cells.get(cell.cellId), cover.years, year)
   const readout = (cell: MapCell) => {
     const value = valueOf(cell)
     const when = year === 2000 ? t('in the 2000 baseline', 'en la línea base 2000') : t(`at the end of ${year}`, `a fines de ${year}`)

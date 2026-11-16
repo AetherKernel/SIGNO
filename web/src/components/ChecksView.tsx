@@ -3,9 +3,11 @@
 // The Cross-checks view (?view=checks): how far the independent datasets agree and where loss and fire coincide.
 // It is the former drawer tab as a page: the cards of ValidationPanel in one column. Chunk 3 adds the first section
 // "Can the trend test be trusted?" from the report's trendChecks.
+// 2026-11-15: loads zones.json for the yearly chart of the Hansen loss vs PRODES card.
 
 import type { Hotspot, Manifest, ValidationCase, ValidationReport } from '../../shared/contracts.ts'
 import type { Remote } from '../hooks/useSignoData.ts'
+import { useZones } from '../hooks/useZones.ts'
 import { useLang } from '../lib/i18n.ts'
 import { ValidationPanel } from './ValidationPanel.tsx'
 import { ViewLink } from './ViewLink.tsx'
@@ -22,12 +24,14 @@ export interface ChecksViewProps {
 
 export function ChecksView({ manifest, validation, flaggedModisYears, onShowHotspot, onShowCase }: ChecksViewProps) {
   const { t } = useLang()
+  const zones = useZones(manifest.extras.zones === true)
   return (
     <div className="page page-checks">
       <h1>{t('How the data were cross-checked', 'Cómo se contrastaron los datos')}</h1>
       {manifest.extras.validation ? (
         <ValidationPanel
           report={validation.data}
+          zones={zones.data}
           loading={validation.loading}
           error={validation.error}
           flaggedModisYears={flaggedModisYears}
